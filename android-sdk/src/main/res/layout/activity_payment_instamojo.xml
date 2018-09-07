@@ -9,7 +9,7 @@
 
     <fragment
         android:id="@+id/juspay_browser_fragment"
-        android:name="com.instamojo.android.fragments.JusPaySafeBrowser"
+        android:name="com.instamojo.android.fragments.JuspaySafeBrowser"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"

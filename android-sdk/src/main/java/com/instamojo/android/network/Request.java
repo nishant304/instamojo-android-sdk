@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 
 import com.instamojo.android.BuildConfig;
 import com.instamojo.android.Instamojo;
-import com.instamojo.android.callbacks.JusPayRequestCallback;
+import com.instamojo.android.callbacks.JuspayRequestCallback;
 import com.instamojo.android.callbacks.OrderRequestCallBack;
 import com.instamojo.android.callbacks.UPICallback;
 import com.instamojo.android.helpers.CardValidator;
@@ -56,7 +56,7 @@ public class Request {
 
     private Order order;
     private OrderRequestCallBack orderRequestCallback;
-    private JusPayRequestCallback jusPayRequestCallback;
+    private JuspayRequestCallback juspayRequestCallback;
     private UPICallback upiCallback;
     private String virtualPaymentAddress;
     private UPISubmissionResponse upiSubmissionResponse;
@@ -87,13 +87,13 @@ public class Request {
      *
      * @param order                 Order model with all the mandatory fields set.
      * @param card                  Card with all the proper validations done.
-     * @param jusPayRequestCallback Callback for Asynchronous network call.
+     * @param juspayRequestCallback Callback for Asynchronous network call.
      */
-    public Request(@NonNull Order order, @NonNull Card card, @NonNull JusPayRequestCallback jusPayRequestCallback) {
+    public Request(@NonNull Order order, @NonNull Card card, @NonNull JuspayRequestCallback juspayRequestCallback) {
         this.mode = MODE.Juspay;
         this.card = card;
         this.order = order;
-        this.jusPayRequestCallback = jusPayRequestCallback;
+        this.juspayRequestCallback = juspayRequestCallback;
     }
 
     /**
@@ -207,7 +207,7 @@ public class Request {
             @Override
             public void onFailure(Call call, IOException e) {
                 Logger.logError(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
-                jusPayRequestCallback.onFinish(null, new Errors.ConnectionError(e.getMessage()));
+                juspayRequestCallback.onFinish(null, new Errors.ConnectionError(e.getMessage()));
             }
 
             @Override
@@ -217,13 +217,13 @@ public class Request {
                     responseBody = response.body().string();
                     response.body().close();
                     Bundle bundle = parseJusPayResponse(responseBody);
-                    jusPayRequestCallback.onFinish(bundle, null);
+                    juspayRequestCallback.onFinish(bundle, null);
                 } catch (IOException e) {
                     Logger.logError(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
-                    jusPayRequestCallback.onFinish(null, new Errors.ServerError(e.getMessage()));
+                    juspayRequestCallback.onFinish(null, new Errors.ServerError(e.getMessage()));
                 } catch (JSONException e) {
                     Logger.logError(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
-                    jusPayRequestCallback.onFinish(null, e);
+                    juspayRequestCallback.onFinish(null, e);
                 }
             }
         });

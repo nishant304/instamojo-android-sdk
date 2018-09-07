@@ -9,10 +9,10 @@ import com.instamojo.android.models.Order;
 /**
  * Callback listener that is passed along with {@link Order}
  * and {@link com.instamojo.android.models.Card} to
- * {@link com.instamojo.android.network.Request#Request(Order, Card, JusPayRequestCallback)}.
+ * {@link com.instamojo.android.network.Request#Request(Order, Card, JuspayRequestCallback)}.
  */
 
-public interface JusPayRequestCallback {
+public interface JuspayRequestCallback {
     /**
      * Called on finish of the network call to Juspay with card and order details.
      * Pass on the bundle only after validating error to be null.

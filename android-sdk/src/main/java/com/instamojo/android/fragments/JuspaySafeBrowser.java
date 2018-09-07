@@ -16,12 +16,12 @@ import in.juspay.godel.ui.JuspayBrowserFragment;
 /**
  * JuspaySafe Browser Fragment extending {@link in.juspay.godel.ui.JuspayBrowserFragment}.
  */
-public class JusPaySafeBrowser extends JuspayBrowserFragment {
+public class JuspaySafeBrowser extends JuspayBrowserFragment {
 
     /**
      * Creates new instance of Fragment.
      */
-    public JusPaySafeBrowser() {
+    public JuspaySafeBrowser() {
         // Required empty public constructor
     }
 

@@ -5,7 +5,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.instamojo.android.R;
-import com.instamojo.android.fragments.JusPaySafeBrowser;
+import com.instamojo.android.fragments.JuspaySafeBrowser;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 
@@ -14,7 +14,7 @@ import in.juspay.godel.ui.JuspayBrowserFragment;
 import in.juspay.godel.ui.JuspayWebView;
 
 /**
- * Activity subclass extending {@link BaseActivity}. Activity for {@link JusPaySafeBrowser} fragment.
+ * Activity subclass extending {@link BaseActivity}. Activity for {@link JuspaySafeBrowser} fragment.
  */
 public class PaymentActivity extends BaseActivity {
 

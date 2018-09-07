@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.instamojo.android.R;
 import com.instamojo.android.activities.BaseActivity;
 import com.instamojo.android.activities.PaymentDetailsActivity;
-import com.instamojo.android.callbacks.JusPayRequestCallback;
+import com.instamojo.android.callbacks.JuspayRequestCallback;
 import com.instamojo.android.helpers.CardValidator;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.helpers.Validators;
@@ -228,7 +228,7 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
         parentActivity.hideKeyboard();
         changeEditBoxesState(false);
         final ProgressDialog dialog = ProgressDialog.show(parentActivity, "", getString(R.string.please_wait), true, false);
-        Request request = new Request(parentActivity.getOrder(), card, new JusPayRequestCallback() {
+        Request request = new Request(parentActivity.getOrder(), card, new JuspayRequestCallback() {
             @Override
             public void onFinish(final Bundle bundle, final Exception error) {
                 parentActivity.runOnUiThread(new Runnable() {
