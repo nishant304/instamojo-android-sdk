@@ -5,10 +5,10 @@ import com.instamojo.android.models.Order;
 
 /**
  * Callback listener that is passed along with {@link Order} to
- * {@link com.instamojo.android.network.Request#Request(Order, OrderRequestCallBack)}.
+ * {@link com.instamojo.android.network.Request#Request(Order, OrderRequestCallback)}.
  */
 
-public interface OrderRequestCallBack {
+public interface OrderRequestCallback {
     /**
      * Called on finishing the order creation with Instamojo server.
      * {@link Order} will be unchanged if the error is not null.

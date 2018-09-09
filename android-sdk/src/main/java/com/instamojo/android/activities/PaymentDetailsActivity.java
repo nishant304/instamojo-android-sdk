@@ -161,6 +161,4 @@ public class PaymentDetailsActivity extends BaseActivity {
         invalidateOptionsMenu();
         Logger.logDebug(this.getClass().getSimpleName(), "Invalidating search option for Net banking");
     }
-
-
 }

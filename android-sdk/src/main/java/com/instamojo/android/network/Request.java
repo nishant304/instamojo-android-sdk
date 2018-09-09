@@ -9,7 +9,7 @@ import android.support.annotation.NonNull;
 import com.instamojo.android.BuildConfig;
 import com.instamojo.android.Instamojo;
 import com.instamojo.android.callbacks.JuspayRequestCallback;
-import com.instamojo.android.callbacks.OrderRequestCallBack;
+import com.instamojo.android.callbacks.OrderRequestCallback;
 import com.instamojo.android.callbacks.UPICallback;
 import com.instamojo.android.helpers.CardValidator;
 import com.instamojo.android.helpers.Constants;
@@ -55,7 +55,7 @@ import okhttp3.Response;
 public class Request {
 
     private Order order;
-    private OrderRequestCallBack orderRequestCallback;
+    private OrderRequestCallback orderRequestCallback;
     private JuspayRequestCallback juspayRequestCallback;
     private UPICallback upiCallback;
     private String virtualPaymentAddress;
@@ -75,7 +75,7 @@ public class Request {
      * @param order                Order model with all the mandatory fields set.
      * @param orderRequestCallback Callback interface for the Asynchronous Network Call.
      */
-    public Request(@NonNull Order order, @NonNull OrderRequestCallBack orderRequestCallback) {
+    public Request(@NonNull Order order, @NonNull OrderRequestCallback orderRequestCallback) {
         this.mode = MODE.OrderCreate;
         this.order = order;
         this.orderRequestCallback = orderRequestCallback;
@@ -129,9 +129,9 @@ public class Request {
      *
      * @param accessToken          String
      * @param orderID              String
-     * @param orderRequestCallback {@link OrderRequestCallBack}
+     * @param orderRequestCallback {@link OrderRequestCallback}
      */
-    public Request(@NonNull String accessToken, @NonNull String orderID, @NonNull OrderRequestCallBack orderRequestCallback) {
+    public Request(@NonNull String accessToken, @NonNull String orderID, @NonNull OrderRequestCallback orderRequestCallback) {
         this.mode = MODE.FetchOrder;
         this.accessToken = accessToken;
         this.orderID = orderID;
