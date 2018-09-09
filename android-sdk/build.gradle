@@ -73,7 +73,7 @@ android {
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
     api 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.squareup.okhttp3:okhttp:3.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     api 'com.rengwuxian.materialedittext:library:2.1.4'
     api 'in.juspay:godel:0.6.23.1423'
 }
