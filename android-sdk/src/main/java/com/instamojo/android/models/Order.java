@@ -338,7 +338,7 @@ public class Order implements Parcelable {
     }
 
     /**
-     * Get UPISubmission otions for this order
+     * Get UPISubmission options for this order
      *
      * @return UPIOptions
      */
@@ -347,7 +347,7 @@ public class Order implements Parcelable {
     }
 
     /**
-     * Set UPISubmission otions for this order
+     * Set UPISubmission options for this order
      *
      * @param upiOptions {@link UPIOptions}
      */
