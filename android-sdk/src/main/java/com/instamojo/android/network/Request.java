@@ -258,7 +258,7 @@ public class Request {
                 try {
                     responseBody = r.body().string();
                     r.body().close();
-                    parseOrder(responseBody);
+                    parseCheckoutOptions(responseBody);
                     orderRequestCallback.onFinish(order, null);
                 } catch (IOException e) {
                     Logger.logError(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
@@ -323,7 +323,7 @@ public class Request {
         });
     }
 
-    private void parseOrder(String responseBody) throws JSONException {
+    private void parseCheckoutOptions(String responseBody) throws JSONException {
         JSONObject responseObject = new JSONObject(responseBody);
         JSONObject orderObject = responseObject.getJSONObject("order");
         String id = orderObject.getString("id");
