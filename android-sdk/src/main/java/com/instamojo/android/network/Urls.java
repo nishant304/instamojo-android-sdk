@@ -65,6 +65,6 @@ public class Urls {
     }
 
     public static String getOrderFetchURL(String orderID) {
-        return baseUrl + "v2/gateway/orders/"+orderID+"/payment-options/";
+        return baseUrl + "v2/gateway/orders/"+orderID+"/checkout-options/";
     }
 }

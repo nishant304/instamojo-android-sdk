@@ -369,7 +369,6 @@ public class Order implements Parcelable {
      */
     public boolean isValidName() {
         return !buyerName.trim().isEmpty() && buyerName.length() <= 100;
-
     }
 
     /**

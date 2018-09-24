@@ -243,7 +243,6 @@ public class Request {
     private void executeFetchOrder() {
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(Urls.getOrderFetchURL(orderID))
-                .header("Authorization", "Bearer " + accessToken)
                 .get()
                 .build();
         client.newCall(request).enqueue(new Callback() {
