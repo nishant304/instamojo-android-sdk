@@ -62,7 +62,7 @@ public class UPIpaymentFragment extends BaseFragment implements View.OnClickList
 
     @Override
     public void inflateXML(View view) {
-        virtualAddressBox = (MaterialEditText) view.findViewById(R.id.virtual_address_box);
+        virtualAddressBox = view.findViewById(R.id.virtual_address_box);
         virtualAddressBox.addValidator(new Validators.EmptyFieldValidator());
         virtualAddressBox.addValidator(new Validators.VPAValidator());
         preVPALayout = view.findViewById(R.id.pre_vpa_layout);

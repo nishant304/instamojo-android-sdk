@@ -34,7 +34,7 @@ public class EMIBankList extends BaseFragment {
 
     @Override
     public void inflateXML(View view) {
-        emiBanksContainer = (LinearLayout) view.findViewById(R.id.emi_view_container);
+        emiBanksContainer = view.findViewById(R.id.emi_view_container);
     }
 
     @Override

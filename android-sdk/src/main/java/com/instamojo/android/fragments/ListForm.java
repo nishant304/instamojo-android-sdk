@@ -75,8 +75,8 @@ public class ListForm extends BaseFragment implements SearchView.OnQueryTextList
 
     @Override
     public void inflateXML(View view) {
-        listContainer = (LinearLayout) view.findViewById(R.id.list_container);
-        headerTextView = (TextView) view.findViewById(R.id.header_text);
+        listContainer = view.findViewById(R.id.list_container);
+        headerTextView = view.findViewById(R.id.header_text);
         Logger.logDebug(this.getClass().getSimpleName(), "Inflated XML");
     }
 
