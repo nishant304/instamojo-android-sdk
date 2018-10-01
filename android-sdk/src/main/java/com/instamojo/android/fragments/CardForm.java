@@ -91,14 +91,14 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
 
     @Override
     public void inflateXML(View view) {
-        cardNumberBox = (MaterialEditText) view.findViewById(R.id.card_number_box);
+        cardNumberBox = view.findViewById(R.id.card_number_box);
         cardNumberBox.setNextFocusDownId(R.id.card_date_box);
         cardNumberBox.addTextChangedListener(new CardTextWatcher());
         cardNumberBox.addValidator(new Validators.EmptyFieldValidator());
         cardNumberBox.addValidator(new Validators.CardValidator());
-        dateBox = (MaterialEditText) view.findViewById(R.id.card_date_box);
+        dateBox = view.findViewById(R.id.card_date_box);
         dateBox.setNextFocusDownId(R.id.cvv_box);
-        cvvBox = (MaterialEditText) view.findViewById(R.id.cvv_box);
+        cvvBox = view.findViewById(R.id.cvv_box);
         dateBox.addTextChangedListener(new TextWatcher() {
 
             private int previousLength = 0, currentLength = 0;
@@ -150,7 +150,7 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
             }
         });
 
-        Button checkOutButton = (Button) view.findViewById(R.id.checkout);
+        Button checkOutButton = view.findViewById(R.id.checkout);
         String checkoutText = "Pay ₹" + parentActivity.getOrder().getAmount();
         checkOutButton.setText(checkoutText);
         checkOutButton.setOnClickListener(this);

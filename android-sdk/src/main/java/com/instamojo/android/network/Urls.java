@@ -3,7 +3,6 @@ package com.instamojo.android.network;
 import android.util.Log;
 
 import com.instamojo.android.Instamojo;
-import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 
 /**
