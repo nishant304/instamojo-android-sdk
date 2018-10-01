@@ -1,10 +1,10 @@
 package com.instamojo.android.fragments;
 
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -227,7 +227,12 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
     private void checkOut(Card card) {
         parentActivity.hideKeyboard();
         changeEditBoxesState(false);
-        final ProgressDialog dialog = ProgressDialog.show(parentActivity, "", getString(R.string.please_wait), true, false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(parentActivity);
+        builder.setCancelable(false); // if you want user to wait for some process to finish,
+        builder.setView(R.layout.please_wait_dialog_instamojo);
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
         Request request = new Request(parentActivity.getOrder(), card, new JuspayRequestCallback() {
             @Override
             public void onFinish(final Bundle bundle, final Exception error) {
