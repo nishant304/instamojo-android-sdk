@@ -29,7 +29,7 @@ public class PaymentActivity extends BaseActivity {
     }
 
     private void inflateXML() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Logger.logDebug(this.getClass().getSimpleName(), "Inflated XML");
     }

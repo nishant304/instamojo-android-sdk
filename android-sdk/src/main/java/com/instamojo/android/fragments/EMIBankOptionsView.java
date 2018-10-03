@@ -53,7 +53,7 @@ public class EMIBankOptionsView extends BaseFragment {
     @Override
     public void inflateXML(View view) {
         super.inflateXML(view);
-        optionsContainer = (LinearLayout) view.findViewById(R.id.emi_view_container);
+        optionsContainer = view.findViewById(R.id.emi_view_container);
     }
 
     @Override

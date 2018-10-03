@@ -6,7 +6,7 @@
     <string name="cvv_hint">CVV</string>
     <string name="checkout">Checkout</string>
     <string name="error_message_juspay">Failed to initiate Payment. Please try again!</string>
-    <string name="please_wait">please wait…</string>
+    <string name="please_wait">Please wait&#8230;</string>
     <string name="title_fragment_choose_payment_option">Choose a Payment Option</string>
     <string name="title_fragment_credit_card_form">Credit Card</string>
     <string name="title_fragment_debit_card_form">Debit Card</string>
@@ -27,6 +27,6 @@
     <string name="example_mohit_icici">Example: mohit@icici</string>
     <string name="verify_payment">Verify Payment</string>
     <string name="verify_payment_image_description">Verify Payment Image</string>
-    <string name="waiting">Waiting…</string>
+    <string name="waiting">Waiting&#8230;</string>
     <string name="complete_payment_description">You will receive a notification on your Bank UPI app.\nPlease confirm it to complete the payment.</string>
 </resources>

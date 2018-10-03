@@ -1,10 +1,10 @@
 package com.instamojo.android.fragments;
 
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -91,14 +91,14 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
 
     @Override
     public void inflateXML(View view) {
-        cardNumberBox = (MaterialEditText) view.findViewById(R.id.card_number_box);
+        cardNumberBox = view.findViewById(R.id.card_number_box);
         cardNumberBox.setNextFocusDownId(R.id.card_date_box);
         cardNumberBox.addTextChangedListener(new CardTextWatcher());
         cardNumberBox.addValidator(new Validators.EmptyFieldValidator());
         cardNumberBox.addValidator(new Validators.CardValidator());
-        dateBox = (MaterialEditText) view.findViewById(R.id.card_date_box);
+        dateBox = view.findViewById(R.id.card_date_box);
         dateBox.setNextFocusDownId(R.id.cvv_box);
-        cvvBox = (MaterialEditText) view.findViewById(R.id.cvv_box);
+        cvvBox = view.findViewById(R.id.cvv_box);
         dateBox.addTextChangedListener(new TextWatcher() {
 
             private int previousLength = 0, currentLength = 0;
@@ -150,7 +150,7 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
             }
         });
 
-        Button checkOutButton = (Button) view.findViewById(R.id.checkout);
+        Button checkOutButton = view.findViewById(R.id.checkout);
         String checkoutText = "Pay ₹" + parentActivity.getOrder().getAmount();
         checkOutButton.setText(checkoutText);
         checkOutButton.setOnClickListener(this);
@@ -227,7 +227,12 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
     private void checkOut(Card card) {
         parentActivity.hideKeyboard();
         changeEditBoxesState(false);
-        final ProgressDialog dialog = ProgressDialog.show(parentActivity, "", getString(R.string.please_wait), true, false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(parentActivity);
+        builder.setCancelable(false); // if you want user to wait for some process to finish,
+        builder.setView(R.layout.please_wait_dialog_instamojo);
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
         Request request = new Request(parentActivity.getOrder(), card, new JuspayRequestCallback() {
             @Override
             public void onFinish(final Bundle bundle, final Exception error) {
