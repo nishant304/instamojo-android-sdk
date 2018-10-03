@@ -68,6 +68,10 @@ public class Order implements Parcelable {
         this.redirectionUrl = Urls.getDefaultRedirectUrl();
     }
 
+    public Order() {
+
+    }
+
     protected Order(Parcel in) {
         id = in.readString();
         transactionID = in.readString();

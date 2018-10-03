@@ -127,13 +127,11 @@ public class Request {
     /**
      * Network request to fetch the order
      *
-     * @param accessToken          String
      * @param orderID              String
      * @param orderRequestCallback {@link OrderRequestCallback}
      */
-    public Request(@NonNull String accessToken, @NonNull String orderID, @NonNull OrderRequestCallback orderRequestCallback) {
+    public Request(@NonNull String orderID, @NonNull OrderRequestCallback orderRequestCallback) {
         this.mode = MODE.FetchOrder;
-        this.accessToken = accessToken;
         this.orderID = orderID;
         this.orderRequestCallback = orderRequestCallback;
     }
@@ -227,7 +225,6 @@ public class Request {
                 }
             }
         });
-
     }
 
     private Bundle parseJusPayResponse(String responseBody) throws JSONException {
@@ -325,21 +322,9 @@ public class Request {
     private void parseCheckoutOptions(String responseBody) throws JSONException {
         JSONObject responseObject = new JSONObject(responseBody);
         JSONObject orderObject = responseObject.getJSONObject("order");
-        String id = orderObject.getString("id");
-        String transactionID = orderObject.getString("transaction_id");
-        String buyerName = orderObject.getString("name");
-        String buyerEmail = orderObject.getString("email");
-        String phone = orderObject.getString("phone");
         String amount = orderObject.getString("amount");
-        String description = orderObject.getString("description");
-        String currency = orderObject.getString("currency");
-        String redirectionURL = orderObject.getString("redirect_url");
-        String webhookURL = orderObject.getString("webhook_url");
-        order = new Order(accessToken, transactionID, buyerName, buyerEmail, phone, amount, description);
-        order.setId(id);
-        order.setCurrency(currency);
-        order.setRedirectionUrl(redirectionURL);
-        order.setWebhook(webhookURL);
+        order = new Order();
+        order.setAmount(amount);
         updateTransactionDetails(responseObject);
     }
 
