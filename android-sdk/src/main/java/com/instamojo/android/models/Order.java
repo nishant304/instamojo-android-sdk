@@ -68,6 +68,10 @@ public class Order implements Parcelable {
         this.redirectionUrl = Urls.getDefaultRedirectUrl();
     }
 
+    public Order() {
+
+    }
+
     protected Order(Parcel in) {
         id = in.readString();
         transactionID = in.readString();
@@ -353,7 +357,6 @@ public class Order implements Parcelable {
      */
     public boolean isValidName() {
         return !buyerName.trim().isEmpty() && buyerName.length() <= 100;
-
     }
 
     /**
