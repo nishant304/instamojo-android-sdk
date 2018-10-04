@@ -21,9 +21,9 @@ public class CardOptions implements Parcelable {
             return new CardOptions[size];
         }
     };
-    private String orderID;
-    private String url;
-    private String merchantID;
+    private final String orderID;
+    private final String url;
+    private final String merchantID;
 
     /**
      * Constructor for CardOptions.

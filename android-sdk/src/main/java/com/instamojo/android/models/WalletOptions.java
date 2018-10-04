@@ -19,7 +19,7 @@ public class WalletOptions implements Parcelable {
             return new WalletOptions[size];
         }
     };
-    private String url;
+    private final String url;
     private ArrayList<Wallet> wallets = new ArrayList<>();
 
     public WalletOptions(String url, ArrayList<Wallet> wallets) {

@@ -17,9 +17,9 @@ public class Wallet implements Parcelable {
             return new Wallet[size];
         }
     };
-    private String name;
-    private String imageURL;
-    private String walletID;
+    private final String name;
+    private final String imageURL;
+    private final String walletID;
 
     public Wallet(String name, String imageURL, String walletID) {
         this.name = name;

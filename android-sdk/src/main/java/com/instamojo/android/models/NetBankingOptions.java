@@ -23,7 +23,7 @@ public class NetBankingOptions implements Parcelable {
             return new NetBankingOptions[size];
         }
     };
-    private String url;
+    private final String url;
     private LinkedHashMap<String, String> banks = new LinkedHashMap<>();
 
     /**
