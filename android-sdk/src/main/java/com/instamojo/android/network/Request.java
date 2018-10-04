@@ -448,9 +448,8 @@ public class Request {
 
             @Override
             public void onResponse(Call call, Response r) {
-                String responseBody = "";
                 try {
-                    responseBody = r.body().string();
+                    String responseBody = r.body().string();
                     r.body().close();
                     upiCallback.onSubmission(parseUPIResponse(responseBody), null);
                 } catch (IOException | JSONException e) {
@@ -491,9 +490,8 @@ public class Request {
 
             @Override
             public void onResponse(Call call, Response r) {
-                String responseBody = "";
                 try {
-                    responseBody = r.body().string();
+                    String responseBody = r.body().string();
                     r.body().close();
                     boolean transactionComplete = isTransactionComplete(responseBody);
                     if (!transactionComplete) {
