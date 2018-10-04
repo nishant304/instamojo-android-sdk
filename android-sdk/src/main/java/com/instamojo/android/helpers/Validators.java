@@ -97,11 +97,7 @@ public class Validators {
                 return false;
             }
 
-            if (text.toString().contains(".com")) {
-                return false;
-            }
-
-            return true;
+            return !text.toString().contains(".com");
         }
     }
 }
