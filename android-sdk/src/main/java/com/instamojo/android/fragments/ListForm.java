@@ -2,6 +2,7 @@ package com.instamojo.android.fragments;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
@@ -45,7 +46,7 @@ public class ListForm extends BaseFragment implements SearchView.OnQueryTextList
 
     @SuppressWarnings("unchecked")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list_form_instamojo, container, false);
         parentActivity = (PaymentDetailsActivity) getActivity();
