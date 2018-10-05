@@ -10,8 +10,8 @@ ext {
 
     libraryDescription = 'Instamojo Payments Android SDK'
 
-    siteUrl = 'https://github.com/Instamojo/android-sdk'
-    gitUrl = 'https://github.com/Instamojo/android-sdk.git'
+    siteUrl = 'https://github.com/Instamojo/instamojo-android-sdk'
+    gitUrl = 'https://github.com/Instamojo/instamojo-android-sdk.git'
 
     libraryVersion = '1.3.0'
 
