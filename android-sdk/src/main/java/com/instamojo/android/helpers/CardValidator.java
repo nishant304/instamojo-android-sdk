@@ -7,6 +7,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Card Validator class to validate card details.
@@ -264,6 +266,13 @@ public class CardValidator {
         return ((PREFIX.contains(prefix2)));
     }
 
+    public static boolean isRupayCard(String cardNumber) {
+        String patternStr = "^(508227|508[5-9]|603741|60698[5-9]|60699|607[0-8]|6079[0-7]|60798[0-4]|60800[1-9]|6080[1-9]|608[1-4]|608500|6521[5-9]|652[2-9]|6530|6531[0-4])";
+        Pattern pattern = Pattern.compile(patternStr);
+        Matcher matcher = pattern.matcher(cardNumber);
+        return matcher.matches();
+    }
+
     /**
      * Returns the drawable of the card issuer.
      *
@@ -290,6 +299,9 @@ public class CardValidator {
         }
         if (maestroCard(card)) {
             return R.drawable.ic_maestro_card;
+        }
+        if (isRupayCard(card)) {
+            return R.drawable.ic_unknown_card;
         }
         return R.drawable.ic_unknown_card;
     }

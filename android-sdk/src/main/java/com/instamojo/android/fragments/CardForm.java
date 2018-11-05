@@ -286,24 +286,24 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            String card = cardNumberBox.getText().toString();
-            card = card.replaceAll(" ", "");
-            if (card.length() == 4) {
-                drawable = CardValidator.getCardDrawable(card);
-                limit = CardValidator.validateCardTypeWithoutLengthForLimit(card);
-                if (CardValidator.maestroCard(card)) {
+            String cardNumber = cardNumberBox.getText().toString();
+            cardNumber = cardNumber.replaceAll(" ", "");
+            if (cardNumber.length() == 4) {
+                drawable = CardValidator.getCardDrawable(cardNumber);
+                limit = CardValidator.validateCardTypeWithoutLengthForLimit(cardNumber);
+                if (CardValidator.maestroCard(cardNumber)) {
                     clearOptionalValidators();
                 } else {
                     addOptionalValidators();
                 }
-            } else if (card.length() < 4) {
+            } else if (cardNumber.length() < 4) {
                 drawable = R.drawable.ic_accepted_cards;
                 clearOptionalValidators();
             }
 
             cardNumberBox.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
 
-            if (card.length() == limit) {
+            if (cardNumber.length() == limit) {
                 dateBox.requestFocus();
             }
             currentLength = cardNumberBox.getText().toString().trim().length();
