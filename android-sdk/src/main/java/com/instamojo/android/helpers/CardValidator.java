@@ -301,7 +301,7 @@ public class CardValidator {
             return R.drawable.ic_maestro_card;
         }
         if (isRupayCard(card)) {
-            return R.drawable.ic_unknown_card;
+            return R.drawable.ic_rupay_card;
         }
         return R.drawable.ic_unknown_card;
     }
@@ -364,6 +364,9 @@ public class CardValidator {
         }
         if (maestroCard(card)) {
             return 19;
+        }
+        if (isRupayCard(card)) {
+            return 16;
         }
         return 19;
     }
