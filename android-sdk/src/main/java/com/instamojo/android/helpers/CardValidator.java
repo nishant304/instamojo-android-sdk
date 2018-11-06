@@ -19,29 +19,28 @@ public class CardValidator {
      * Luhn's algorithm implementation to validate the card passed.
      *
      * @param card            Card number. Require atleast first 4 to give a valid result.
-     * @param skipLengthCheck skip the length check for Maestro cards.
      * @return 1 for valid card , 0 for invalid card.
      */
-    public static int isValid(String card, boolean skipLengthCheck) {
+    public static boolean isValid(String card) {
 
-        if (card.length() < 4) {
-            return 0;
+        if (card == null || card.isEmpty() || card.length() < 4) {
+            return false;
         }
 
-        if (!skipLengthCheck) {
-            CardType cardType = CardValidator.getCardType(card);
-            if (cardType.getNumberLength() != card.length()) {
-                return 0;
-            }
+        CardType cardType = CardValidator.getCardType(card);
+        // No length check for MAESTRO
+        if (cardType != CardType.MAESTRO && cardType.getNumberLength() != card.length()) {
+            return false;
         }
 
         long number = Long.valueOf(card);
         int total = sumOfDoubleEvenPlace(number) + sumOfOddPlace(number);
 
         if ((total % 10 == 0) && (prefixMatched(number, 1) != 0)) {
-            return prefixMatched(number, 1);
+            return prefixMatched(number, 1) == 1;
+
         } else {
-            return 0;
+            return false;
         }
     }
 

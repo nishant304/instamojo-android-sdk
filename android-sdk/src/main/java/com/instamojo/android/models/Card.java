@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.instamojo.android.helpers.CardValidator;
+import static com.instamojo.android.helpers.CardValidator.*;
 
 /**
  * Card object to hold the User card details.
@@ -164,10 +165,10 @@ public class Card implements Parcelable {
             if (!this.date.isEmpty()) {
                 return !CardValidator.isDateExpired(this.date);
             } else {
-                return !(isCardNumberValid() && !CardValidator.maestroCard(this.cardNumber));
+                return !(isValid(cardNumber) && !CardValidator.maestroCard(this.cardNumber));
             }
         } else {
-            return !(isCardNumberValid() && !CardValidator.maestroCard(this.cardNumber));
+            return !(isValid(cardNumber) && !CardValidator.maestroCard(this.cardNumber));
         }
 
 
@@ -181,41 +182,16 @@ public class Card implements Parcelable {
      */
     public boolean isCVVValid() {
         if (this.cvv != null) {
-            return !this.cvv.isEmpty() || !(isCardNumberValid() && !CardValidator.maestroCard(this.cardNumber));
+            return !this.cvv.isEmpty() || !(isValid(cardNumber) && !CardValidator.maestroCard(this.cardNumber));
         } else {
-            return !(isCardNumberValid() && !CardValidator.maestroCard(this.cardNumber));
+            return !(isValid(cardNumber) && !CardValidator.maestroCard(this.cardNumber));
         }
-    }
-
-    /**
-     * Check if the Card Number is Valid using Luhn's algorithm.
-     * Takes care of all the Edge cases. Requires atleast first four digits of the card.
-     *
-     * @return True if Valid. Else False.
-     */
-    public boolean isCardNumberValid() {
-        if (cardNumber == null || cardNumber.isEmpty()) {
-            return false;
-        }
-
-        int result;
-        if (CardValidator.masterCardWithoutLength(cardNumber)
-                || CardValidator.dinnersClubIntWithoutLength(cardNumber)
-                || CardValidator.visaCardWithoutLength(cardNumber)
-                || CardValidator.amexCardWithoutLength(cardNumber)
-                || CardValidator.discoverCardWithoutLength(cardNumber)) {
-            result = com.instamojo.android.helpers.CardValidator.isValid(cardNumber, false);
-        } else {
-            result = com.instamojo.android.helpers.CardValidator.isValid(cardNumber, true);
-        }
-        return result != 0;
     }
 
     /**
      * Check if the all the card details are valid.
      * if False, use
      * {@link Card#isCardNameValid()},
-     * {@link Card#isCardNumberValid()},
      * {@link Card#isCVVValid()},
      * {@link Card#isDateValid()}
      * to pinpoint the which field failed.
