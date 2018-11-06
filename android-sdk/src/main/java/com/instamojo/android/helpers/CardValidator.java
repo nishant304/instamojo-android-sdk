@@ -138,63 +138,6 @@ public class CardValidator {
     }
 
     /**
-     * Check for Visa Card.
-     *
-     * @param card Card Number to be validated, requires atleast first digit of the card.
-     * @return True if card is Visa else False.
-     */
-    public static boolean visaCardWithoutLength(String card) {
-        String PREFIX = "4";
-        return (card.substring(0, 1).equals(PREFIX));
-    }
-
-    /**
-     * Check for Discover Card.
-     *
-     * @param card Card Number to be validated, requires atleast first four digits of the card.
-     * @return True if card is Discover else False.
-     */
-    public static boolean discoverCardWithoutLength(String card) {
-        String PREFIX = "6011";
-        return (card.substring(0, 4).equals(PREFIX));
-    }
-
-    /**
-     * Check for Dinner's club International Card.
-     *
-     * @param card Card Number to be validated, requires atleast first two digits of the card.
-     * @return True if card is Dinner's club International else False.
-     */
-    public static boolean dinnersClubIntWithoutLength(String card) {
-        String PREFIX = "36";
-        return (card.substring(0, 2).equals(PREFIX));
-    }
-
-    /**
-     * Check for Amex Card.
-     *
-     * @param card Card Number to be validated, requires atleast first two digits of the card.
-     * @return True if card is Amex else False.
-     */
-    public static boolean amexCardWithoutLength(String card) {
-        String PREFIX = "34,37,";
-        String prefix2 = card.substring(0, 2) + ",";
-        return ((PREFIX.contains(prefix2)));
-    }
-
-    /**
-     * Check for Master Card.
-     *
-     * @param card Card Number to be validated, requires atleast first two digits of the card.
-     * @return True if card is Master else False.
-     */
-    public static boolean masterCardWithoutLength(String card) {
-        String PREFIX = "51,52,53,54,55,";
-        String prefix2 = card.substring(0, 2) + ",";
-        return ((PREFIX.contains(prefix2)));
-    }
-
-    /**
      * Check for Maestro Card.
      *
      * @param card Card Number to be validated, requires atleast first four digits of the card.
