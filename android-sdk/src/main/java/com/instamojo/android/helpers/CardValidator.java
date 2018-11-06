@@ -307,32 +307,18 @@ public class CardValidator {
     }
 
     /**
-     * Returns the String Name of the card issuer.
+     * Returns the CardType of the card issuer.
      *
-     * @param card Card number with atleast first four digits.
-     * @return Drawable int of appropriate issuer if found. Else returns Unknown.
+     * @param cardNumber Card number.
+     * @return CardType
      */
-    public static String getCardType(String card) {
+    public static CardType getCardType(String cardNumber) {
+        for (CardType cardType : CardType.values()) { if (cardType.matches(cardNumber)) {
+                return cardType;
+            }
+        }
 
-        if (visaCardWithoutLength(card)) {
-            return "Visa";
-        }
-        if (discoverCardWithoutLength(card)) {
-            return "Discover";
-        }
-        if (dinnersClubIntWithoutLength(card)) {
-            return "Dinners club Int";
-        }
-        if (amexCardWithoutLength(card)) {
-            return "Amex";
-        }
-        if (masterCardWithoutLength(card)) {
-            return "Master";
-        }
-        if (maestroCard(card)) {
-            return "Maestro";
-        }
-        return "Unknown";
+        return CardType.UNKNOWN;
     }
 
     /**

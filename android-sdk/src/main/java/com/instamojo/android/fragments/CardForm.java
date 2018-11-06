@@ -19,6 +19,7 @@ import com.instamojo.android.R;
 import com.instamojo.android.activities.BaseActivity;
 import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.callbacks.JuspayRequestCallback;
+import com.instamojo.android.helpers.CardType;
 import com.instamojo.android.helpers.CardValidator;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.helpers.Validators;
@@ -272,9 +273,9 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
 
     private class CardTextWatcher implements TextWatcher {
 
-        private int limit = -1;
         private int drawable = 0;
         private int previousLength = 0, currentLength = 0;
+        private CardType cardType = CardType.UNKNOWN;
 
         public CardTextWatcher() {
         }
@@ -288,22 +289,25 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             String cardNumber = cardNumberBox.getText().toString();
             cardNumber = cardNumber.replaceAll(" ", "");
-            if (cardNumber.length() == 4) {
-                drawable = CardValidator.getCardDrawable(cardNumber);
-                limit = CardValidator.validateCardTypeWithoutLengthForLimit(cardNumber);
-                if (CardValidator.maestroCard(cardNumber)) {
-                    clearOptionalValidators();
-                } else {
-                    addOptionalValidators();
-                }
-            } else if (cardNumber.length() < 4) {
-                drawable = R.drawable.ic_accepted_cards;
+
+            // TODO this will be triggered for every text change which may not be required
+            // Do this only for few characters not for entire card number
+            cardType = CardValidator.getCardType(cardNumber);
+            drawable = cardType.getImageResource();
+
+            if (cardType == CardType.UNKNOWN || cardType == CardType.MAESTRO) {
                 clearOptionalValidators();
+            } else {
+                addOptionalValidators();
+            }
+
+            if (cardNumber.isEmpty()) {
+                drawable = R.drawable.ic_accepted_cards;
             }
 
             cardNumberBox.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
 
-            if (cardNumber.length() == limit) {
+            if (cardNumber.length() == cardType.getNumberLength()) {
                 dateBox.requestFocus();
             }
             currentLength = cardNumberBox.getText().toString().trim().length();

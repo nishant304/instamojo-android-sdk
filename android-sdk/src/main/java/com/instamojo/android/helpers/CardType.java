@@ -7,9 +7,9 @@ import java.util.regex.Pattern;
 
 public enum CardType {
 
-    VISA("Visa", R.drawable.ic_visa_card, 16, "^4"),
+    VISA("Visa", R.drawable.ic_visa_card, 16, "^(4)"),
 
-    MASTER_CARD("Master", R.drawable.ic_master_card, 16, "^5[1-5]"),
+    MASTER_CARD("Master", R.drawable.ic_master_card, 16, "^(5[1-5])"),
 
     DISCOVER("Discover", R.drawable.ic_discover_card, 16, "^(6011|65|64[4-9]|622[1-9])"),
 
@@ -17,11 +17,11 @@ public enum CardType {
 
     DINERS_CLUB("Dinners club Int", R.drawable.ic_dinners_club_int_card, 14, "^(3[689]|30[0-5]|309)"),
 
-    AMEX("Amex", R.drawable.ic_amex_card, 15, "^3[47]"),
+    AMEX("Amex", R.drawable.ic_amex_card, 15, "^(3[47])"),
 
     RUPAY("Rupay", R.drawable.ic_rupay_card, 16, "^(508227|508[5-9]|603741|60698[5-9]|60699|607[0-8]|6079[0-7]|60798[0-4]|60800[1-9]|6080[1-9]|608[1-4]|608500|6521[5-9]|652[2-9]|6530|6531[0-4])"),
 
-    UNKNOWN("Unknown", R.drawable.ic_unknown_card, 19, "[0-9]+");
+    UNKNOWN("Unknown", R.drawable.ic_unknown_card, 19, "asdfg");
 
     private String displayName;
 
@@ -50,12 +50,8 @@ public enum CardType {
         return numberLength;
     }
 
-    public String getNumberPattern() {
-        return numberPattern;
-    }
-
     public boolean matches(String cardNumber) {
-        Pattern pattern = Pattern.compile(cardNumber);
+        Pattern pattern = Pattern.compile(this.numberPattern);
         Matcher matcher = pattern.matcher(cardNumber);
         return matcher.matches();
     }
