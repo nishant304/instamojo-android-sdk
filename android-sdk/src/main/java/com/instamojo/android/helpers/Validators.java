@@ -43,7 +43,7 @@ public class Validators {
 
         @Override
         public boolean isValid(@NonNull CharSequence text, boolean isEmpty) {
-            return !com.instamojo.android.helpers.CardValidator.isDateExpired(text.toString());
+            return !CardUtil.isDateExpired(text.toString());
         }
     }
 
@@ -59,7 +59,7 @@ public class Validators {
         @Override
         public boolean isValid(@NonNull CharSequence text, boolean isEmpty) {
             String card = text.toString().trim().replaceAll(" ", "");
-            return com.instamojo.android.helpers.CardValidator.isValid(card);
+            return CardUtil.isValid(card);
         }
     }
 

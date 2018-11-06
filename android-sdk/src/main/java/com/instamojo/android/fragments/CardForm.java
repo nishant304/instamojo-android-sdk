@@ -20,7 +20,7 @@ import com.instamojo.android.activities.BaseActivity;
 import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.callbacks.JuspayRequestCallback;
 import com.instamojo.android.helpers.CardType;
-import com.instamojo.android.helpers.CardValidator;
+import com.instamojo.android.helpers.CardUtil;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.helpers.Validators;
 import com.instamojo.android.models.Card;
@@ -292,7 +292,7 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
 
             // TODO this will be triggered for every text change which may not be required
             // Do this only for few characters not for entire card number
-            cardType = CardValidator.getCardType(cardNumber);
+            cardType = CardUtil.getCardType(cardNumber);
             drawable = cardType.getImageResource();
 
             if (cardType == CardType.UNKNOWN || cardType == CardType.MAESTRO) {
@@ -324,7 +324,7 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
             if (currentLength > previousLength) {
                 String[] data = cardNumber.replaceAll(" ", "").split("");
                 modifiedCard = "";
-                CardType cardType = CardValidator.getCardType(cardNumber);
+                CardType cardType = CardUtil.getCardType(cardNumber);
                 switch (cardType) {
                     case VISA:
                     case MASTER_CARD:

@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import com.instamojo.android.helpers.CardValidator;
+import com.instamojo.android.helpers.CardUtil;
 
 /**
  * Card object to hold the User card details.
@@ -158,11 +158,11 @@ public class Card implements Parcelable {
      */
     public boolean isDateValid() {
         if (date != null && !date.isEmpty()) {
-            return !CardValidator.isDateExpired(this.date);
+            return !CardUtil.isDateExpired(this.date);
         }
 
         // Expiry is optional for MAESTRO card
-        return CardValidator.isMaestroCard(this.cardNumber);
+        return CardUtil.isMaestroCard(this.cardNumber);
     }
 
     /**
@@ -174,7 +174,7 @@ public class Card implements Parcelable {
         }
 
         // CVV is optional for MAESTRO card
-        return CardValidator.isMaestroCard(this.cardNumber);
+        return CardUtil.isMaestroCard(this.cardNumber);
     }
 
     /**
@@ -184,7 +184,7 @@ public class Card implements Parcelable {
      * @return True if Valid. Else False.
      */
     public boolean isCardNumberValid() {
-        return com.instamojo.android.helpers.CardValidator.isValid(cardNumber);
+        return CardUtil.isValid(cardNumber);
     }
 
     /**

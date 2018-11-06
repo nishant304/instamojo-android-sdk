@@ -6,29 +6,29 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Card Validator class to validate card details.
+ * Utility class to validate card details.
  */
-public class CardValidator {
+public class CardUtil {
 
     /**
      * Luhn's algorithm implementation to validate the card passed.
      *
-     * @param card Card number. Require atleast first 4 to give a valid result.
+     * @param cardNumber Card number. Require atleast first 4 to give a valid result.
      * @return 1 for valid card , 0 for invalid card.
      */
-    public static boolean isValid(String card) {
+    public static boolean isValid(String cardNumber) {
 
-        if (card == null || card.isEmpty() || card.length() < 4) {
+        if (cardNumber == null || cardNumber.isEmpty() || cardNumber.length() < 4) {
             return false;
         }
 
-        CardType cardType = CardValidator.getCardType(card);
+        CardType cardType = CardUtil.getCardType(cardNumber);
         // No length check for MAESTRO
-        if (cardType != CardType.MAESTRO && cardType.getNumberLength() != card.length()) {
+        if (cardType != CardType.MAESTRO && cardType.getNumberLength() != cardNumber.length()) {
             return false;
         }
 
-        long number = Long.valueOf(card);
+        long number = Long.valueOf(cardNumber);
         int total = sumOfDoubleEvenPlace(number) + sumOfOddPlace(number);
 
         if ((total % 10 == 0) && (prefixMatched(number, 1) != 0)) {
@@ -172,7 +172,7 @@ public class CardValidator {
             Date expiryDate = dateFormat.parse(expiry);
             return expiryDate.before(new Date());
         } catch (ParseException e) {
-            Logger.logError(CardValidator.class.getSimpleName(), "Invalid Date - " + expiry);
+            Logger.logError(CardUtil.class.getSimpleName(), "Invalid Date - " + expiry);
             return true;
         }
     }
