@@ -353,7 +353,8 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
                             }
                         }
                         break;
-                    default:modifiedCard = cardNumber;
+                    default:
+                        modifiedCard = cardNumber;
                 }
             } else {
                 modifiedCard = cardNumber;

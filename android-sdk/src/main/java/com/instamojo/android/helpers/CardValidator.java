@@ -1,14 +1,9 @@
 package com.instamojo.android.helpers;
 
-
-import com.instamojo.android.R;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Card Validator class to validate card details.
@@ -18,7 +13,7 @@ public class CardValidator {
     /**
      * Luhn's algorithm implementation to validate the card passed.
      *
-     * @param card            Card number. Require atleast first 4 to give a valid result.
+     * @param card Card number. Require atleast first 4 to give a valid result.
      * @return 1 for valid card , 0 for invalid card.
      */
     public static boolean isValid(String card) {
@@ -154,7 +149,8 @@ public class CardValidator {
      * @return CardType
      */
     public static CardType getCardType(String cardNumber) {
-        for (CardType cardType : CardType.values()) { if (cardType.matches(cardNumber)) {
+        for (CardType cardType : CardType.values()) {
+            if (cardType.matches(cardNumber)) {
                 return cardType;
             }
         }
