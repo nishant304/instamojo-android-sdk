@@ -37,7 +37,7 @@ public class CardValidator {
         int total = sumOfDoubleEvenPlace(number) + sumOfOddPlace(number);
 
         if ((total % 10 == 0) && (prefixMatched(number, 1) != 0)) {
-            return prefixMatched(number, 1) == 1;
+            return true;
 
         } else {
             return false;
