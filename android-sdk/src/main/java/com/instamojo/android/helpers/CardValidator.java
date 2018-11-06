@@ -140,13 +140,11 @@ public class CardValidator {
     /**
      * Check for Maestro Card.
      *
-     * @param card Card Number to be validated, requires atleast first four digits of the card.
+     * @param cardNumber Card Number to be validated, requires atleast first four digits of the card.
      * @return True if card is Maestro else False.
      */
-    public static boolean maestroCard(String card) {
-        String PREFIX = "5018,5044,5020,5038,5893,6304,6759,6761,6762,6763,6220,";
-        String prefix2 = card.substring(0, 4) + ",";
-        return ((PREFIX.contains(prefix2)));
+    public static boolean isMaestroCard(String cardNumber) {
+        return CardType.MAESTRO.matches(cardNumber);
     }
 
     /**

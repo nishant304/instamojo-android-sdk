@@ -163,7 +163,7 @@ public class Request {
 
     private void executeJuspayRequest() {
         //For maestro, add the default values if empty
-        if (CardValidator.maestroCard(card.getCardNumber())) {
+        if (CardValidator.isMaestroCard(card.getCardNumber())) {
             if (card.getDate() == null || card.getDate().isEmpty()) {
                 card.setDate("12/49");
             }
