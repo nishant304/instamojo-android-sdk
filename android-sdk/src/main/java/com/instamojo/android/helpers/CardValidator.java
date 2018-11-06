@@ -29,7 +29,8 @@ public class CardValidator {
         }
 
         if (!skipLengthCheck) {
-            if (validateCardTypeWithoutLengthForLimit(card) != card.length()) {
+            CardType cardType = CardValidator.getCardType(card);
+            if (cardType.getNumberLength() != card.length()) {
                 return 0;
             }
         }
@@ -140,66 +141,6 @@ public class CardValidator {
     /**
      * Check for Visa Card.
      *
-     * @param card Card number to be validated.
-     * @return True if card is Visa.
-     */
-
-    public static boolean visaCard(String card) {
-        String PREFIX = "4";
-        return (
-                card.substring(0, 1).equals(PREFIX)
-                        && (card.length() == 13 || card.length() == 16));
-    }
-
-    /**
-     * Check for Discover Card.
-     *
-     * @param card Card number to be validated.
-     * @return True if card is Discover else False.
-     */
-    public static boolean discoverCard(String card) {
-        String PREFIX = "6011";
-        return (card.substring(0, 4).equals(PREFIX) && (card.length() == 16));
-    }
-
-    /**
-     * Check for Dinner's club International Card.
-     *
-     * @param card Card Number to be validated.
-     * @return True if card is Dinner's club International else False.
-     */
-    public static boolean dinnersClubInternationalCard(String card) {
-        String PREFIX = "36";
-        return (card.substring(0, 2).equals(PREFIX) && (card.length() == 14));
-    }
-
-    /**
-     * Check for Amex Card.
-     *
-     * @param card Card Number to be validated.
-     * @return True if card is Amex else False.
-     */
-    public static boolean amexCard(String card) {
-        String PREFIX = "34,37,";
-        String prefix2 = card.substring(0, 2) + ",";
-        return ((PREFIX.contains(prefix2)) && (card.length() == 15));
-    }
-
-    /**
-     * Check for Master Card.
-     *
-     * @param card Card Number to be validated.
-     * @return True if card is Master else False.
-     */
-    public static boolean masterCard(String card) {
-        String PREFIX = "51,52,53,54,55,";
-        String prefix2 = card.substring(0, 2) + ",";
-        return ((PREFIX.contains(prefix2)) && (card.length() == 16));
-    }
-
-    /**
-     * Check for Visa Card.
-     *
      * @param card Card Number to be validated, requires atleast first digit of the card.
      * @return True if card is Visa else False.
      */
@@ -266,46 +207,6 @@ public class CardValidator {
         return ((PREFIX.contains(prefix2)));
     }
 
-    public static boolean isRupayCard(String cardNumber) {
-        String patternStr = "^(508227|508[5-9]|603741|60698[5-9]|60699|607[0-8]|6079[0-7]|60798[0-4]|60800[1-9]|6080[1-9]|608[1-4]|608500|6521[5-9]|652[2-9]|6530|6531[0-4])";
-        Pattern pattern = Pattern.compile(patternStr);
-        Matcher matcher = pattern.matcher(cardNumber);
-        return matcher.matches();
-    }
-
-    /**
-     * Returns the drawable of the card issuer.
-     *
-     * @param card Card number with atleast first four digits.
-     * @return Drawable int of appropriate issuer if found.
-     * Else returns drawable of {@link com.instamojo.android.R.drawable#ic_unknown_card}.
-     */
-    public static int getCardDrawable(String card) {
-
-        if (visaCardWithoutLength(card)) {
-            return R.drawable.ic_visa_card;
-        }
-        if (discoverCardWithoutLength(card)) {
-            return R.drawable.ic_discover_card;
-        }
-        if (dinnersClubIntWithoutLength(card)) {
-            return R.drawable.ic_dinners_club_int_card;
-        }
-        if (amexCardWithoutLength(card)) {
-            return R.drawable.ic_amex_card;
-        }
-        if (masterCardWithoutLength(card)) {
-            return R.drawable.ic_master_card;
-        }
-        if (maestroCard(card)) {
-            return R.drawable.ic_maestro_card;
-        }
-        if (isRupayCard(card)) {
-            return R.drawable.ic_rupay_card;
-        }
-        return R.drawable.ic_unknown_card;
-    }
-
     /**
      * Returns the CardType of the card issuer.
      *
@@ -319,42 +220,6 @@ public class CardValidator {
         }
 
         return CardType.UNKNOWN;
-    }
-
-    /**
-     * Method to get the supposed length of the card type.
-     *
-     * @param card Card Number to validate, requires atleast first four digits of the card
-     *             to return the valid length.
-     * @return Either actual length of the card type else default 19.
-     */
-    public static int validateCardTypeWithoutLengthForLimit(String card) {
-        if (card.contains(" ")) {
-            card = card.replace(" ", "");
-        }
-        card = card.trim();
-        if (visaCardWithoutLength(card)) {
-            return 16;
-        }
-        if (discoverCard(card)) {
-            return 16;
-        }
-        if (dinnersClubIntWithoutLength(card)) {
-            return 14;
-        }
-        if (amexCardWithoutLength(card)) {
-            return 15;
-        }
-        if (masterCardWithoutLength(card)) {
-            return 16;
-        }
-        if (maestroCard(card)) {
-            return 19;
-        }
-        if (isRupayCard(card)) {
-            return 16;
-        }
-        return 19;
     }
 
     /**
