@@ -189,9 +189,20 @@ public class Card implements Parcelable {
     }
 
     /**
+     * Check if the Card Number is Valid using Luhn's algorithm.
+     * Takes care of all the Edge cases. Requires atleast first four digits of the card.
+     *
+     * @return True if Valid. Else False.
+     */
+    public boolean isCardNumberValid() {
+        return com.instamojo.android.helpers.CardValidator.isValid(cardNumber);
+    }
+
+    /**
      * Check if the all the card details are valid.
      * if False, use
      * {@link Card#isCardNameValid()},
+     * {@link Card#isCardNumberValid()},
      * {@link Card#isCVVValid()},
      * {@link Card#isDateValid()}
      * to pinpoint the which field failed.
