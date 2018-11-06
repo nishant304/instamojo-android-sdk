@@ -315,42 +315,48 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
 
         @Override
         public void afterTextChanged(Editable s) {
-            String card = s.toString().trim();
-            if (card.length() < 4) {
+            String cardNumber = s.toString().trim();
+            if (cardNumber.length() < 4) {
                 return;
             }
 
             String modifiedCard;
             if (currentLength > previousLength) {
-                String[] data = card.replaceAll(" ", "").split("");
+                String[] data = cardNumber.replaceAll(" ", "").split("");
                 modifiedCard = "";
-                if (CardValidator.masterCardWithoutLength(card) || CardValidator.visaCardWithoutLength(card)
-                        || CardValidator.discoverCardWithoutLength(card)) {
-                    for (int index = 1; index < data.length; index++) {
-                        modifiedCard = modifiedCard + data[index];
-                        if (index == 4 || index == 8 || index == 12) {
-                            modifiedCard = modifiedCard + " ";
+                CardType cardType = CardValidator.getCardType(cardNumber);
+                switch (cardType) {
+                    case VISA:
+                    case MASTER_CARD:
+                    case DISCOVER:
+                    case RUPAY:
+                        for (int index = 1; index < data.length; index++) {
+                            modifiedCard = modifiedCard + data[index];
+                            if (index == 4 || index == 8 || index == 12) {
+                                modifiedCard = modifiedCard + " ";
+                            }
                         }
-                    }
-                } else if (CardValidator.amexCardWithoutLength(card)) {
-                    for (int index = 1; index < data.length; index++) {
-                        modifiedCard = modifiedCard + data[index];
-                        if (index == 4 || index == 11) {
-                            modifiedCard = modifiedCard + " ";
+                        break;
+                    case AMEX:
+                        for (int index = 1; index < data.length; index++) {
+                            modifiedCard = modifiedCard + data[index];
+                            if (index == 4 || index == 11) {
+                                modifiedCard = modifiedCard + " ";
+                            }
                         }
-                    }
-                } else if (CardValidator.dinnersClubIntWithoutLength(card)) {
-                    for (int index = 1; index < data.length; index++) {
-                        modifiedCard = modifiedCard + data[index];
-                        if (index == 4 || index == 10) {
-                            modifiedCard = modifiedCard + " ";
+                        break;
+                    case DINERS_CLUB:
+                        for (int index = 1; index < data.length; index++) {
+                            modifiedCard = modifiedCard + data[index];
+                            if (index == 4 || index == 10) {
+                                modifiedCard = modifiedCard + " ";
+                            }
                         }
-                    }
-                } else {
-                    modifiedCard = card;
+                        break;
+                    default:modifiedCard = cardNumber;
                 }
             } else {
-                modifiedCard = card;
+                modifiedCard = cardNumber;
             }
 
             applyText(cardNumberBox, this, modifiedCard);
