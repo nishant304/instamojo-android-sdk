@@ -456,12 +456,28 @@ public class Request {
 
                     } catch (IOException | JSONException e) {
                         Logger.logError(this.getClass().getSimpleName(),
-                                "Error while handling UPI response - " + e.getMessage());
+                                "Error while handling UPI success response - " + e.getMessage());
                         upiCallback.onSubmission(null, e);
                     }
 
                 } else {
-                    upiCallback.onSubmission(null, new Exception("Error response from server"));
+                    Exception ex = new Exception("Error response from server");
+                    if (response.code() == 400) {
+                        try {
+                            String errorBody = response.body().string();
+                            response.body().close();
+                            JSONObject responseObject = new JSONObject(errorBody);
+                            JSONObject errors = responseObject.getJSONObject("errors");
+                            ex = new Exception(errors.getString("virtual_address"));
+
+                        } catch (IOException | JSONException e) {
+                            Logger.logError(this.getClass().getSimpleName(),
+                                    "Error while handling UPI error response - " + e.getMessage());
+                            ex = e;
+                        }
+                    }
+
+                    upiCallback.onSubmission(null, ex);
                 }
             }
         });
