@@ -447,15 +447,21 @@ public class Request {
             }
 
             @Override
-            public void onResponse(Call call, Response r) {
-                try {
-                    String responseBody = r.body().string();
-                    r.body().close();
-                    upiCallback.onSubmission(parseUPIResponse(responseBody), null);
-                } catch (IOException | JSONException e) {
-                    Logger.logError(this.getClass().getSimpleName(),
-                            "Error while making UPI Submission request - " + e.getMessage());
-                    upiCallback.onSubmission(null, e);
+            public void onResponse(Call call, Response response) {
+                if (response.isSuccessful()) {
+                    try {
+                        String responseBody = response.body().string();
+                        response.body().close();
+                        upiCallback.onSubmission(parseUPIResponse(responseBody), null);
+
+                    } catch (IOException | JSONException e) {
+                        Logger.logError(this.getClass().getSimpleName(),
+                                "Error while handling UPI response - " + e.getMessage());
+                        upiCallback.onSubmission(null, e);
+                    }
+
+                } else {
+                    upiCallback.onSubmission(null, new Exception("Error response from server"));
                 }
             }
         });
