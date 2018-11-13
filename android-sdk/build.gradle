@@ -1,27 +1,11 @@
 apply plugin: 'com.android.library'
 
 ext {
-    bintrayRepo = 'maven'
-    bintrayName = 'sdks'
-
-    publishedGroupId = 'com.instamojo'
-    libraryName = 'Android SDK'
-    artifact = 'android-sdk'
-
+    sdkVersion = '2.0.1'
+    sdkVersionCode = 14
     libraryDescription = 'Instamojo Payments Android SDK'
-
     siteUrl = 'https://github.com/Instamojo/instamojo-android-sdk'
     gitUrl = 'https://github.com/Instamojo/instamojo-android-sdk.git'
-
-    libraryVersion = '2.0.1'
-
-    developerId = 'instamojo'
-    developerName = 'Instamojo Technologies'
-    developerEmail = 'support@instamojo.com'
-
-    licenseName = 'The Apache Software License, Version 2.0'
-    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-    allLicenses = ["Apache-2.0"]
 }
 
 repositories {
@@ -37,8 +21,8 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 27
-        versionCode 14
-        versionName "2.0.1"
+        versionCode sdkVersionCode
+        versionName sdkVersion
         vectorDrawables.useSupportLibrary = true
         consumerProguardFiles 'proguard-rules.pro'
     }
@@ -77,6 +61,6 @@ dependencies {
 }
 
 if (project.rootProject.file('local.properties').exists()) {
-    apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-    apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
+    apply from: '../install.gradle'
+    apply from: '../bintray.gradle'
 }
