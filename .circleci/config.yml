@@ -31,3 +31,26 @@ jobs:
       - store_artifacts:
           path: android-sdk/build/outputs/aar/
           destination: aar
+
+  release:
+    - run:
+        name: Publish to Bintray
+        command: ./gradlew bintrayUpload
+
+workflows:
+  version: 2
+  build-and-release:
+    jobs:
+      - build:
+          filters:
+            # By default a build is only triggered on commits. Lets build for any tag too.
+            tags:
+              only: /.*/
+      - release:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
