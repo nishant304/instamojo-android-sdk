@@ -1,11 +1,14 @@
+defaults: &defaults
+  working_directory: ~/code
+  docker:
+    - image: circleci/android:api-27-alpha
+  environment:
+    JVM_OPTS: -Xmx3200m
+
 version: 2
 jobs:
   build:
-    working_directory: ~/code
-    docker:
-      - image: circleci/android:api-27-alpha
-    environment:
-      JVM_OPTS: -Xmx3200m
+    <<: *defaults
     steps:
       - checkout
       - restore_cache:
@@ -33,9 +36,11 @@ jobs:
           destination: aar
 
   release:
-    - run:
-        name: Publish to Bintray
-        command: ./gradlew bintrayUpload
+    <<: *defaults
+    steps:
+      - run:
+          name: Publish to Bintray
+          command: ./gradlew bintrayUpload
 
 workflows:
   version: 2
