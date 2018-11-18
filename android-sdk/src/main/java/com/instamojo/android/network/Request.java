@@ -191,7 +191,7 @@ public class Request {
 
         if (order.getEmiOptions() != null
                 && order.getEmiOptions().getSelectedBankCode() != null) {
-            Logger.logDebug(this.getClass().getSimpleName(), "emi selected....");
+            Logger.d(this.getClass().getSimpleName(), "emi selected....");
             body.add("is_emi", "true");
             body.add("emi_bank", order.getEmiOptions().getSelectedBankCode());
             body.add("emi_tenure", String.valueOf(order.getEmiOptions().getSelectedTenure()));
@@ -204,7 +204,7 @@ public class Request {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Logger.logError(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
+                Logger.e(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
                 juspayRequestCallback.onFinish(null, new Errors.ConnectionError(e.getMessage()));
             }
 
@@ -217,10 +217,10 @@ public class Request {
                     Bundle bundle = parseJusPayResponse(responseBody);
                     juspayRequestCallback.onFinish(bundle, null);
                 } catch (IOException e) {
-                    Logger.logError(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
+                    Logger.e(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
                     juspayRequestCallback.onFinish(null, new Errors.ServerError(e.getMessage()));
                 } catch (JSONException e) {
-                    Logger.logError(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
+                    Logger.e(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
                     juspayRequestCallback.onFinish(null, e);
                 }
             }
@@ -245,7 +245,7 @@ public class Request {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Logger.logError(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
+                Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
                 orderRequestCallback.onFinish(null, new Errors.ConnectionError(e.getMessage()));
             }
 
@@ -258,10 +258,10 @@ public class Request {
                     parseCheckoutOptions(responseBody);
                     orderRequestCallback.onFinish(order, null);
                 } catch (IOException e) {
-                    Logger.logError(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
+                    Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
                     orderRequestCallback.onFinish(order, new Errors.ServerError(e.getMessage()));
                 } catch (JSONException e) {
-                    Logger.logError(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
+                    Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
                     orderRequestCallback.onFinish(order, Errors.getAppropriateError(responseBody));
                 }
             }
@@ -292,7 +292,7 @@ public class Request {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Logger.logError(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
+                Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
                 orderRequestCallback.onFinish(order, new Errors.ConnectionError(e.getMessage()));
             }
 
@@ -309,10 +309,10 @@ public class Request {
                     updateTransactionDetails(responseObject);
                     orderRequestCallback.onFinish(order, null);
                 } catch (IOException e) {
-                    Logger.logError(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
+                    Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
                     orderRequestCallback.onFinish(order, new Errors.ServerError(e.getMessage()));
                 } catch (JSONException e) {
-                    Logger.logError(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
+                    Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
                     orderRequestCallback.onFinish(order, Errors.getAppropriateError(responseBody));
                 }
             }
@@ -441,7 +441,7 @@ public class Request {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Logger.logError(this.getClass().getSimpleName(),
+                Logger.e(this.getClass().getSimpleName(),
                         "Error while making UPI Submission request - " + e.getMessage());
                 upiCallback.onSubmission(null, e);
             }
@@ -453,7 +453,7 @@ public class Request {
                     r.body().close();
                     upiCallback.onSubmission(parseUPIResponse(responseBody), null);
                 } catch (IOException | JSONException e) {
-                    Logger.logError(this.getClass().getSimpleName(),
+                    Logger.e(this.getClass().getSimpleName(),
                             "Error while making UPI Submission request - " + e.getMessage());
                     upiCallback.onSubmission(null, e);
                 }
@@ -483,7 +483,7 @@ public class Request {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Logger.logError(this.getClass().getSimpleName(),
+                Logger.e(this.getClass().getSimpleName(),
                         "Error while making UPI Status Check request - " + e.getMessage());
                 upiCallback.onStatusCheckComplete(null, false, e);
             }
@@ -505,7 +505,7 @@ public class Request {
                     bundle.putString(Constants.PAYMENT_ID, upiSubmissionResponse.getPaymentID());
                     upiCallback.onStatusCheckComplete(bundle, true, null);
                 } catch (IOException | JSONException e) {
-                    Logger.logError(this.getClass().getSimpleName(),
+                    Logger.e(this.getClass().getSimpleName(),
                             "Error while making UPI Status Check request - " + e.getMessage());
                     upiCallback.onStatusCheckComplete(null, false, e);
                 }
@@ -563,7 +563,7 @@ public class Request {
                 try {
                     this.referer += "/" + appContext.getPackageManager().getPackageInfo(packageName, 0).versionName;
                 } catch (PackageManager.NameNotFoundException e) {
-                    Logger.logError("Request", "Unable to get version of the current application.");
+                    Logger.e("Request", "Unable to get version of the current application.");
                 }
             }
             return this.referer;

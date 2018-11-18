@@ -16,6 +16,7 @@ import com.instamojo.android.models.Order;
  */
 public class ChoosePaymentOption extends BaseFragment implements View.OnClickListener {
 
+    private static final String TAG = ChoosePaymentOption.class.getSimpleName();
     private static final String FRAGMENT_NAME = "ChoosePaymentOption";
     private PaymentDetailsActivity parentActivity;
 
@@ -48,28 +49,28 @@ public class ChoosePaymentOption extends BaseFragment implements View.OnClickLis
         View upiLayout = view.findViewById(R.id.upi_layout);
 
         if (order.getNetBankingOptions() == null) {
-            Logger.logDebug(this.getClass().getSimpleName(), "Hiding Net banking Layout");
+            Logger.d(TAG, "Hiding Net banking Layout");
             netBankingLayout.setVisibility(View.GONE);
         }
 
         if (order.getCardOptions() == null) {
-            Logger.logDebug(this.getClass().getSimpleName(), "Hiding Debit and Credit Card Layout");
+            Logger.d(TAG, "Hiding Debit and Credit Card Layout");
             debitCardLayout.setVisibility(View.GONE);
             creditCardLayout.setVisibility(View.GONE);
         }
 
         if (order.getEmiOptions() == null) {
-            Logger.logDebug(this.getClass().getSimpleName(), "Hiding EMI Layout");
+            Logger.d(TAG, "Hiding EMI Layout");
             emiLayout.setVisibility(View.GONE);
         }
 
         if (order.getWalletOptions() == null) {
-            Logger.logDebug(this.getClass().getSimpleName(), "Hiding Wallet Layout");
+            Logger.d(TAG, "Hiding Wallet Layout");
             walletLayout.setVisibility(View.GONE);
         }
 
         if (order.getUpiOptions() == null) {
-            Logger.logDebug(this.getClass().getSimpleName(), "Hiding UPISubmission layout");
+            Logger.d(TAG, "Hiding UPISubmission layout");
             upiLayout.setVisibility(View.GONE);
         }
 
@@ -79,7 +80,7 @@ public class ChoosePaymentOption extends BaseFragment implements View.OnClickLis
         emiLayout.setOnClickListener(this);
         walletLayout.setOnClickListener(this);
         upiLayout.setOnClickListener(this);
-        Logger.logDebug(this.getClass().getSimpleName(), "Inflated XML");
+        Logger.d(this.getClass().getSimpleName(), "Inflated XML");
     }
 
     @Override
@@ -87,19 +88,19 @@ public class ChoosePaymentOption extends BaseFragment implements View.OnClickLis
         int id = v.getId();
 
         if (id == R.id.wallet_layout) {
-            Logger.logDebug(this.getClass().getSimpleName(), "Starting Wallet Form");
+            Logger.d(TAG, "Starting Wallet Form");
             parentActivity.loadFragment(ListForm.getListFormFragment(ListForm.Mode.Wallet), true);
         } else if (id == R.id.net_banking_layout) {
-            Logger.logDebug(this.getClass().getSimpleName(), "Starting Net Banking Form");
+            Logger.d(TAG, "Starting Net Banking Form");
             parentActivity.loadFragment(ListForm.getListFormFragment(ListForm.Mode.NetBanking), true);
         } else if (id == R.id.emi_layout) {
-            Logger.logDebug(this.getClass().getSimpleName(), "Starting EMI Form");
+            Logger.d(TAG, "Starting EMI Form");
             parentActivity.loadFragment(new EMIBankList(), true);
         } else if (id == R.id.upi_layout) {
-            Logger.logDebug(this.getClass().getSimpleName(), "Starting UPISubmission Form");
+            Logger.d(TAG, "Starting UPISubmission Form");
             parentActivity.loadFragment(new UPIpaymentFragment(), true);
         } else {
-            Logger.logDebug(this.getClass().getSimpleName(), "Starting CardForm");
+            Logger.d(TAG, "Starting CardForm");
             //since the user is directly jumping to Card from instead of EMI.
             // We can safely assume that emi is not chosen. Hence, clear all emi related stuff in order
             if (parentActivity.getOrder().getEmiOptions() != null) {

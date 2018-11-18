@@ -26,6 +26,7 @@ import java.util.Map;
  */
 public class ListForm extends BaseFragment implements SearchView.OnQueryTextListener {
 
+    private static final String TAG = ListForm.class.getSimpleName();
     private PaymentDetailsActivity parentActivity;
     private LinearLayout listContainer;
     private TextView headerTextView;
@@ -78,7 +79,7 @@ public class ListForm extends BaseFragment implements SearchView.OnQueryTextList
     public void inflateXML(View view) {
         listContainer = view.findViewById(R.id.list_container);
         headerTextView = view.findViewById(R.id.header_text);
-        Logger.logDebug(this.getClass().getSimpleName(), "Inflated XML");
+        Logger.d(TAG, "Inflated XML");
     }
 
     private void loadBanks(String queryText) {
@@ -135,7 +136,7 @@ public class ListForm extends BaseFragment implements SearchView.OnQueryTextList
             loadBanks(queryText);
         }
 
-        Logger.logDebug(this.getClass().getSimpleName(), "Loaded list matching Query text - " + queryText);
+        Logger.d(TAG, "Loaded list matching Query text - " + queryText);
     }
 
     @Override

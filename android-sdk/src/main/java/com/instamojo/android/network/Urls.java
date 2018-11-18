@@ -47,7 +47,7 @@ public class Urls {
         }
 
         Urls.baseUrl = baseUrl;
-        Logger.logDebug("Urls", "Base URL - " + Urls.baseUrl);
+        Logger.d("Urls", "Base URL - " + Urls.baseUrl);
     }
 
     private static String sanitizeURL(String baseUrl) {

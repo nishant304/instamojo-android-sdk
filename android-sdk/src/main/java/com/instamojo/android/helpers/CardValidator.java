@@ -13,6 +13,8 @@ import java.util.Locale;
  */
 public class CardValidator {
 
+    private static final String TAG = CardValidator.class.getSimpleName();
+
     /**
      * Luhn's algorithm implementation to validate the card passed.
      *
@@ -370,7 +372,7 @@ public class CardValidator {
             Date expiryDate = dateFormat.parse(expiry);
             return expiryDate.before(new Date());
         } catch (ParseException e) {
-            Logger.logError(CardValidator.class.getSimpleName(), "Invalid Date - " + expiry);
+            Logger.e(TAG, "Invalid Date - " + expiry);
             return true;
         }
     }

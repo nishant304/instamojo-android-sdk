@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
+    private static final String TAG = BaseActivity.class.getSimpleName();
+
     @SuppressWarnings("unchecked")
     @Override
     protected void attachBaseContext(Context context) {
@@ -57,7 +59,7 @@ public abstract class BaseActivity extends AppCompatActivity {
      */
 
     public void returnResult(Bundle bundle, int result) {
-        Logger.logDebug(this.getClass().getSimpleName(), "Returning back the result received");
+        Logger.d(TAG, "Returning back the result received");
         Intent intent = new Intent();
         if (bundle != null) {
             intent.putExtras(bundle);
@@ -111,7 +113,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (getSupportActionBar() == null) {
             return;
         }
-        Logger.logDebug(this.getClass().getSimpleName(), "Setting title for Toolbar");
+        Logger.d(TAG, "Setting title for Toolbar");
         getSupportActionBar().setTitle(title);
     }
 }
