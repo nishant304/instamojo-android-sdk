@@ -3,7 +3,6 @@ package com.instamojo.android;
 import android.content.Context;
 import android.util.Log;
 
-import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.network.Urls;
 
 /**
@@ -36,7 +35,6 @@ public class Instamojo {
      */
     public static void initialize(Context appContext) {
         instance = new Instamojo(appContext);
-        Logger.setLogLevel(Log.WARN);
         Urls.setBaseUrl(PRODUCTION_BASE_URL);
     }
 
@@ -49,7 +47,6 @@ public class Instamojo {
         if (!isInitialised()) {
             return;
         }
-        Logger.setLogLevel(logLevel);
     }
 
     /**
