@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import com.instamojo.android.helpers.CardValidator;
+import com.instamojo.android.helpers.CardUtil;
 
 /**
  * Card object to hold the User card details.
@@ -154,37 +154,27 @@ public class Card implements Parcelable {
     }
 
     /**
-     * Check if the Expiry date is valid. {@link Card#cardNumber} must not be null.
-     * Takes care of all the Edge cases involved.
-     *
-     * @return True if the date is valid Else False.
+     * Checks if expiry date is valid
      */
     public boolean isDateValid() {
-        if (this.date != null) {
-            if (!this.date.isEmpty()) {
-                return !CardValidator.isDateExpired(this.date);
-            } else {
-                return !(isCardNumberValid() && !CardValidator.maestroCard(this.cardNumber));
-            }
-        } else {
-            return !(isCardNumberValid() && !CardValidator.maestroCard(this.cardNumber));
+        if (date != null && !date.isEmpty()) {
+            return !CardUtil.isDateExpired(this.date);
         }
 
-
+        // Expiry is optional for MAESTRO card
+        return CardUtil.isMaestroCard(this.cardNumber);
     }
 
     /**
-     * Check if the Cvv Exists. {@link Card#cvv} must not be null.
-     * Takes care of all the edge cases involved.
-     *
-     * @return True if valid. Else False.
+     * Checks if CVV is valid
      */
     public boolean isCVVValid() {
-        if (this.cvv != null) {
-            return !this.cvv.isEmpty() || !(isCardNumberValid() && !CardValidator.maestroCard(this.cardNumber));
-        } else {
-            return !(isCardNumberValid() && !CardValidator.maestroCard(this.cardNumber));
+        if (cvv != null && !cvv.isEmpty()) {
+            return true;
         }
+
+        // CVV is optional for MAESTRO card
+        return CardUtil.isMaestroCard(this.cardNumber);
     }
 
     /**
@@ -194,21 +184,7 @@ public class Card implements Parcelable {
      * @return True if Valid. Else False.
      */
     public boolean isCardNumberValid() {
-        if (cardNumber == null || cardNumber.isEmpty()) {
-            return false;
-        }
-
-        int result;
-        if (CardValidator.masterCardWithoutLength(cardNumber)
-                || CardValidator.dinnersClubIntWithoutLength(cardNumber)
-                || CardValidator.visaCardWithoutLength(cardNumber)
-                || CardValidator.amexCardWithoutLength(cardNumber)
-                || CardValidator.discoverCardWithoutLength(cardNumber)) {
-            result = com.instamojo.android.helpers.CardValidator.isValid(cardNumber, false);
-        } else {
-            result = com.instamojo.android.helpers.CardValidator.isValid(cardNumber, true);
-        }
-        return result != 0;
+        return CardUtil.isValid(cardNumber);
     }
 
     /**
@@ -223,6 +199,6 @@ public class Card implements Parcelable {
      * @return True if Valid. Else False.
      */
     public boolean isCardValid() {
-        return isCardNameValid() && isDateValid() && isCVVValid() && isCardNameValid();
+        return isCardNameValid() && isDateValid() && isCVVValid() && isCardNumberValid();
     }
 }

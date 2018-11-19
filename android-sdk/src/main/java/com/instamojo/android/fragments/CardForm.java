@@ -19,7 +19,8 @@ import com.instamojo.android.R;
 import com.instamojo.android.activities.BaseActivity;
 import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.callbacks.JuspayRequestCallback;
-import com.instamojo.android.helpers.CardValidator;
+import com.instamojo.android.helpers.CardType;
+import com.instamojo.android.helpers.CardUtil;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.helpers.Validators;
 import com.instamojo.android.models.Card;
@@ -272,9 +273,9 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
 
     private class CardTextWatcher implements TextWatcher {
 
-        private int limit = -1;
         private int drawable = 0;
         private int previousLength = 0, currentLength = 0;
+        private CardType cardType = CardType.UNKNOWN;
 
         public CardTextWatcher() {
         }
@@ -286,24 +287,27 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            String card = cardNumberBox.getText().toString();
-            card = card.replaceAll(" ", "");
-            if (card.length() == 4) {
-                drawable = CardValidator.getCardDrawable(card);
-                limit = CardValidator.validateCardTypeWithoutLengthForLimit(card);
-                if (CardValidator.maestroCard(card)) {
-                    clearOptionalValidators();
-                } else {
-                    addOptionalValidators();
-                }
-            } else if (card.length() < 4) {
-                drawable = R.drawable.ic_accepted_cards;
+            String cardNumber = cardNumberBox.getText().toString();
+            cardNumber = cardNumber.replaceAll(" ", "");
+
+            // TODO this will be triggered for every text change which may not be required
+            // Do this only for few characters not for entire card number
+            cardType = CardUtil.getCardType(cardNumber);
+            drawable = cardType.getImageResource();
+
+            if (cardType == CardType.UNKNOWN || cardType == CardType.MAESTRO) {
                 clearOptionalValidators();
+            } else {
+                addOptionalValidators();
+            }
+
+            if (cardNumber.isEmpty()) {
+                drawable = R.drawable.ic_accepted_cards;
             }
 
             cardNumberBox.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0);
 
-            if (card.length() == limit) {
+            if (cardNumber.length() == cardType.getNumberLength()) {
                 dateBox.requestFocus();
             }
             currentLength = cardNumberBox.getText().toString().trim().length();
@@ -311,42 +315,49 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
 
         @Override
         public void afterTextChanged(Editable s) {
-            String card = s.toString().trim();
-            if (card.length() < 4) {
+            String cardNumber = s.toString().trim();
+            if (cardNumber.length() < 4) {
                 return;
             }
 
             String modifiedCard;
             if (currentLength > previousLength) {
-                String[] data = card.replaceAll(" ", "").split("");
+                String[] data = cardNumber.replaceAll(" ", "").split("");
                 modifiedCard = "";
-                if (CardValidator.masterCardWithoutLength(card) || CardValidator.visaCardWithoutLength(card)
-                        || CardValidator.discoverCardWithoutLength(card)) {
-                    for (int index = 1; index < data.length; index++) {
-                        modifiedCard = modifiedCard + data[index];
-                        if (index == 4 || index == 8 || index == 12) {
-                            modifiedCard = modifiedCard + " ";
+                CardType cardType = CardUtil.getCardType(cardNumber);
+                switch (cardType) {
+                    case VISA:
+                    case MASTER_CARD:
+                    case DISCOVER:
+                    case RUPAY:
+                        for (int index = 1; index < data.length; index++) {
+                            modifiedCard = modifiedCard + data[index];
+                            if (index == 4 || index == 8 || index == 12) {
+                                modifiedCard = modifiedCard + " ";
+                            }
                         }
-                    }
-                } else if (CardValidator.amexCardWithoutLength(card)) {
-                    for (int index = 1; index < data.length; index++) {
-                        modifiedCard = modifiedCard + data[index];
-                        if (index == 4 || index == 11) {
-                            modifiedCard = modifiedCard + " ";
+                        break;
+                    case AMEX:
+                        for (int index = 1; index < data.length; index++) {
+                            modifiedCard = modifiedCard + data[index];
+                            if (index == 4 || index == 11) {
+                                modifiedCard = modifiedCard + " ";
+                            }
                         }
-                    }
-                } else if (CardValidator.dinnersClubIntWithoutLength(card)) {
-                    for (int index = 1; index < data.length; index++) {
-                        modifiedCard = modifiedCard + data[index];
-                        if (index == 4 || index == 10) {
-                            modifiedCard = modifiedCard + " ";
+                        break;
+                    case DINERS_CLUB:
+                        for (int index = 1; index < data.length; index++) {
+                            modifiedCard = modifiedCard + data[index];
+                            if (index == 4 || index == 10) {
+                                modifiedCard = modifiedCard + " ";
+                            }
                         }
-                    }
-                } else {
-                    modifiedCard = card;
+                        break;
+                    default:
+                        modifiedCard = cardNumber;
                 }
             } else {
-                modifiedCard = card;
+                modifiedCard = cardNumber;
             }
 
             applyText(cardNumberBox, this, modifiedCard);

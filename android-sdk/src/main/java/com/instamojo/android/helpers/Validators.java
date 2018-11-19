@@ -43,7 +43,7 @@ public class Validators {
 
         @Override
         public boolean isValid(@NonNull CharSequence text, boolean isEmpty) {
-            return !com.instamojo.android.helpers.CardValidator.isDateExpired(text.toString());
+            return !CardUtil.isDateExpired(text.toString());
         }
     }
 
@@ -59,20 +59,7 @@ public class Validators {
         @Override
         public boolean isValid(@NonNull CharSequence text, boolean isEmpty) {
             String card = text.toString().trim().replaceAll(" ", "");
-            if (card.length() < 4) {
-                return false;
-            }
-            int result;
-            if (com.instamojo.android.helpers.CardValidator.masterCardWithoutLength(card)
-                    || com.instamojo.android.helpers.CardValidator.dinnersClubIntWithoutLength(card)
-                    || com.instamojo.android.helpers.CardValidator.visaCardWithoutLength(card)
-                    || com.instamojo.android.helpers.CardValidator.amexCardWithoutLength(card)
-                    || com.instamojo.android.helpers.CardValidator.discoverCardWithoutLength(card)) {
-                result = com.instamojo.android.helpers.CardValidator.isValid(card, false);
-            } else {
-                result = com.instamojo.android.helpers.CardValidator.isValid(card, true);
-            }
-            return result != 0;
+            return CardUtil.isValid(card);
         }
     }
 

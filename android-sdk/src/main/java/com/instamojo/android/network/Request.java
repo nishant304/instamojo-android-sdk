@@ -11,7 +11,7 @@ import com.instamojo.android.Instamojo;
 import com.instamojo.android.callbacks.JuspayRequestCallback;
 import com.instamojo.android.callbacks.OrderRequestCallback;
 import com.instamojo.android.callbacks.UPICallback;
-import com.instamojo.android.helpers.CardValidator;
+import com.instamojo.android.helpers.CardUtil;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.Card;
@@ -163,7 +163,7 @@ public class Request {
 
     private void executeJuspayRequest() {
         //For maestro, add the default values if empty
-        if (CardValidator.maestroCard(card.getCardNumber())) {
+        if (CardUtil.isMaestroCard(card.getCardNumber())) {
             if (card.getDate() == null || card.getDate().isEmpty()) {
                 card.setDate("12/49");
             }
