@@ -447,15 +447,37 @@ public class Request {
             }
 
             @Override
-            public void onResponse(Call call, Response r) {
-                try {
-                    String responseBody = r.body().string();
-                    r.body().close();
-                    upiCallback.onSubmission(parseUPIResponse(responseBody), null);
-                } catch (IOException | JSONException e) {
-                    Logger.logError(this.getClass().getSimpleName(),
-                            "Error while making UPI Submission request - " + e.getMessage());
-                    upiCallback.onSubmission(null, e);
+            public void onResponse(Call call, Response response) {
+                if (response.isSuccessful()) {
+                    try {
+                        String responseBody = response.body().string();
+                        response.body().close();
+                        upiCallback.onSubmission(parseUPIResponse(responseBody), null);
+
+                    } catch (IOException | JSONException e) {
+                        Logger.logError(this.getClass().getSimpleName(),
+                                "Error while handling UPI success response - " + e.getMessage());
+                        upiCallback.onSubmission(null, e);
+                    }
+
+                } else {
+                    Exception ex = new Exception("Error response from server");
+                    if (response.code() == 400) {
+                        try {
+                            String errorBody = response.body().string();
+                            response.body().close();
+                            JSONObject responseObject = new JSONObject(errorBody);
+                            JSONObject errors = responseObject.getJSONObject("errors");
+                            ex = new Exception(errors.getString("virtual_address"));
+
+                        } catch (IOException | JSONException e) {
+                            Logger.logError(this.getClass().getSimpleName(),
+                                    "Error while handling UPI error response - " + e.getMessage());
+                            ex = e;
+                        }
+                    }
+
+                    upiCallback.onSubmission(null, ex);
                 }
             }
         });
