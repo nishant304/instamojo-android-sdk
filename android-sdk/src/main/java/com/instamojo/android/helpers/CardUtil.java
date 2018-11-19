@@ -24,114 +24,36 @@ public class CardUtil {
             return false;
         }
 
+        int cardLength = cardNumber.length();
         CardType cardType = CardUtil.getCardType(cardNumber);
+
         // No length check for MAESTRO
-        if (cardType != CardType.MAESTRO && cardType.getNumberLength() != cardNumber.length()) {
+        if (cardType != CardType.MAESTRO && cardType.getNumberLength() != cardLength) {
             return false;
         }
 
-        long number = Long.valueOf(cardNumber);
-        int total = sumOfDoubleEvenPlace(number) + sumOfOddPlace(number);
-
-        if ((total % 10 == 0) && (prefixMatched(number, 1) != 0)) {
-            return true;
-
-        } else {
+        // If the card number starts with 0
+        if (cardNumber.charAt(0) == 0) {
             return false;
         }
-    }
 
-    private static int getDigit(int number) {
+        int total = 0;
+        boolean isEvenPosition = false;
+        for (int i = cardLength - 1; i >= 0; i--) {
 
-        if (number <= 9) {
-            return number;
-        } else {
-            int firstDigit = number % 10;
-            int secondDigit = number / 10;
+            int digit = cardNumber.charAt(i);
 
-            return firstDigit + secondDigit;
-        }
-    }
-
-    private static int sumOfOddPlace(long number) {
-        int result = 0;
-
-        while (number > 0) {
-            result += (int) (number % 10);
-            number = number / 100;
-        }
-
-        return result;
-    }
-
-    private static int sumOfDoubleEvenPlace(long number) {
-
-        int result = 0;
-        long temp;
-
-        while (number > 0) {
-            temp = number % 100;
-            result += getDigit((int) (temp / 10) * 2);
-            number = number / 100;
-        }
-
-        return result;
-    }
-
-    private static int prefixMatched(long number, int d) {
-
-        if ((getPrefix(number, d) == 3)
-                || (getPrefix(number, d) == 4)
-                || (getPrefix(number, d) == 5)
-                || (getPrefix(number, d) == 6)) {
-
-            if (getPrefix(number, d) == 3) {
-                return 3;
-            } else if (getPrefix(number, d) == 4) {
-                return 4;
-            } else if (getPrefix(number, d) == 5) {
-                return 5;
-            } else if (getPrefix(number, d) == 6) {
-                return 6;
+            if (isEvenPosition) {
+                digit *= 2;
             }
 
-            return 1;
-        } else {
-            return 0;
+            total += digit / 10; // For 'digit' with two digits
+            total += digit % 10;
 
-        }
-    }
-
-    private static int getSize(long d) {
-
-        int count = 0;
-
-        while (d > 0) {
-            d = d / 10;
-
-            count++;
+            isEvenPosition = !isEvenPosition;
         }
 
-        return count;
-
-    }
-
-    private static long getPrefix(long number, int k) {
-
-        if (getSize(number) < k) {
-            return number;
-        } else {
-
-            int size = getSize(number);
-
-            for (int i = 0; i < (size - k); i++) {
-                number = number / 10;
-            }
-
-            return number;
-
-        }
-
+        return (total % 10 == 0);
     }
 
     /**
