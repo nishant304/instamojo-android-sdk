@@ -25,12 +25,12 @@ public class JavaScriptInterface {
 
     @android.webkit.JavascriptInterface
     public void onTransactionComplete(String orderID, String transactionID, String paymentID) {
-        Logger.logDebug(this.getClass().getSimpleName(), "Received Call to Javascript Interface");
+        Logger.d(this.getClass().getSimpleName(), "Received Call to Javascript Interface");
         Bundle bundle = new Bundle();
         bundle.putString(Constants.ORDER_ID, orderID);
         bundle.putString(Constants.TRANSACTION_ID, transactionID);
         bundle.putString(Constants.PAYMENT_ID, paymentID);
-        Logger.logDebug(this.getClass().getSimpleName(), "Returning result back to caller");
+        Logger.d(this.getClass().getSimpleName(), "Returning result back to caller");
         ((PaymentActivity) activity).returnResult(bundle, Activity.RESULT_OK);
     }
 }

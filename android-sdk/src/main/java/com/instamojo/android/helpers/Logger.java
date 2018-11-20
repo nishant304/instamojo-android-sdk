@@ -2,33 +2,23 @@ package com.instamojo.android.helpers;
 
 import android.util.Log;
 
+import com.instamojo.android.BuildConfig;
+
 public class Logger {
 
-    private static int logLevel = Log.WARN;
-
     /**
-     * Logs debug messages if log level is <= Log.DEBUG
-     *
-     * @param tag     SimpleTag
-     * @param message Error Message
+     * Logs debug messages if DEBUG mode
      */
-    public static void logDebug(String tag, String message) {
-        if (logLevel <= Log.DEBUG) {
+    public static void d(String tag, String message) {
+        if (BuildConfig.DEBUG) {
             Log.d(tag, message);
         }
     }
 
     /**
      * Logs all the errors
-     *
-     * @param tag     SimpleTag
-     * @param message Error message
      */
-    public static void logError(String tag, String message) {
+    public static void e(String tag, String message) {
         Log.e(tag, message);
-    }
-
-    public static void setLogLevel(int logLevel) {
-        Logger.logLevel = logLevel;
     }
 }

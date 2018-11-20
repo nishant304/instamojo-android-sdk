@@ -18,6 +18,7 @@ import in.juspay.godel.ui.JuspayWebView;
  */
 public class PaymentActivity extends BaseActivity {
 
+    private static final String TAG = PaymentActivity.class.getSimpleName();
     private JuspayBrowserFragment currentFragment;
 
     @Override
@@ -31,7 +32,7 @@ public class PaymentActivity extends BaseActivity {
     private void inflateXML() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        Logger.logDebug(this.getClass().getSimpleName(), "Inflated XML");
+        Logger.d(TAG, "Inflated XML");
     }
 
     @Override
@@ -45,7 +46,7 @@ public class PaymentActivity extends BaseActivity {
     private void showFragment() {
         final Bundle sourceArgs = getIntent().getBundleExtra(Constants.PAYMENT_BUNDLE);
         if (sourceArgs == null) {
-            Logger.logError(this.getClass().getSimpleName(), "Payment bundle is Null");
+            Logger.e(TAG, "Payment bundle is Null");
             returnResult(RESULT_CANCELED);
             return;
         }
@@ -58,12 +59,12 @@ public class PaymentActivity extends BaseActivity {
             }
         };
         currentFragment.setupJuspayWebviewCallbackInterface(juspayWebViewCallback);
-        Logger.logDebug(this.getClass().getSimpleName(), "Loaded Fragment - " + currentFragment.getClass().getSimpleName());
+        Logger.d(TAG, "Loaded Fragment - " + currentFragment.getClass().getSimpleName());
     }
 
     @Override
     public void onBackPressed() {
-        Logger.logDebug(this.getClass().getSimpleName(), "Invoking Juspay Cancel Payment Handler");
+        Logger.d(TAG, "Invoking Juspay Cancel Payment Handler");
         currentFragment.juspayBackPressedHandler(true);
     }
 }

@@ -28,6 +28,7 @@ import com.rengwuxian.materialedittext.MaterialEditText;
 
 public class UPIpaymentFragment extends BaseFragment implements View.OnClickListener, UPICallback {
 
+    private static final String TAG = UPIpaymentFragment.class.getSimpleName();
     private static final String FRAGMENT_NAME = "UPISubmission Form";
     private static final long DELAY_CHECK = 2000;
 
@@ -143,7 +144,7 @@ public class UPIpaymentFragment extends BaseFragment implements View.OnClickList
             return;
         }
 
-        Logger.logDebug(UPIpaymentFragment.this.getClass().getSimpleName(), "Payment complete. Finishing activity...");
+        Logger.d(TAG, "Payment complete. Finishing activity...");
         parentActivity.returnResult(bundle, Activity.RESULT_OK);
     }
 }

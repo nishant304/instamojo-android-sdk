@@ -35,6 +35,7 @@ import java.util.List;
  */
 public class CardForm extends BaseFragment implements View.OnClickListener {
 
+    private static final String TAG = CardForm.class.getSimpleName();
     private static final String MONTH_YEAR_SEPARATOR = "/";
     private static final String FRAGMENT_NAME = "Card Form";
 
@@ -158,7 +159,7 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
         checkOutButton.setOnClickListener(this);
 
         editTexts = Arrays.asList(cardNumberBox, dateBox, cvvBox);
-        Logger.logDebug(this.getClass().getSimpleName(), "Inflated XML");
+        Logger.d(TAG, "Inflated XML");
     }
 
     @Override
@@ -222,7 +223,7 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
             card.setCvv(cvv);
         }
 
-        Logger.logDebug(this.getClass().getSimpleName(), "Checking Out");
+        Logger.d(TAG, "Checking Out");
         checkOut(card);
     }
 
@@ -246,7 +247,7 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
                         if (error != null) {
                             Toast.makeText(parentActivity, R.string.error_message_juspay,
                                     Toast.LENGTH_SHORT).show();
-                            Logger.logError(this.getClass().getSimpleName(), "Card checkout failed due to - " + error.getMessage());
+                            Logger.e(this.getClass().getSimpleName(), "Card checkout failed due to - " + error.getMessage());
                             return;
                         }
                         parentActivity.startPaymentActivity(bundle);

@@ -15,6 +15,7 @@ import com.instamojo.android.models.EMIBank;
 
 public class EMIBankList extends BaseFragment {
 
+    private static final String TAG = EMIBankList.class.getSimpleName();
     private PaymentDetailsActivity parentActivity;
     private LinearLayout emiBanksContainer;
 
@@ -59,6 +60,6 @@ public class EMIBankList extends BaseFragment {
 
             emiBanksContainer.addView(bankView);
         }
-        Logger.logDebug(this.getClass().getSimpleName(), "Loaded EMI Banks");
+        Logger.d(TAG, "Loaded EMI Banks");
     }
 }

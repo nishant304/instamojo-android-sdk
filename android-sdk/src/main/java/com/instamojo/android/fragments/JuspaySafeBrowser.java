@@ -18,6 +18,8 @@ import in.juspay.godel.ui.JuspayBrowserFragment;
  */
 public class JuspaySafeBrowser extends JuspayBrowserFragment {
 
+    private static final String TAG = JuspaySafeBrowser.class.getSimpleName();
+
     /**
      * Creates new instance of Fragment.
      */
@@ -41,6 +43,6 @@ public class JuspaySafeBrowser extends JuspayBrowserFragment {
         });
         getWebView().addJavascriptInterface(new JavaScriptInterface(getActivity()), "AndroidScriptInterface");
         getWebView().getSettings().setJavaScriptEnabled(true);
-        Logger.logDebug(this.getClass().getSimpleName(), "Loaded Webview");
+        Logger.d(TAG, "Loaded Webview");
     }
 }

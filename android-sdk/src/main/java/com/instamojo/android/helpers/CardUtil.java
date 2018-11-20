@@ -10,6 +10,8 @@ import java.util.Locale;
  */
 public class CardUtil {
 
+    private static final String TAG = CardUtil.class.getSimpleName();
+
     /**
      * Luhn's algorithm implementation to validate the card passed.
      *
@@ -172,7 +174,7 @@ public class CardUtil {
             Date expiryDate = dateFormat.parse(expiry);
             return expiryDate.before(new Date());
         } catch (ParseException e) {
-            Logger.logError(CardUtil.class.getSimpleName(), "Invalid Date - " + expiry);
+            Logger.e(TAG, "Invalid Date - " + expiry);
             return true;
         }
     }

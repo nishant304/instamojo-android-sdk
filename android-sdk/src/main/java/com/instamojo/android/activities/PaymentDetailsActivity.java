@@ -24,6 +24,7 @@ import com.instamojo.android.models.Order;
  */
 public class PaymentDetailsActivity extends BaseActivity {
 
+    private static final String TAG = PaymentDetailsActivity.class.getSimpleName();
     private Order order;
     private boolean showSearch;
     private SearchView.OnQueryTextListener onQueryTextListener;
@@ -61,7 +62,7 @@ public class PaymentDetailsActivity extends BaseActivity {
             }
         }
 
-        Logger.logDebug(this.getClass().getSimpleName(), "Inflated Options Menu");
+        Logger.d(TAG, "Inflated Options Menu");
         return true;
     }
 
@@ -79,7 +80,7 @@ public class PaymentDetailsActivity extends BaseActivity {
      * @param bundle Bundle with either card/netbanking url
      */
     public void startPaymentActivity(Bundle bundle) {
-        Logger.logDebug(this.getClass().getSimpleName(), "Starting PaymentActivity with given Bundle");
+        Logger.d(TAG, "Starting PaymentActivity with given Bundle");
         Intent intent = new Intent(this, PaymentActivity.class);
         intent.putExtras(getIntent());
         intent.putExtra(Constants.PAYMENT_BUNDLE, bundle);
@@ -99,7 +100,7 @@ public class PaymentDetailsActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.REQUEST_CODE) {
-            Logger.logDebug(this.getClass().getSimpleName(), "Returning back result to caller");
+            Logger.d(TAG, "Returning back result to caller");
             returnResult(data.getExtras(), resultCode);
         }
     }
@@ -108,7 +109,7 @@ public class PaymentDetailsActivity extends BaseActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         updateActionBar();
-        Logger.logDebug(this.getClass().getSimpleName(), "Inflated XML");
+        Logger.d(TAG, "Inflated XML");
     }
 
     /**
@@ -119,14 +120,14 @@ public class PaymentDetailsActivity extends BaseActivity {
     }
 
     private void loadFragments() {
-        Logger.logDebug(this.getClass().getSimpleName(), "looking for Order object...");
+        Logger.d(TAG, "looking for Order object...");
         order = getIntent().getParcelableExtra(Constants.ORDER);
         if (order == null) {
-            Logger.logError(this.getClass().getSimpleName(), "Object not found. Sending back - Payment Cancelled");
+            Logger.e(TAG, "Object not found. Sending back - Payment Cancelled");
             returnResult(RESULT_CANCELED);
             return;
         }
-        Logger.logDebug(this.getClass().getSimpleName(), "Found order Object. Starting PaymentOptionsFragment");
+        Logger.d(TAG, "Found order Object. Starting PaymentOptionsFragment");
         loadFragment(new ChoosePaymentOption(), false);
     }
 
@@ -137,7 +138,7 @@ public class PaymentDetailsActivity extends BaseActivity {
      * @param addToBackStack Whether to add this fragment to back stack
      */
     public void loadFragment(BaseFragment fragment, boolean addToBackStack) {
-        Logger.logDebug(this.getClass().getSimpleName(), "Loading Fragment - " + fragment.getClass().getSimpleName());
+        Logger.d(TAG, "Loading Fragment - " + fragment.getClass().getSimpleName());
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         fragmentTransaction.replace(R.id.container, fragment);
@@ -145,7 +146,7 @@ public class PaymentDetailsActivity extends BaseActivity {
             fragmentTransaction.addToBackStack(fragment.getFragmentName());
         }
         fragmentTransaction.commit();
-        Logger.logDebug(this.getClass().getSimpleName(), "Loaded Fragment - " + fragment.getClass().getSimpleName());
+        Logger.d(TAG, "Loaded Fragment - " + fragment.getClass().getSimpleName());
     }
 
     /**
@@ -159,6 +160,6 @@ public class PaymentDetailsActivity extends BaseActivity {
         this.showSearch = showSearch;
         this.onQueryTextListener = queryTextListener;
         invalidateOptionsMenu();
-        Logger.logDebug(this.getClass().getSimpleName(), "Invalidating search option for Net banking");
+        Logger.d(TAG, "Invalidating search option for Net banking");
     }
 }
