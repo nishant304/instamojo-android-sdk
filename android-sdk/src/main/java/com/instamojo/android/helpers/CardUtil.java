@@ -13,18 +13,18 @@ public class CardUtil {
     private static final String TAG = CardUtil.class.getSimpleName();
 
     /**
-     * Luhn's algorithm implementation to validate the card passed.
+     * Luhn's algorithm implementation to validate a card number.
      *
-     * @param cardNumber Card number. Require atleast first 4 to give a valid result.
-     * @return 1 for valid card , 0 for invalid card.
+     * @param cardNumber Card number
+     * @return True for valid card number, False for invalid card number.
      */
-    public static boolean isValid(String cardNumber) {
+    public static boolean isCardNumberValid(String cardNumber) {
 
-        if (cardNumber == null || cardNumber.isEmpty() || cardNumber.length() < 4) {
+        int cardLength = cardNumber.length();
+        if (cardNumber == null || cardNumber.isEmpty() || cardLength < 4) {
             return false;
         }
 
-        int cardLength = cardNumber.length();
         CardType cardType = CardUtil.getCardType(cardNumber);
 
         // No length check for MAESTRO
@@ -59,7 +59,7 @@ public class CardUtil {
     /**
      * Check for Maestro Card.
      *
-     * @param cardNumber Card Number to be validated, requires atleast first four digits of the card.
+     * @param cardNumber Card Number
      * @return True if card is Maestro else False.
      */
     public static boolean isMaestroCard(String cardNumber) {
@@ -85,19 +85,21 @@ public class CardUtil {
     /**
      * Check method to see if the card expiry date is valid.
      *
-     * @param expiry Date string in the formt - MM/yy.
-     * @return True if the Date is expired Else False.
+     * @param expiryDateStr Date string in the format - MM/yy.
+     * @return True if the Date is expired else False.
      */
 
-    public static boolean isDateExpired(String expiry) {
+    public static boolean isDateExpired(String expiryDateStr) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/yy", Locale.ENGLISH);
         dateFormat.setLenient(false);
         try {
-            Date expiryDate = dateFormat.parse(expiry);
+            Date expiryDate = dateFormat.parse(expiryDateStr);
             return expiryDate.before(new Date());
+
         } catch (ParseException e) {
-            Logger.e(TAG, "Invalid Date - " + expiry);
-            return true;
+            Logger.e(TAG, "Invalid Date - " + expiryDateStr);
         }
+
+        return false;
     }
 }

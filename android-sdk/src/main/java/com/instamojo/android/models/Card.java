@@ -184,7 +184,7 @@ public class Card implements Parcelable {
      * @return True if Valid. Else False.
      */
     public boolean isCardNumberValid() {
-        return CardUtil.isValid(cardNumber);
+        return CardUtil.isCardNumberValid(cardNumber);
     }
 
     /**

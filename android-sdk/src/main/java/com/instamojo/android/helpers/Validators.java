@@ -59,7 +59,7 @@ public class Validators {
         @Override
         public boolean isValid(@NonNull CharSequence text, boolean isEmpty) {
             String card = text.toString().trim().replaceAll(" ", "");
-            return CardUtil.isValid(card);
+            return CardUtil.isCardNumberValid(card);
         }
     }
 
