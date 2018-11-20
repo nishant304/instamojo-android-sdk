@@ -11,7 +11,7 @@ import com.instamojo.android.Instamojo;
 import com.instamojo.android.callbacks.JuspayRequestCallback;
 import com.instamojo.android.callbacks.OrderRequestCallback;
 import com.instamojo.android.callbacks.UPICallback;
-import com.instamojo.android.helpers.CardValidator;
+import com.instamojo.android.helpers.CardUtil;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.Card;
@@ -54,6 +54,7 @@ import okhttp3.Response;
 
 public class Request {
 
+    private static final String TAG = Request.class.getSimpleName();
     private Order order;
     private OrderRequestCallback orderRequestCallback;
     private JuspayRequestCallback juspayRequestCallback;
@@ -163,7 +164,7 @@ public class Request {
 
     private void executeJuspayRequest() {
         //For maestro, add the default values if empty
-        if (CardValidator.maestroCard(card.getCardNumber())) {
+        if (CardUtil.isMaestroCard(card.getCardNumber())) {
             if (card.getDate() == null || card.getDate().isEmpty()) {
                 card.setDate("12/49");
             }
@@ -447,15 +448,35 @@ public class Request {
             }
 
             @Override
-            public void onResponse(Call call, Response r) {
-                try {
-                    String responseBody = r.body().string();
-                    r.body().close();
-                    upiCallback.onSubmission(parseUPIResponse(responseBody), null);
-                } catch (IOException | JSONException e) {
-                    Logger.e(this.getClass().getSimpleName(),
-                            "Error while making UPI Submission request - " + e.getMessage());
-                    upiCallback.onSubmission(null, e);
+            public void onResponse(Call call, Response response) {
+                if (response.isSuccessful()) {
+                    try {
+                        String responseBody = response.body().string();
+                        response.body().close();
+                        upiCallback.onSubmission(parseUPIResponse(responseBody), null);
+
+                    } catch (IOException | JSONException e) {
+                        Logger.e(TAG, "Error while handling UPI success response - " + e.getMessage());
+                        upiCallback.onSubmission(null, e);
+                    }
+
+                } else {
+                    Exception ex = new Exception("Error response from server");
+                    if (response.code() == 400) {
+                        try {
+                            String errorBody = response.body().string();
+                            response.body().close();
+                            JSONObject responseObject = new JSONObject(errorBody);
+                            JSONObject errors = responseObject.getJSONObject("errors");
+                            ex = new Exception(errors.getString("virtual_address"));
+
+                        } catch (IOException | JSONException e) {
+                            Logger.e(TAG, "Error while handling UPI error response - " + e.getMessage());
+                            ex = e;
+                        }
+                    }
+
+                    upiCallback.onSubmission(null, ex);
                 }
             }
         });
