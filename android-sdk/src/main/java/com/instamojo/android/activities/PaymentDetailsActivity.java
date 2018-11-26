@@ -13,8 +13,8 @@ import android.view.MenuItem;
 
 import com.instamojo.android.R;
 import com.instamojo.android.fragments.BaseFragment;
-import com.instamojo.android.fragments.ChoosePaymentOption;
-import com.instamojo.android.fragments.ListForm;
+import com.instamojo.android.fragments.PaymentOptionsFragment;
+import com.instamojo.android.fragments.NetBankingFragment;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.Order;
@@ -28,7 +28,7 @@ public class PaymentDetailsActivity extends BaseActivity {
     private Order order;
     private boolean showSearch;
     private SearchView.OnQueryTextListener onQueryTextListener;
-    private ListForm.Mode mode;
+    private NetBankingFragment.Mode mode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +48,7 @@ public class PaymentDetailsActivity extends BaseActivity {
                     getSystemService(Context.SEARCH_SERVICE);
             MenuItem searchMenuItem = menu.findItem(R.id.search);
             SearchView searchView = (SearchView) searchMenuItem.getActionView();
-            if (mode == ListForm.Mode.NetBanking) {
+            if (mode == NetBankingFragment.Mode.NetBanking) {
                 searchView.setQueryHint(getString(R.string.search_your_bank));
             } else {
                 searchView.setQueryHint(getString(R.string.search_your_wallet));
@@ -128,7 +128,7 @@ public class PaymentDetailsActivity extends BaseActivity {
             return;
         }
         Logger.d(TAG, "Found order Object. Starting PaymentOptionsFragment");
-        loadFragment(new ChoosePaymentOption(), false);
+        loadFragment(new PaymentOptionsFragment(), false);
     }
 
     /**
@@ -155,7 +155,7 @@ public class PaymentDetailsActivity extends BaseActivity {
      * @param showSearch        Show the search icon in action action bar
      * @param queryTextListener {@link android.support.v7.widget.SearchView.OnQueryTextListener} to listen for the query string
      */
-    public void setShowSearch(boolean showSearch, SearchView.OnQueryTextListener queryTextListener, ListForm.Mode mode) {
+    public void setShowSearch(boolean showSearch, SearchView.OnQueryTextListener queryTextListener, NetBankingFragment.Mode mode) {
         this.mode = mode;
         this.showSearch = showSearch;
         this.onQueryTextListener = queryTextListener;

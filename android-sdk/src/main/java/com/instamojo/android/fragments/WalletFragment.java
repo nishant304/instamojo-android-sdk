@@ -24,23 +24,23 @@ import java.util.Map;
 /**
  * A simple {@link Fragment} subclass. The {@link Fragment} to show Net Banking options to User.
  */
-public class ListForm extends BaseFragment implements SearchView.OnQueryTextListener {
+public class WalletFragment extends BaseFragment implements SearchView.OnQueryTextListener {
 
-    private static final String TAG = ListForm.class.getSimpleName();
+    private static final String TAG = WalletFragment.class.getSimpleName();
     private PaymentDetailsActivity parentActivity;
     private LinearLayout listContainer;
     private TextView headerTextView;
-    private Mode mode;
+    private NetBankingFragment.Mode mode;
 
     /**
      * Creates a new Instance of Fragment.
      */
-    public ListForm() {
+    public WalletFragment() {
         // Required empty public constructor
     }
 
-    public static ListForm getListFormFragment(Mode mode) {
-        ListForm form = new ListForm();
+    public static WalletFragment getListFormFragment(NetBankingFragment.Mode mode) {
+        WalletFragment form = new WalletFragment();
         form.mode = mode;
         return form;
     }
@@ -59,7 +59,7 @@ public class ListForm extends BaseFragment implements SearchView.OnQueryTextList
     @Override
     public void onResume() {
         super.onResume();
-        if (mode == Mode.NetBanking) {
+        if (mode == NetBankingFragment.Mode.NetBanking) {
             headerTextView.setText(R.string.choose_your_bank);
             parentActivity.updateActionBarTitle(R.string.net_banking);
         } else {
@@ -130,7 +130,7 @@ public class ListForm extends BaseFragment implements SearchView.OnQueryTextList
 
     private void loadList(String queryText) {
         listContainer.removeAllViews();
-        if (mode == Mode.Wallet) {
+        if (mode == NetBankingFragment.Mode.Wallet) {
             loadWallets(queryText);
         } else {
             loadBanks(queryText);

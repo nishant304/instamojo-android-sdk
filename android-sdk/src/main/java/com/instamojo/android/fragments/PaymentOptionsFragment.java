@@ -14,13 +14,13 @@ import com.instamojo.android.models.Order;
 /**
  * Fragment holds the available Payment options for the User
  */
-public class ChoosePaymentOption extends BaseFragment implements View.OnClickListener {
+public class PaymentOptionsFragment extends BaseFragment implements View.OnClickListener {
 
-    private static final String TAG = ChoosePaymentOption.class.getSimpleName();
-    private static final String FRAGMENT_NAME = "ChoosePaymentOption";
+    private static final String TAG = PaymentOptionsFragment.class.getSimpleName();
+    private static final String FRAGMENT_NAME = "PaymentOptionsFragment";
     private PaymentDetailsActivity parentActivity;
 
-    public ChoosePaymentOption() {
+    public PaymentOptionsFragment() {
         //empty as required
     }
 
@@ -89,18 +89,18 @@ public class ChoosePaymentOption extends BaseFragment implements View.OnClickLis
 
         if (id == R.id.wallet_layout) {
             Logger.d(TAG, "Starting Wallet Form");
-            parentActivity.loadFragment(ListForm.getListFormFragment(ListForm.Mode.Wallet), true);
+            parentActivity.loadFragment(NetBankingFragment.getListFormFragment(NetBankingFragment.Mode.Wallet), true);
         } else if (id == R.id.net_banking_layout) {
             Logger.d(TAG, "Starting Net Banking Form");
-            parentActivity.loadFragment(ListForm.getListFormFragment(ListForm.Mode.NetBanking), true);
+            parentActivity.loadFragment(NetBankingFragment.getListFormFragment(NetBankingFragment.Mode.NetBanking), true);
         } else if (id == R.id.emi_layout) {
             Logger.d(TAG, "Starting EMI Form");
-            parentActivity.loadFragment(new EMIBankList(), true);
+            parentActivity.loadFragment(new EMIFragment(), true);
         } else if (id == R.id.upi_layout) {
             Logger.d(TAG, "Starting UPISubmission Form");
-            parentActivity.loadFragment(new UPIpaymentFragment(), true);
+            parentActivity.loadFragment(new UPIFragment(), true);
         } else {
-            Logger.d(TAG, "Starting CardForm");
+            Logger.d(TAG, "Starting CardFragment");
             //since the user is directly jumping to Card from instead of EMI.
             // We can safely assume that emi is not chosen. Hence, clear all emi related stuff in order
             if (parentActivity.getOrder().getEmiOptions() != null) {
@@ -109,9 +109,9 @@ public class ChoosePaymentOption extends BaseFragment implements View.OnClickLis
             }
 
             if (id == R.id.debit_card_layout) {
-                parentActivity.loadFragment(CardForm.getCardForm(CardForm.Mode.DebitCard), true);
+                parentActivity.loadFragment(CardFragment.getCardForm(CardFragment.Mode.DebitCard), true);
             } else {
-                parentActivity.loadFragment(CardForm.getCardForm(CardForm.Mode.CreditCard), true);
+                parentActivity.loadFragment(CardFragment.getCardForm(CardFragment.Mode.CreditCard), true);
             }
         }
     }

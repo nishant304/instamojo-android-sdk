@@ -26,9 +26,9 @@ import com.rengwuxian.materialedittext.MaterialEditText;
  * A simple {@link Fragment} subclass. The {@link Fragment} to get Virtual Private Address from user.
  */
 
-public class UPIpaymentFragment extends BaseFragment implements View.OnClickListener, UPICallback {
+public class UPIFragment extends BaseFragment implements View.OnClickListener, UPICallback {
 
-    private static final String TAG = UPIpaymentFragment.class.getSimpleName();
+    private static final String TAG = UPIFragment.class.getSimpleName();
     private static final String FRAGMENT_NAME = "UPISubmission Form";
     private static final long DELAY_CHECK = 2000;
 
@@ -124,7 +124,7 @@ public class UPIpaymentFragment extends BaseFragment implements View.OnClickList
                 preVPALayout.setVisibility(View.GONE);
                 postVPALayout.setVisibility(View.VISIBLE);
 
-                UPIpaymentFragment.this.upiSubmissionResponse = upiSubmissionResponse;
+                UPIFragment.this.upiSubmissionResponse = upiSubmissionResponse;
                 checkStatusOfTransaction();
             }
         });

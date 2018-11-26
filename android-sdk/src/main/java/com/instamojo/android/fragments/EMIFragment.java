@@ -13,13 +13,13 @@ import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.EMIBank;
 
-public class EMIBankList extends BaseFragment {
+public class EMIFragment extends BaseFragment {
 
-    private static final String TAG = EMIBankList.class.getSimpleName();
+    private static final String TAG = EMIFragment.class.getSimpleName();
     private PaymentDetailsActivity parentActivity;
     private LinearLayout emiBanksContainer;
 
-    public EMIBankList() {
+    public EMIFragment() {
 
     }
 
@@ -53,7 +53,7 @@ public class EMIBankList extends BaseFragment {
             bankView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    EMIBankOptionsView optionsView = EMIBankOptionsView.getInstance(bank);
+                    EMIOptionsFragment optionsView = EMIOptionsFragment.getInstance(bank);
                     parentActivity.loadFragment(optionsView, true);
                 }
             });

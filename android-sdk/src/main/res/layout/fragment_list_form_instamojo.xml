@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/background"
     android:orientation="vertical"
-    tools:context="com.instamojo.android.fragments.ListForm">
+    tools:context="com.instamojo.android.fragments.NetBankingFragment">
 
     <TextView
         android:id="@+id/header_text"

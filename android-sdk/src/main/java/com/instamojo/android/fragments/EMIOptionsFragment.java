@@ -16,17 +16,17 @@ import com.instamojo.android.models.EMIBank;
 import java.math.BigDecimal;
 import java.util.Map;
 
-public class EMIBankOptionsView extends BaseFragment {
+public class EMIOptionsFragment extends BaseFragment {
 
     private PaymentDetailsActivity parentActivity;
     private LinearLayout optionsContainer;
     private EMIBank selectedBank;
 
-    public EMIBankOptionsView() {
+    public EMIOptionsFragment() {
     }
 
-    public static EMIBankOptionsView getInstance(EMIBank selectedBank) {
-        EMIBankOptionsView optionsView = new EMIBankOptionsView();
+    public static EMIOptionsFragment getInstance(EMIBank selectedBank) {
+        EMIOptionsFragment optionsView = new EMIOptionsFragment();
         optionsView.setSelectedBank(selectedBank);
         return optionsView;
     }
@@ -85,7 +85,7 @@ public class EMIBankOptionsView extends BaseFragment {
                     parentActivity.getOrder().getEmiOptions()
                             .setSelectedBankCode(selectedBank.getBankCode());
                     parentActivity.getOrder().getEmiOptions().setSelectedTenure(option.getKey());
-                    parentActivity.loadFragment(CardForm.getCardForm(CardForm.Mode.EMI), true);
+                    parentActivity.loadFragment(CardFragment.getCardForm(CardFragment.Mode.EMI), true);
                 }
             });
             optionsContainer.addView(optionView);

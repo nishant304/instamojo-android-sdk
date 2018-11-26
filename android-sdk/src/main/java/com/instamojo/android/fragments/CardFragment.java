@@ -33,9 +33,9 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass. The {@link Fragment} to get Debit Card details from user.
  */
-public class CardForm extends BaseFragment implements View.OnClickListener {
+public class CardFragment extends BaseFragment implements View.OnClickListener {
 
-    private static final String TAG = CardForm.class.getSimpleName();
+    private static final String TAG = CardFragment.class.getSimpleName();
     private static final String MONTH_YEAR_SEPARATOR = "/";
     private static final String FRAGMENT_NAME = "Card Form";
 
@@ -47,12 +47,12 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
     /**
      * Creates a new instance of Fragment
      */
-    public CardForm() {
+    public CardFragment() {
         // Required empty public constructor
     }
 
-    public static CardForm getCardForm(Mode mode) {
-        CardForm form = new CardForm();
+    public static CardFragment getCardForm(Mode mode) {
+        CardFragment form = new CardFragment();
         form.mode = mode;
         return form;
     }
