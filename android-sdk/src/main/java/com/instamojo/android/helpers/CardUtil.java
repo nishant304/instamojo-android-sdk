@@ -13,131 +13,53 @@ public class CardUtil {
     private static final String TAG = CardUtil.class.getSimpleName();
 
     /**
-     * Luhn's algorithm implementation to validate the card passed.
+     * Luhn's algorithm implementation to validate a card number.
      *
-     * @param cardNumber Card number. Require atleast first 4 to give a valid result.
-     * @return 1 for valid card , 0 for invalid card.
+     * @param cardNumber Card number
+     * @return True for valid card number, False for invalid card number.
      */
-    public static boolean isValid(String cardNumber) {
+    public static boolean isCardNumberValid(String cardNumber) {
 
-        if (cardNumber == null || cardNumber.isEmpty() || cardNumber.length() < 4) {
+        int cardLength = cardNumber.length();
+        if (cardNumber == null || cardNumber.isEmpty() || cardLength < 4) {
             return false;
         }
 
         CardType cardType = CardUtil.getCardType(cardNumber);
+
         // No length check for MAESTRO
-        if (cardType != CardType.MAESTRO && cardType.getNumberLength() != cardNumber.length()) {
+        if (cardType != CardType.MAESTRO && cardType.getNumberLength() != cardLength) {
             return false;
         }
 
-        long number = Long.valueOf(cardNumber);
-        int total = sumOfDoubleEvenPlace(number) + sumOfOddPlace(number);
-
-        if ((total % 10 == 0) && (prefixMatched(number, 1) != 0)) {
-            return true;
-
-        } else {
+        // If the card number starts with 0
+        if (cardNumber.charAt(0) == 0) {
             return false;
         }
-    }
 
-    private static int getDigit(int number) {
+        int total = 0;
+        boolean isEvenPosition = false;
+        for (int i = cardLength - 1; i >= 0; i--) {
 
-        if (number <= 9) {
-            return number;
-        } else {
-            int firstDigit = number % 10;
-            int secondDigit = number / 10;
+            int digit = cardNumber.charAt(i);
 
-            return firstDigit + secondDigit;
-        }
-    }
-
-    private static int sumOfOddPlace(long number) {
-        int result = 0;
-
-        while (number > 0) {
-            result += (int) (number % 10);
-            number = number / 100;
-        }
-
-        return result;
-    }
-
-    private static int sumOfDoubleEvenPlace(long number) {
-
-        int result = 0;
-        long temp;
-
-        while (number > 0) {
-            temp = number % 100;
-            result += getDigit((int) (temp / 10) * 2);
-            number = number / 100;
-        }
-
-        return result;
-    }
-
-    private static int prefixMatched(long number, int d) {
-
-        if ((getPrefix(number, d) == 3)
-                || (getPrefix(number, d) == 4)
-                || (getPrefix(number, d) == 5)
-                || (getPrefix(number, d) == 6)) {
-
-            if (getPrefix(number, d) == 3) {
-                return 3;
-            } else if (getPrefix(number, d) == 4) {
-                return 4;
-            } else if (getPrefix(number, d) == 5) {
-                return 5;
-            } else if (getPrefix(number, d) == 6) {
-                return 6;
+            if (isEvenPosition) {
+                digit *= 2;
             }
 
-            return 1;
-        } else {
-            return 0;
+            total += digit / 10; // For 'digit' with two digits
+            total += digit % 10;
 
-        }
-    }
-
-    private static int getSize(long d) {
-
-        int count = 0;
-
-        while (d > 0) {
-            d = d / 10;
-
-            count++;
+            isEvenPosition = !isEvenPosition;
         }
 
-        return count;
-
-    }
-
-    private static long getPrefix(long number, int k) {
-
-        if (getSize(number) < k) {
-            return number;
-        } else {
-
-            int size = getSize(number);
-
-            for (int i = 0; i < (size - k); i++) {
-                number = number / 10;
-            }
-
-            return number;
-
-        }
-
+        return (total % 10 == 0);
     }
 
     /**
      * Check for Maestro Card.
      *
-     * @param cardNumber Card Number to be validated, requires atleast first four digits of the card.
+     * @param cardNumber Card Number
      * @return True if card is Maestro else False.
      */
     public static boolean isMaestroCard(String cardNumber) {
@@ -163,19 +85,21 @@ public class CardUtil {
     /**
      * Check method to see if the card expiry date is valid.
      *
-     * @param expiry Date string in the formt - MM/yy.
-     * @return True if the Date is expired Else False.
+     * @param expiryDateStr Date string in the format - MM/yy.
+     * @return True if the Date is expired else False.
      */
 
-    public static boolean isDateExpired(String expiry) {
+    public static boolean isDateExpired(String expiryDateStr) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/yy", Locale.ENGLISH);
         dateFormat.setLenient(false);
         try {
-            Date expiryDate = dateFormat.parse(expiry);
+            Date expiryDate = dateFormat.parse(expiryDateStr);
             return expiryDate.before(new Date());
+
         } catch (ParseException e) {
-            Logger.e(TAG, "Invalid Date - " + expiry);
-            return true;
+            Logger.e(TAG, "Invalid Date - " + expiryDateStr);
         }
+
+        return false;
     }
 }
