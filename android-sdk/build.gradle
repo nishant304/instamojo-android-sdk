@@ -57,6 +57,8 @@ dependencies {
     api 'com.squareup.okhttp3:okhttp:3.11.0'
     api 'com.rengwuxian.materialedittext:library:2.1.4'
     api 'in.juspay:godel:0.6.25.2.1423'
+    api 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 }
 
 apply from: '../install.gradle'

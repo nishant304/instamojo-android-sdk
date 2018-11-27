@@ -270,6 +270,10 @@ public class Request {
     }
 
     private void executeCreateOrder() {
+
+//        Order order = new Order();
+//        order.setBuyerName();
+//
         FormBody.Builder builder = new FormBody.Builder()
                 .add("name", order.getBuyerName())
                 .add("email", order.getBuyerEmail())
