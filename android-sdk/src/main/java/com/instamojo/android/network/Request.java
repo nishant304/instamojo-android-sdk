@@ -1,13 +1,8 @@
 package com.instamojo.android.network;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.instamojo.android.BuildConfig;
-import com.instamojo.android.Instamojo;
 import com.instamojo.android.callbacks.JuspayRequestCallback;
 import com.instamojo.android.callbacks.OrderRequestCallback;
 import com.instamojo.android.callbacks.UPICallback;
@@ -43,7 +38,6 @@ import java.util.Map;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -67,21 +61,7 @@ public class Request {
     private String orderID;
 
     private static final OkHttpClient client = new OkHttpClient.Builder()
-            .addInterceptor(new DefaultHeadersInterceptor())
             .build();
-
-    /**
-     * Network Request to create an order ID from Instamojo server.
-     *
-     * @param order                Order model with all the mandatory fields set.
-     * @param orderRequestCallback Callback interface for the Asynchronous Network Call.
-     */
-    public Request(@NonNull Order order, @NonNull OrderRequestCallback orderRequestCallback) {
-        this.mode = MODE.OrderCreate;
-        this.order = order;
-        this.orderRequestCallback = orderRequestCallback;
-    }
-
 
     /**
      * Network Request to get order details from Juspay for JuspaySafeBrowser.
@@ -131,10 +111,39 @@ public class Request {
      * @param orderID              String
      * @param orderRequestCallback {@link OrderRequestCallback}
      */
-    public Request(@NonNull String orderID, @NonNull OrderRequestCallback orderRequestCallback) {
+    public void getPaymentOptions(@NonNull String orderID, @NonNull OrderRequestCallback orderRequestCallback) {
         this.mode = MODE.FetchOrder;
         this.orderID = orderID;
         this.orderRequestCallback = orderRequestCallback;
+
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url(Urls.getOrderFetchURL(orderID))
+                .get()
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
+                orderRequestCallback.onFinish(null, new Errors.ConnectionError(e.getMessage()));
+            }
+
+            @Override
+            public void onResponse(Call call, Response r) throws IOException {
+                String responseBody = "";
+                try {
+                    responseBody = r.body().string();
+                    r.body().close();
+                    parseCheckoutOptions(responseBody);
+                    orderRequestCallback.onFinish(order, null);
+                } catch (IOException e) {
+                    Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
+                    orderRequestCallback.onFinish(order, new Errors.ServerError(e.getMessage()));
+                } catch (JSONException e) {
+                    Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
+                    orderRequestCallback.onFinish(order, Errors.getAppropriateError(responseBody));
+                }
+            }
+        });
     }
 
     /**
@@ -142,9 +151,6 @@ public class Request {
      */
     public void execute() {
         switch (this.mode) {
-            case OrderCreate:
-                executeCreateOrder();
-                break;
             case Juspay:
                 executeJuspayRequest();
                 break;
@@ -257,61 +263,6 @@ public class Request {
                     responseBody = r.body().string();
                     r.body().close();
                     parseCheckoutOptions(responseBody);
-                    orderRequestCallback.onFinish(order, null);
-                } catch (IOException e) {
-                    Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
-                    orderRequestCallback.onFinish(order, new Errors.ServerError(e.getMessage()));
-                } catch (JSONException e) {
-                    Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
-                    orderRequestCallback.onFinish(order, Errors.getAppropriateError(responseBody));
-                }
-            }
-        });
-    }
-
-    private void executeCreateOrder() {
-
-//        Order order = new Order();
-//        order.setBuyerName();
-//
-        FormBody.Builder builder = new FormBody.Builder()
-                .add("name", order.getBuyerName())
-                .add("email", order.getBuyerEmail())
-                .add("amount", order.getAmount())
-                .add("description", order.getDescription())
-                .add("phone", order.getBuyerPhone())
-                .add("currency", order.getCurrency())
-                .add("transaction_id", order.getTransactionID())
-                .add("redirect_url", order.getRedirectionUrl())
-                .add("advanced_payment_options", "true");
-        if (order.getWebhook() != null) {
-            builder.add("webhook_url", order.getWebhook());
-        }
-        RequestBody body = builder.build();
-        okhttp3.Request request = new okhttp3.Request.Builder()
-                .url(Urls.getOrderCreateUrl())
-                .header("Authorization", "Bearer " + order.getAuthToken())
-                .post(body)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
-                orderRequestCallback.onFinish(order, new Errors.ConnectionError(e.getMessage()));
-            }
-
-            @Override
-            public void onResponse(Call call, Response r) {
-                String responseBody = "";
-                try {
-                    responseBody = r.body().string();
-                    r.body().close();
-                    JSONObject responseObject = new JSONObject(responseBody);
-                    JSONObject orderObject = responseObject.getJSONObject("order");
-                    order.setId(orderObject.getString("id"));
-                    order.setTransactionID(orderObject.getString("transaction_id"));
-                    updateTransactionDetails(responseObject);
                     orderRequestCallback.onFinish(order, null);
                 } catch (IOException e) {
                     Logger.e(this.getClass().getSimpleName(), "Error while making Instamojo request - " + e.getMessage());
@@ -544,54 +495,9 @@ public class Request {
     }
 
     private enum MODE {
-        OrderCreate,
         FetchOrder,
         Juspay,
         UPISubmission,
         UPIStatusCheck
-    }
-
-    private static class DefaultHeadersInterceptor implements Interceptor {
-        private String userAgent;
-        private String referer;
-
-        @Override
-        public Response intercept(Chain chain) throws IOException {
-            return chain.proceed(chain.request()
-                    .newBuilder()
-                    .header("User-Agent", getUserAgent())
-                    .header("Referer", getReferer())
-                    .build());
-        }
-
-        private String getUserAgent() {
-            if (this.userAgent == null || this.userAgent.length() == 0) {
-                userAgent = "instamojo-android/" + BuildConfig.VERSION_NAME
-                        + " android/" + Build.VERSION.RELEASE
-                        + " " + Build.BRAND + "/" + Build.MODEL;
-            }
-
-            return this.userAgent;
-        }
-
-        private String getReferer() {
-            if (this.referer == null || this.referer.length() == 0) {
-                if (!Instamojo.isInitialised()) {
-                    return "";
-                }
-
-                Context appContext = Instamojo.getInstance().getAppContext();
-
-                String packageName = appContext.getPackageName();
-                this.referer = "android-app://" + packageName;
-
-                try {
-                    this.referer += "/" + appContext.getPackageManager().getPackageInfo(packageName, 0).versionName;
-                } catch (PackageManager.NameNotFoundException e) {
-                    Logger.e("Request", "Unable to get version of the current application.");
-                }
-            }
-            return this.referer;
-        }
     }
 }
