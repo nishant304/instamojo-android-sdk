@@ -89,16 +89,20 @@ public class PaymentOptionsFragment extends BaseFragment implements View.OnClick
 
         if (id == R.id.wallet_layout) {
             Logger.d(TAG, "Starting Wallet Form");
-            parentActivity.loadFragment(NetBankingFragment.getListFormFragment(NetBankingFragment.Mode.Wallet), true);
+            parentActivity.loadFragment(WalletFragment.newInstance(), true);
+
         } else if (id == R.id.net_banking_layout) {
             Logger.d(TAG, "Starting Net Banking Form");
-            parentActivity.loadFragment(NetBankingFragment.getListFormFragment(NetBankingFragment.Mode.NetBanking), true);
+            parentActivity.loadFragment(NetBankingFragment.newInstance(), true);
+
         } else if (id == R.id.emi_layout) {
             Logger.d(TAG, "Starting EMI Form");
             parentActivity.loadFragment(new EMIFragment(), true);
+
         } else if (id == R.id.upi_layout) {
             Logger.d(TAG, "Starting UPISubmission Form");
             parentActivity.loadFragment(new UPIFragment(), true);
+
         } else {
             Logger.d(TAG, "Starting CardFragment");
             //since the user is directly jumping to Card from instead of EMI.

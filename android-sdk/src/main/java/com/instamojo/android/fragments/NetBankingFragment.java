@@ -3,7 +3,6 @@ package com.instamojo.android.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,13 +15,12 @@ import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.Order;
-import com.instamojo.android.models.Wallet;
 
 import java.util.Locale;
 import java.util.Map;
 
 /**
- * A simple {@link Fragment} subclass. The {@link Fragment} to show Net Banking options to User.
+ * Fragment to show Net Banking options to User.
  */
 public class NetBankingFragment extends BaseFragment implements SearchView.OnQueryTextListener {
 
@@ -30,7 +28,6 @@ public class NetBankingFragment extends BaseFragment implements SearchView.OnQue
     private PaymentDetailsActivity parentActivity;
     private LinearLayout listContainer;
     private TextView headerTextView;
-    private Mode mode;
 
     /**
      * Creates a new Instance of Fragment.
@@ -39,10 +36,8 @@ public class NetBankingFragment extends BaseFragment implements SearchView.OnQue
         // Required empty public constructor
     }
 
-    public static NetBankingFragment getListFormFragment(Mode mode) {
-        NetBankingFragment form = new NetBankingFragment();
-        form.mode = mode;
-        return form;
+    public static NetBankingFragment newInstance() {
+        return new NetBankingFragment();
     }
 
     @SuppressWarnings("unchecked")
@@ -52,27 +47,22 @@ public class NetBankingFragment extends BaseFragment implements SearchView.OnQue
         View view = inflater.inflate(R.layout.fragment_list_form_instamojo, container, false);
         parentActivity = (PaymentDetailsActivity) getActivity();
         inflateXML(view);
-        loadList("");
+        loadAllBanks();
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (mode == Mode.NetBanking) {
-            headerTextView.setText(R.string.choose_your_bank);
-            parentActivity.updateActionBarTitle(R.string.net_banking);
-        } else {
-            headerTextView.setText(R.string.choose_your_wallet);
-            parentActivity.updateActionBarTitle(R.string.wallets);
-        }
-        parentActivity.setShowSearch(true, this, mode);
+        headerTextView.setText(R.string.choose_your_bank);
+        parentActivity.updateActionBarTitle(R.string.net_banking);
+        parentActivity.showSearchOption(getString(R.string.search_your_bank), this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        parentActivity.setShowSearch(false, this, mode);
+        parentActivity.hideSearchOption();
     }
 
     @Override
@@ -82,9 +72,13 @@ public class NetBankingFragment extends BaseFragment implements SearchView.OnQue
         Logger.d(TAG, "Inflated XML");
     }
 
-    private void loadBanks(String queryText) {
+    private void loadAllBanks() {
+        loadBanks("");
+    }
+
+    private void loadBanks(String query) {
         for (final Map.Entry<String, String> bank : parentActivity.getOrder().getNetBankingOptions().getBanks().entrySet()) {
-            if (!bank.getKey().toLowerCase(Locale.US).contains(queryText.toLowerCase(Locale.US))) {
+            if (!bank.getKey().toLowerCase(Locale.US).contains(query.toLowerCase(Locale.US))) {
                 continue;
             }
             View bankView = LayoutInflater.from(getContext()).inflate(R.layout.list_view_instamojo, listContainer, false);
@@ -105,54 +99,15 @@ public class NetBankingFragment extends BaseFragment implements SearchView.OnQue
         }
     }
 
-    private void loadWallets(String queryText) {
-        for (final Wallet wallet : parentActivity.getOrder().getWalletOptions().getWallets()) {
-            if (!wallet.getName().toLowerCase(Locale.US).contains(queryText.toLowerCase(Locale.US))) {
-                continue;
-            }
-            View itemView = LayoutInflater.from(getContext()).inflate(R.layout.list_view_instamojo, listContainer, false);
-            ((TextView) itemView.findViewById(R.id.item_name)).setText(wallet.getName());
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Bundle bundle = new Bundle();
-                    Order order = parentActivity.getOrder();
-                    bundle.putString(Constants.URL, order.getWalletOptions().getUrl());
-                    bundle.putString(Constants.POST_DATA, order.getWalletOptions().
-                            getPostData(wallet.getWalletID()));
-                    parentActivity.startPaymentActivity(bundle);
-                }
-            });
-
-            listContainer.addView(itemView);
-        }
-    }
-
-    private void loadList(String queryText) {
-        listContainer.removeAllViews();
-        if (mode == Mode.Wallet) {
-            loadWallets(queryText);
-        } else {
-            loadBanks(queryText);
-        }
-
-        Logger.d(TAG, "Loaded list matching Query text - " + queryText);
-    }
-
     @Override
     public boolean onQueryTextSubmit(String query) {
-        loadList(query);
+        loadBanks(query);
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        loadList(newText);
+        loadBanks(newText);
         return false;
-    }
-
-    public enum Mode {
-        Wallet,
-        NetBanking
     }
 }

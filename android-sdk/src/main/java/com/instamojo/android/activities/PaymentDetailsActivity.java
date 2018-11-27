@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import com.instamojo.android.R;
 import com.instamojo.android.fragments.BaseFragment;
 import com.instamojo.android.fragments.PaymentOptionsFragment;
-import com.instamojo.android.fragments.NetBankingFragment;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.Order;
@@ -28,7 +27,7 @@ public class PaymentDetailsActivity extends BaseActivity {
     private Order order;
     private boolean showSearch;
     private SearchView.OnQueryTextListener onQueryTextListener;
-    private NetBankingFragment.Mode mode;
+    private String hintText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,18 +43,12 @@ public class PaymentDetailsActivity extends BaseActivity {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.menu_payment_options, menu);
 
-            SearchManager searchManager = (SearchManager)
-                    getSystemService(Context.SEARCH_SERVICE);
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             MenuItem searchMenuItem = menu.findItem(R.id.search);
             SearchView searchView = (SearchView) searchMenuItem.getActionView();
-            if (mode == NetBankingFragment.Mode.NetBanking) {
-                searchView.setQueryHint(getString(R.string.search_your_bank));
-            } else {
-                searchView.setQueryHint(getString(R.string.search_your_wallet));
-            }
+            searchView.setQueryHint(hintText);
 
-            searchView.setSearchableInfo(searchManager.
-                    getSearchableInfo(getComponentName()));
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
             searchView.setSubmitButtonEnabled(true);
             if (onQueryTextListener != null) {
                 searchView.setOnQueryTextListener(onQueryTextListener);
@@ -152,14 +145,17 @@ public class PaymentDetailsActivity extends BaseActivity {
     /**
      * Show the search icon in the actionbar
      *
-     * @param showSearch        Show the search icon in action action bar
      * @param queryTextListener {@link android.support.v7.widget.SearchView.OnQueryTextListener} to listen for the query string
      */
-    public void setShowSearch(boolean showSearch, SearchView.OnQueryTextListener queryTextListener, NetBankingFragment.Mode mode) {
-        this.mode = mode;
-        this.showSearch = showSearch;
+    public void showSearchOption(String hintText, SearchView.OnQueryTextListener queryTextListener) {
+        this.showSearch = true;
         this.onQueryTextListener = queryTextListener;
+        this.hintText = hintText;
         invalidateOptionsMenu();
-        Logger.d(TAG, "Invalidating search option for Net banking");
+    }
+
+    public void hideSearchOption() {
+        this.showSearch = false;
+        invalidateOptionsMenu();
     }
 }

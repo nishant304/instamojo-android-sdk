@@ -19,7 +19,6 @@ import com.instamojo.android.models.Order;
 import com.instamojo.android.models.Wallet;
 
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass. The {@link Fragment} to show Net Banking options to User.
@@ -30,7 +29,6 @@ public class WalletFragment extends BaseFragment implements SearchView.OnQueryTe
     private PaymentDetailsActivity parentActivity;
     private LinearLayout listContainer;
     private TextView headerTextView;
-    private NetBankingFragment.Mode mode;
 
     /**
      * Creates a new Instance of Fragment.
@@ -39,10 +37,8 @@ public class WalletFragment extends BaseFragment implements SearchView.OnQueryTe
         // Required empty public constructor
     }
 
-    public static WalletFragment getListFormFragment(NetBankingFragment.Mode mode) {
-        WalletFragment form = new WalletFragment();
-        form.mode = mode;
-        return form;
+    public static WalletFragment newInstance() {
+        return new WalletFragment();
     }
 
     @SuppressWarnings("unchecked")
@@ -52,27 +48,22 @@ public class WalletFragment extends BaseFragment implements SearchView.OnQueryTe
         View view = inflater.inflate(R.layout.fragment_list_form_instamojo, container, false);
         parentActivity = (PaymentDetailsActivity) getActivity();
         inflateXML(view);
-        loadList("");
+        loadAllWallets();
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (mode == NetBankingFragment.Mode.NetBanking) {
-            headerTextView.setText(R.string.choose_your_bank);
-            parentActivity.updateActionBarTitle(R.string.net_banking);
-        } else {
-            headerTextView.setText(R.string.choose_your_wallet);
-            parentActivity.updateActionBarTitle(R.string.wallets);
-        }
-        parentActivity.setShowSearch(true, this, mode);
+        headerTextView.setText(R.string.choose_your_wallet);
+        parentActivity.updateActionBarTitle(R.string.wallets);
+        parentActivity.showSearchOption(getString(R.string.search_your_wallet), this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        parentActivity.setShowSearch(false, this, mode);
+        parentActivity.hideSearchOption();
     }
 
     @Override
@@ -82,32 +73,13 @@ public class WalletFragment extends BaseFragment implements SearchView.OnQueryTe
         Logger.d(TAG, "Inflated XML");
     }
 
-    private void loadBanks(String queryText) {
-        for (final Map.Entry<String, String> bank : parentActivity.getOrder().getNetBankingOptions().getBanks().entrySet()) {
-            if (!bank.getKey().toLowerCase(Locale.US).contains(queryText.toLowerCase(Locale.US))) {
-                continue;
-            }
-            View bankView = LayoutInflater.from(getContext()).inflate(R.layout.list_view_instamojo, listContainer, false);
-            ((TextView) bankView.findViewById(R.id.item_name)).setText(bank.getKey());
-            bankView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Bundle bundle = new Bundle();
-                    Order order = parentActivity.getOrder();
-                    bundle.putString(Constants.URL, order.getNetBankingOptions().getUrl());
-                    bundle.putString(Constants.POST_DATA, order.getNetBankingOptions().
-                            getPostData(bank.getValue()));
-                    parentActivity.startPaymentActivity(bundle);
-                }
-            });
-
-            listContainer.addView(bankView);
-        }
+    private void loadAllWallets() {
+        loadWallets("");
     }
 
-    private void loadWallets(String queryText) {
+    private void loadWallets(String query) {
         for (final Wallet wallet : parentActivity.getOrder().getWalletOptions().getWallets()) {
-            if (!wallet.getName().toLowerCase(Locale.US).contains(queryText.toLowerCase(Locale.US))) {
+            if (!wallet.getName().toLowerCase(Locale.US).contains(query.toLowerCase(Locale.US))) {
                 continue;
             }
             View itemView = LayoutInflater.from(getContext()).inflate(R.layout.list_view_instamojo, listContainer, false);
@@ -128,31 +100,15 @@ public class WalletFragment extends BaseFragment implements SearchView.OnQueryTe
         }
     }
 
-    private void loadList(String queryText) {
-        listContainer.removeAllViews();
-        if (mode == NetBankingFragment.Mode.Wallet) {
-            loadWallets(queryText);
-        } else {
-            loadBanks(queryText);
-        }
-
-        Logger.d(TAG, "Loaded list matching Query text - " + queryText);
-    }
-
     @Override
     public boolean onQueryTextSubmit(String query) {
-        loadList(query);
+        loadWallets(query);
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        loadList(newText);
+        loadWallets(newText);
         return false;
-    }
-
-    public enum Mode {
-        Wallet,
-        NetBanking
     }
 }
