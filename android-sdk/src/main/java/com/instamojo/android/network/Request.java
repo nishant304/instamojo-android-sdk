@@ -1,14 +1,9 @@
 package com.instamojo.android.network;
 
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.instamojo.android.callbacks.JuspayRequestCallback;
 import com.instamojo.android.callbacks.OrderRequestCallback;
-import com.instamojo.android.callbacks.UPICallback;
-import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
-import com.instamojo.android.models.Card;
 import com.instamojo.android.models.CardOptions;
 import com.instamojo.android.models.EMIBank;
 import com.instamojo.android.models.EMIOptions;
@@ -16,7 +11,6 @@ import com.instamojo.android.models.Errors;
 import com.instamojo.android.models.NetBankingOptions;
 import com.instamojo.android.models.Order;
 import com.instamojo.android.models.UPIOptions;
-import com.instamojo.android.models.UPISubmissionResponse;
 import com.instamojo.android.models.Wallet;
 import com.instamojo.android.models.WalletOptions;
 
@@ -36,9 +30,7 @@ import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -50,45 +42,11 @@ public class Request {
     private static final String TAG = Request.class.getSimpleName();
     private Order order;
     private OrderRequestCallback orderRequestCallback;
-    private JuspayRequestCallback juspayRequestCallback;
-    private UPICallback upiCallback;
-    private String virtualPaymentAddress;
-    private UPISubmissionResponse upiSubmissionResponse;
-    private Card card;
     private MODE mode;
-    private String accessToken;
     private String orderID;
 
     private static final OkHttpClient client = new OkHttpClient.Builder()
             .build();
-
-    /**
-     * Network request for UPISubmission Submission
-     *
-     * @param order                 {@link Order}
-     * @param virtualPaymentAddress String
-     * @param upiCallback           {@link UPICallback}
-     */
-    public Request(@NonNull Order order, @NonNull String virtualPaymentAddress, @NonNull UPICallback upiCallback) {
-        this.mode = MODE.UPISubmission;
-        this.order = order;
-        this.virtualPaymentAddress = virtualPaymentAddress;
-        this.upiCallback = upiCallback;
-    }
-
-    /**
-     * Network Request to check the status of the transaction
-     *
-     * @param order                 {@link Order}
-     * @param upiSubmissionResponse {@link UPISubmissionResponse}
-     * @param upiCallback           {@link UPICallback}
-     */
-    public Request(@NonNull Order order, @NonNull UPISubmissionResponse upiSubmissionResponse, @NonNull UPICallback upiCallback) {
-        this.mode = MODE.UPIStatusCheck;
-        this.order = order;
-        this.upiSubmissionResponse = upiSubmissionResponse;
-        this.upiCallback = upiCallback;
-    }
 
     /**
      * Network request to fetch the order
@@ -136,12 +94,6 @@ public class Request {
      */
     public void execute() {
         switch (this.mode) {
-            case UPISubmission:
-                executeUPIRequest();
-                break;
-            case UPIStatusCheck:
-                executeUPIStatusCheck();
-                break;
             case FetchOrder:
                 executeFetchOrder();
                 break;
@@ -290,119 +242,7 @@ public class Request {
         }
     }
 
-    private void executeUPIRequest() {
-        RequestBody body = new FormBody.Builder()
-                .add("virtual_address", this.virtualPaymentAddress)
-                .build();
-
-        okhttp3.Request request = new okhttp3.Request.Builder()
-                .url(order.getUpiOptions().getUrl())
-                .post(body)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Logger.e(this.getClass().getSimpleName(),
-                        "Error while making UPI Submission request - " + e.getMessage());
-                upiCallback.onSubmission(null, e);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) {
-                if (response.isSuccessful()) {
-                    try {
-                        String responseBody = response.body().string();
-                        response.body().close();
-                        upiCallback.onSubmission(parseUPIResponse(responseBody), null);
-
-                    } catch (IOException | JSONException e) {
-                        Logger.e(TAG, "Error while handling UPI success response - " + e.getMessage());
-                        upiCallback.onSubmission(null, e);
-                    }
-
-                } else {
-                    Exception ex = new Exception("Error response from server");
-                    if (response.code() == 400) {
-                        try {
-                            String errorBody = response.body().string();
-                            response.body().close();
-                            JSONObject responseObject = new JSONObject(errorBody);
-                            JSONObject errors = responseObject.getJSONObject("errors");
-                            ex = new Exception(errors.getString("virtual_address"));
-
-                        } catch (IOException | JSONException e) {
-                            Logger.e(TAG, "Error while handling UPI error response - " + e.getMessage());
-                            ex = e;
-                        }
-                    }
-
-                    upiCallback.onSubmission(null, ex);
-                }
-            }
-        });
-    }
-
-    private UPISubmissionResponse parseUPIResponse(String responseString) throws JSONException {
-        JSONObject responseObject = new JSONObject(responseString);
-        String paymentID = responseObject.getString("payment_id");
-        int statusCode = responseObject.getInt("status_code");
-        String payerVirtualAddress = responseObject.getString("payer_virtual_address");
-        String payeeVirtualAddress = responseObject.getString("payee_virtual_address");
-        String statusCheckURL = responseObject.getString("status_check_url");
-        String upiBank = responseObject.getString("upi_bank");
-        String statusMessage = responseObject.getString("status_message");
-
-        return new UPISubmissionResponse(paymentID, statusCode, payerVirtualAddress,
-                payeeVirtualAddress, statusCheckURL, upiBank, statusMessage);
-    }
-
-    private void executeUPIStatusCheck() {
-        okhttp3.Request request = new okhttp3.Request.Builder()
-                .url(upiSubmissionResponse.getStatusCheckURL())
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Logger.e(this.getClass().getSimpleName(),
-                        "Error while making UPI Status Check request - " + e.getMessage());
-                upiCallback.onStatusCheckComplete(null, false, e);
-            }
-
-            @Override
-            public void onResponse(Call call, Response r) {
-                try {
-                    String responseBody = r.body().string();
-                    r.body().close();
-                    boolean transactionComplete = isTransactionComplete(responseBody);
-                    if (!transactionComplete) {
-                        upiCallback.onStatusCheckComplete(null, false, null);
-                        return;
-                    }
-
-                    Bundle bundle = new Bundle();
-                    bundle.putString(Constants.ORDER_ID, order.getId());
-                    bundle.putString(Constants.TRANSACTION_ID, order.getTransactionID());
-                    bundle.putString(Constants.PAYMENT_ID, upiSubmissionResponse.getPaymentID());
-                    upiCallback.onStatusCheckComplete(bundle, true, null);
-                } catch (IOException | JSONException e) {
-                    Logger.e(this.getClass().getSimpleName(),
-                            "Error while making UPI Status Check request - " + e.getMessage());
-                    upiCallback.onStatusCheckComplete(null, false, e);
-                }
-            }
-        });
-    }
-
-    private boolean isTransactionComplete(String responseBody) throws JSONException {
-        JSONObject responseObject = new JSONObject(responseBody);
-        return responseObject.getInt("status_code") != Constants.PENDING_PAYMENT;
-    }
-
     private enum MODE {
-        FetchOrder,
-        UPISubmission,
-        UPIStatusCheck
+        FetchOrder
     }
 }

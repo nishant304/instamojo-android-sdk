@@ -2,7 +2,6 @@ package com.instamojo.android.network;
 
 import android.util.Log;
 
-import com.instamojo.android.Instamojo;
 import com.instamojo.android.helpers.Logger;
 
 /**
@@ -11,14 +10,8 @@ import com.instamojo.android.helpers.Logger;
 
 public class Urls {
 
-    private static String baseUrl = Instamojo.PRODUCTION_BASE_URL;
-
-    /**
-     * @return Order Create URL.
-     */
-    public static String getOrderCreateUrl() {
-        return baseUrl + "v2/gateway/orders/";
-    }
+    private static final String PRODUCTION_BASE_URL = "https://api.instamojo.com/";
+    private static String baseUrl = PRODUCTION_BASE_URL;
 
     /**
      * @return default redirect URL
@@ -27,12 +20,6 @@ public class Urls {
         return baseUrl + "integrations/android/redirect/";
     }
 
-    /**
-     * @return base url
-     */
-    public static String getBaseUrl() {
-        return baseUrl;
-    }
 
     /**
      * Set the base url
@@ -53,7 +40,7 @@ public class Urls {
     private static String sanitizeURL(String baseUrl) {
 
         if (baseUrl == null || baseUrl.trim().isEmpty()) {
-            baseUrl = Instamojo.PRODUCTION_BASE_URL;
+            baseUrl = PRODUCTION_BASE_URL;
         }
 
         if (!baseUrl.endsWith("/")) {
@@ -63,7 +50,4 @@ public class Urls {
         return baseUrl;
     }
 
-    public static String getOrderFetchURL(String orderID) {
-        return baseUrl + "v2/gateway/orders/"+orderID+"/checkout-options/";
-    }
 }

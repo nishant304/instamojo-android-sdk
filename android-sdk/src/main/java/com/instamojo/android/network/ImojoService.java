@@ -3,8 +3,10 @@ package com.instamojo.android.network;
 import com.instamojo.android.models.CardPaymentRequest;
 import com.instamojo.android.models.CardPaymentResponse;
 import com.instamojo.android.models.Order;
+import com.instamojo.android.models.UPIPaymentRequest;
+import com.instamojo.android.models.UPIStatusResponse;
+import com.instamojo.android.models.UPISubmissionResponse;
 
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -15,15 +17,15 @@ import retrofit2.http.Url;
 public interface ImojoService {
 
     @GET("v2/gateway/orders/{orderID}/checkout-options/")
-    public Call<Order> getPaymentOptions(@Path("orderID") String orderID);
+    Call<Order> getPaymentOptions(@Path("orderID") String orderID);
 
     @POST
-    public Call<CardPaymentResponse> collectCardPayment(@Url String url, @Body CardPaymentRequest cardPaymentRequest);
+    Call<CardPaymentResponse> collectCardPayment(@Url String url, @Body CardPaymentRequest cardPaymentRequest);
 
     @POST("v2/gateway/orders/{orderID})/upi/")
-    public Call<Order> collectUPIPayment(@Path("orderID") String orderID, @Body RequestBody body);
+    Call<UPISubmissionResponse> collectUPIPayment(@Path("orderID") String orderID, @Body UPIPaymentRequest upiPaymentRequest);
 
     @GET
-    public Call<Order> getUPIStatus(@Url String url);
+    Call<UPIStatusResponse> getUPIStatus(@Url String url);
 
 }
