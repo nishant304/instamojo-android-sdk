@@ -1,5 +1,7 @@
 package com.instamojo.android.network;
 
+import com.instamojo.android.models.CardPaymentRequest;
+import com.instamojo.android.models.CardPaymentResponse;
 import com.instamojo.android.models.Order;
 
 import okhttp3.RequestBody;
@@ -16,7 +18,7 @@ public interface ImojoService {
     public Call<Order> getPaymentOptions(@Path("orderID") String orderID);
 
     @POST
-    public Call<Order> collectCardPayment(@Url String url, @Body Order order);
+    public Call<CardPaymentResponse> collectCardPayment(@Url String url, @Body CardPaymentRequest cardPaymentRequest);
 
     @POST("v2/gateway/orders/{orderID})/upi/")
     public Call<Order> collectUPIPayment(@Path("orderID") String orderID, @Body RequestBody body);

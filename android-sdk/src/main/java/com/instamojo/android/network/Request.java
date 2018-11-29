@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import com.instamojo.android.callbacks.JuspayRequestCallback;
 import com.instamojo.android.callbacks.OrderRequestCallback;
 import com.instamojo.android.callbacks.UPICallback;
-import com.instamojo.android.helpers.CardUtil;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.Card;
@@ -64,20 +63,6 @@ public class Request {
             .build();
 
     /**
-     * Network Request to get order details from Juspay for JuspaySafeBrowser.
-     *
-     * @param order                 Order model with all the mandatory fields set.
-     * @param card                  Card with all the proper validations done.
-     * @param juspayRequestCallback Callback for Asynchronous network call.
-     */
-    public Request(@NonNull Order order, @NonNull Card card, @NonNull JuspayRequestCallback juspayRequestCallback) {
-        this.mode = MODE.Juspay;
-        this.card = card;
-        this.order = order;
-        this.juspayRequestCallback = juspayRequestCallback;
-    }
-
-    /**
      * Network request for UPISubmission Submission
      *
      * @param order                 {@link Order}
@@ -111,7 +96,7 @@ public class Request {
      * @param orderID              String
      * @param orderRequestCallback {@link OrderRequestCallback}
      */
-    public void getPaymentOptions(@NonNull String orderID, @NonNull OrderRequestCallback orderRequestCallback) {
+    public void getPaymentOptions(@NonNull String orderID, @NonNull final OrderRequestCallback orderRequestCallback) {
         this.mode = MODE.FetchOrder;
         this.orderID = orderID;
         this.orderRequestCallback = orderRequestCallback;
@@ -151,9 +136,6 @@ public class Request {
      */
     public void execute() {
         switch (this.mode) {
-            case Juspay:
-                executeJuspayRequest();
-                break;
             case UPISubmission:
                 executeUPIRequest();
                 break;
@@ -166,82 +148,6 @@ public class Request {
             default:
                 throw new RuntimeException("Unknown Mode");
         }
-    }
-
-    private void executeJuspayRequest() {
-        //For maestro, add the default values if empty
-        if (CardUtil.isMaestroCard(card.getCardNumber())) {
-            if (card.getDate() == null || card.getDate().isEmpty()) {
-                card.setDate("12/49");
-            }
-
-            if (card.getCvv() == null || card.getCvv().isEmpty()) {
-                card.setDate("111");
-            }
-        }
-
-        FormBody.Builder body = new FormBody.Builder()
-                .add("order_id", order.getCardOptions().getOrderID())
-                .add("merchant_id", order.getCardOptions().getMerchantID())
-                .add("payment_method_type", "CARD")
-                .add("card_number", card.getCardNumber())
-                .add("card_exp_month", card.getMonth())
-                .add("card_exp_year", card.getYear())
-                .add("card_security_code", card.getCvv())
-                .add("save_to_locker", card.canSaveCard() ? "true" : "false")
-                .add("redirect_after_payment", "true")
-                .add("format", "json");
-
-        if (card.getCardHolderName() != null) {
-            body.add("name_on_card", card.getCardHolderName());
-        }
-
-        if (order.getEmiOptions() != null
-                && order.getEmiOptions().getSelectedBankCode() != null) {
-            Logger.d(this.getClass().getSimpleName(), "emi selected....");
-            body.add("is_emi", "true");
-            body.add("emi_bank", order.getEmiOptions().getSelectedBankCode());
-            body.add("emi_tenure", String.valueOf(order.getEmiOptions().getSelectedTenure()));
-        }
-
-        final okhttp3.Request request = new okhttp3.Request.Builder()
-                .url(order.getCardOptions().getUrl())
-                .post(body.build())
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Logger.e(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
-                juspayRequestCallback.onFinish(null, new Errors.ConnectionError(e.getMessage()));
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) {
-                String responseBody;
-                try {
-                    responseBody = response.body().string();
-                    response.body().close();
-                    Bundle bundle = parseJusPayResponse(responseBody);
-                    juspayRequestCallback.onFinish(bundle, null);
-                } catch (IOException e) {
-                    Logger.e(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
-                    juspayRequestCallback.onFinish(null, new Errors.ServerError(e.getMessage()));
-                } catch (JSONException e) {
-                    Logger.e(this.getClass().getSimpleName(), "Error while making Juspay request - " + e.getMessage());
-                    juspayRequestCallback.onFinish(null, e);
-                }
-            }
-        });
-    }
-
-    private Bundle parseJusPayResponse(String responseBody) throws JSONException {
-        JSONObject responseObject = new JSONObject(responseBody);
-        String url = responseObject.getJSONObject("payment").getJSONObject("authentication").getString("url");
-        final Bundle args = new Bundle();
-        args.putString(Constants.URL, url);
-        args.putString(Constants.MERCHANT_ID, order.getCardOptions().getMerchantID());
-        args.putString(Constants.ORDER_ID, order.getCardOptions().getOrderID());
-        return args;
     }
 
     private void executeFetchOrder() {
@@ -496,7 +402,6 @@ public class Request {
 
     private enum MODE {
         FetchOrder,
-        Juspay,
         UPISubmission,
         UPIStatusCheck
     }

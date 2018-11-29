@@ -18,17 +18,26 @@ import android.widget.Toast;
 import com.instamojo.android.R;
 import com.instamojo.android.activities.BaseActivity;
 import com.instamojo.android.activities.PaymentDetailsActivity;
-import com.instamojo.android.callbacks.JuspayRequestCallback;
 import com.instamojo.android.helpers.CardType;
 import com.instamojo.android.helpers.CardUtil;
+import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.helpers.Validators;
 import com.instamojo.android.models.Card;
-import com.instamojo.android.network.Request;
+import com.instamojo.android.models.CardPaymentRequest;
+import com.instamojo.android.models.CardPaymentResponse;
+import com.instamojo.android.models.Order;
+import com.instamojo.android.network.ImojoService;
+import com.instamojo.android.network.ServiceGenerator;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass. The {@link Fragment} to get Debit Card details from user.
@@ -236,26 +245,95 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
         final AlertDialog dialog = builder.create();
         dialog.show();
 
-        Request request = new Request(parentActivity.getOrder(), card, new JuspayRequestCallback() {
+        final Order order = parentActivity.getOrder();
+        CardPaymentRequest cardPaymentRequest = populateCardRequest(order, card);
+
+        ImojoService service = ServiceGenerator.getImojoService();
+        Call<CardPaymentResponse> orderCall = service.collectCardPayment(order.getCardOptions().getUrl(),
+                cardPaymentRequest);
+        orderCall.enqueue(new Callback<CardPaymentResponse>() {
             @Override
-            public void onFinish(final Bundle bundle, final Exception error) {
+            public void onResponse(Call<CardPaymentResponse> call, final Response<CardPaymentResponse> response) {
+
                 parentActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        changeEditBoxesState(true);
-                        dialog.dismiss();
-                        if (error != null) {
+                        if (response.isSuccessful()) {
+                            changeEditBoxesState(true);
+                            dialog.dismiss();
+
+                            final Bundle bundle = new Bundle();
+                            bundle.putString(Constants.URL, response.body().getUrl());
+                            bundle.putString(Constants.MERCHANT_ID, order.getCardOptions().getMerchantID());
+                            bundle.putString(Constants.ORDER_ID, order.getCardOptions().getOrderID());
+                            parentActivity.startPaymentActivity(bundle);
+
+                        } else {
                             Toast.makeText(parentActivity, R.string.error_message_juspay,
                                     Toast.LENGTH_SHORT).show();
-                            Logger.e(this.getClass().getSimpleName(), "Card checkout failed due to - " + error.getMessage());
-                            return;
+                            if (response.errorBody() != null) {
+                                try {
+                                    Logger.e(TAG, "Error response from card checkout call - " +
+                                            response.errorBody().string());
+
+                                } catch (IOException e) {
+                                    Logger.e(TAG, "Error reading error response: " + e.getMessage());
+                                }
+                            }
                         }
-                        parentActivity.startPaymentActivity(bundle);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<CardPaymentResponse> call, final Throwable t) {
+                parentActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(parentActivity, R.string.error_message_juspay,
+                                Toast.LENGTH_SHORT).show();
+                        Logger.e(TAG, "Card checkout failed due to - " + t.getMessage());
                     }
                 });
             }
         });
-        request.execute();
+    }
+
+    private CardPaymentRequest populateCardRequest(Order order, Card card) {
+
+        //For maestro, add the default values if empty
+        if (CardUtil.isMaestroCard(card.getCardNumber())) {
+            if (card.getDate() == null || card.getDate().isEmpty()) {
+                card.setDate("12/49");
+            }
+
+            if (card.getCvv() == null || card.getCvv().isEmpty()) {
+                card.setDate("111");
+            }
+        }
+
+        CardPaymentRequest cardPaymentRequest = new CardPaymentRequest();
+        cardPaymentRequest.setOrderID(order.getCardOptions().getOrderID());
+        cardPaymentRequest.setMerchantID(order.getCardOptions().getMerchantID());
+        cardPaymentRequest.setPaymentMethod("CARD");
+        cardPaymentRequest.setCardNumber(card.getCardNumber());
+        cardPaymentRequest.setCardExpiryMonth(card.getMonth());
+        cardPaymentRequest.setCardExpiryYear(card.getYear());
+        cardPaymentRequest.setCardSecurityCode(card.getCvv());
+        cardPaymentRequest.setSaveToLocker(card.canSaveCard());
+        cardPaymentRequest.setRedirectAfterPayment(true);
+        cardPaymentRequest.setFormat("json");
+        cardPaymentRequest.setNameOnCard(card.getCardHolderName());
+
+        if (order.getEmiOptions() != null
+                && order.getEmiOptions().getSelectedBankCode() != null) {
+            Logger.d(this.getClass().getSimpleName(), "emi selected....");
+            cardPaymentRequest.setEmi(true);
+            cardPaymentRequest.setEmiBank(order.getEmiOptions().getSelectedBankCode());
+            cardPaymentRequest.setEmiTenure(String.valueOf(order.getEmiOptions().getSelectedTenure()));
+        }
+
+        return cardPaymentRequest;
     }
 
     @Override
