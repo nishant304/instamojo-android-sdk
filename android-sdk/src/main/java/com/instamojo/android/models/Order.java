@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import com.instamojo.android.network.Urls;
+import com.instamojo.android.Instamojo;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -65,7 +65,7 @@ public class Order implements Parcelable {
         this.currency = "INR";
         this.authToken = authToken;
         this.transactionID = transactionID;
-        this.redirectionUrl = Urls.getDefaultRedirectUrl();
+        this.redirectionUrl = Instamojo.getInstance().getDefaultRedirectUrl();
     }
 
     public Order() {
@@ -269,7 +269,7 @@ public class Order implements Parcelable {
     }
 
     /**
-     * @param currency  Currency for this order
+     * @param currency Currency for this order
      */
     public void setCurrency(String currency) {
         this.currency = currency;

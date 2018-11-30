@@ -9,42 +9,48 @@ import android.util.Log;
 
 public class Instamojo {
 
-    private static Instamojo instance;
-    private Context appContext;
+    public static final String TAG = Instamojo.class.getSimpleName();
+    public static final String PRODUCTION_BASE_URL = "https://api.instamojo.com/";
+    public static final String TEST_BASE_URL = "https://test.instamojo.com/";
 
-    public Instamojo(Context appContext) {
-        this.appContext = appContext;
+    private static Instamojo mInstance;
+    private Context mContext;
+    private static String mBaseUrl;
+
+    private Instamojo() {
+        // Default private constructor
     }
 
-    /**
-     * Initialises the previous session if exists
-     *
-     * @param appContext Application Context
-     */
-    public static void initialize(Context appContext) {
-        instance = new Instamojo(appContext);
+    enum Environment {
+        TEST, PRODUCTION
     }
 
-    public static boolean isInitialised() {
-        if (instance != null) {
-            return true;
+    public static Instamojo getInstance() {
+        if (mInstance == null) {
+            synchronized (Instamojo.class) {
+                if (mInstance == null) {
+                    mInstance = new Instamojo();
+                }
+            }
         }
 
-        Log.e("Instamojo SDK", "Initialise the SDK with Application Context.");
-        return false;
+        return mInstance;
     }
 
-    /**
-     * @return Current instance
-     */
-    public static Instamojo getInstance() {
-        return instance;
+    public void initialize(Context context, Environment environment) {
+        Log.e(TAG, "Initializing SDK...");
+
+        mContext = context;
+        mBaseUrl = (environment == Environment.PRODUCTION) ? PRODUCTION_BASE_URL : TEST_BASE_URL;
+
+        Log.d(TAG, "Using base url: " + mBaseUrl);
     }
 
-    /**
-     * @return Application context
-     */
-    public Context getAppContext() {
-        return appContext;
+    public Context getContext() {
+        return mContext;
+    }
+
+    public String getDefaultRedirectUrl() {
+        return mBaseUrl + "integrations/android/redirect/";
     }
 }

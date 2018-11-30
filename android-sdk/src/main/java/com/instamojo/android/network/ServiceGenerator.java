@@ -65,7 +65,7 @@ public class ServiceGenerator {
                     return "";
                 }
 
-                Context appContext = Instamojo.getInstance().getAppContext();
+                Context appContext = Instamojo.getInstance().getContext();
                 referer = "android-app://" + appContext.getPackageName();
 
                 try {
