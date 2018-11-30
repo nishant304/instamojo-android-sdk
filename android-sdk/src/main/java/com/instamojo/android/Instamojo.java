@@ -4,9 +4,8 @@ import android.content.Context;
 import android.util.Log;
 
 /**
- * SDK Base Class.
+ * Instamojo SDK
  */
-
 public class Instamojo {
 
     public static final String TAG = Instamojo.class.getSimpleName();
@@ -25,6 +24,12 @@ public class Instamojo {
         TEST, PRODUCTION
     }
 
+    public interface InstamojoPaymentCallback {
+        void onInstamojoPaymentSuccess();
+
+        void onInstamojoPaymentFailure();
+    }
+
     public static Instamojo getInstance() {
         if (mInstance == null) {
             synchronized (Instamojo.class) {
@@ -37,6 +42,9 @@ public class Instamojo {
         return mInstance;
     }
 
+    /**
+     * Initialize the SDK with application context and environment
+     */
     public void initialize(Context context, Environment environment) {
         Log.e(TAG, "Initializing SDK...");
 
@@ -52,5 +60,15 @@ public class Instamojo {
 
     public String getDefaultRedirectUrl() {
         return mBaseUrl + "integrations/android/redirect/";
+    }
+
+    /**
+     * Initiate an Instamojo payment with an orderID
+     *
+     * @param orderID  Identifier of an Gateway Order instance created in the server (developer)
+     * @param callback Callback interface to receive the response from Instamojo SDK
+     */
+    public void initiatePayment(String orderID, InstamojoPaymentCallback callback) {
+
     }
 }
