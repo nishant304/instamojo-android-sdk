@@ -14,10 +14,9 @@ import com.instamojo.android.R;
 import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
-import com.instamojo.android.models.Order;
-
-import java.util.Locale;
-import java.util.Map;
+import com.instamojo.android.models.Bank;
+import com.instamojo.android.models.GatewayOrder;
+import com.instamojo.android.models.NetBankingOptions;
 
 /**
  * Fragment to show Net Banking options to User.
@@ -77,20 +76,21 @@ public class NetBankingFragment extends BaseFragment implements SearchView.OnQue
     }
 
     private void loadBanks(String query) {
-        for (final Map.Entry<String, String> bank : parentActivity.getOrder().getNetBankingOptions().getBanks().entrySet()) {
-            if (!bank.getKey().toLowerCase(Locale.US).contains(query.toLowerCase(Locale.US))) {
+        final GatewayOrder order = parentActivity.getOrder();
+        final NetBankingOptions netBankingOptions = order.getPaymentOptions().getNetBankingOptions();
+        for (final Bank bank : netBankingOptions.getBanks()) {
+            if (!bank.getName().toLowerCase().contains(query.toLowerCase())) {
                 continue;
             }
             View bankView = LayoutInflater.from(getContext()).inflate(R.layout.list_view_instamojo, listContainer, false);
-            ((TextView) bankView.findViewById(R.id.item_name)).setText(bank.getKey());
+            ((TextView) bankView.findViewById(R.id.item_name)).setText(bank.getName());
             bankView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Bundle bundle = new Bundle();
-                    Order order = parentActivity.getOrder();
-                    bundle.putString(Constants.URL, order.getNetBankingOptions().getUrl());
-                    bundle.putString(Constants.POST_DATA, order.getNetBankingOptions().
-                            getPostData(bank.getValue()));
+
+                    bundle.putString(Constants.URL, netBankingOptions.getSubmissionURL());
+                    bundle.putString(Constants.POST_DATA, netBankingOptions.getPostData(bank.getId()));
                     parentActivity.startPaymentActivity(bundle);
                 }
             });

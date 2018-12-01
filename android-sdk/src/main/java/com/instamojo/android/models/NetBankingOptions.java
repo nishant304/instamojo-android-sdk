@@ -2,6 +2,7 @@ package com.instamojo.android.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -39,6 +40,10 @@ public class NetBankingOptions implements Parcelable {
         }
     };
 
+    public List<Bank> getBanks() {
+        return banks;
+    }
+
     public void setBanks(List<Bank> banks) {
         this.banks = banks;
     }
@@ -57,6 +62,16 @@ public class NetBankingOptions implements Parcelable {
 
     public void setSubmissionURL(String submissionURL) {
         this.submissionURL = submissionURL;
+    }
+
+    /**
+     * PostData to be posted with Netbanking URL.
+     *
+     * @param bankCode Bank code of the Bank user selected.
+     * @return string with form query format.
+     */
+    public String getPostData(@NonNull String bankCode) {
+        return "bank_code=" + bankCode;
     }
 
     @Override

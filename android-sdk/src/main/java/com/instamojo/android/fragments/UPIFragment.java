@@ -17,7 +17,7 @@ import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.helpers.Validators;
-import com.instamojo.android.models.Order;
+import com.instamojo.android.models.GatewayOrder;
 import com.instamojo.android.models.UPIPaymentRequest;
 import com.instamojo.android.models.UPIStatusResponse;
 import com.instamojo.android.models.UPISubmissionResponse;
@@ -145,7 +145,7 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
 
         ImojoService imojoService = ServiceGenerator.getImojoService();
         Call<UPISubmissionResponse> upiPaymentCall =
-                imojoService.collectUPIPayment(parentActivity.getOrder().getId(), upiPaymentRequest);
+                imojoService.collectUPIPayment(parentActivity.getOrder().getOrder().getId(), upiPaymentRequest);
 
         upiPaymentCall.enqueue(new Callback<UPISubmissionResponse>() {
             @Override
@@ -214,9 +214,9 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
 
     private void returnResult() {
         Bundle bundle = new Bundle();
-        Order order = parentActivity.getOrder();
-        bundle.putString(Constants.ORDER_ID, order.getId());
-        bundle.putString(Constants.TRANSACTION_ID, order.getTransactionID());
+        GatewayOrder order = parentActivity.getOrder();
+        bundle.putString(Constants.ORDER_ID, order.getOrder().getId());
+        bundle.putString(Constants.TRANSACTION_ID, order.getOrder().getTransactionID());
         bundle.putString(Constants.PAYMENT_ID, upiSubmissionResponse.getPaymentID());
         Logger.d(TAG, "Payment complete. Finishing activity...");
         parentActivity.returnResult(bundle, Activity.RESULT_OK);

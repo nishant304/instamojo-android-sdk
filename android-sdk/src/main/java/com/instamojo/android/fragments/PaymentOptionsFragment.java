@@ -9,7 +9,8 @@ import android.view.ViewGroup;
 import com.instamojo.android.R;
 import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.helpers.Logger;
-import com.instamojo.android.models.Order;
+import com.instamojo.android.models.GatewayOrder;
+import com.instamojo.android.models.PaymentOptions;
 
 /**
  * Fragment holds the available Payment options for the User
@@ -40,7 +41,8 @@ public class PaymentOptionsFragment extends BaseFragment implements View.OnClick
 
     @Override
     public void inflateXML(View view) {
-        Order order = parentActivity.getOrder();
+        GatewayOrder order = parentActivity.getOrder();
+        PaymentOptions paymentOptions = order.getPaymentOptions();
         View debitCardLayout = view.findViewById(R.id.debit_card_layout);
         View creditCardLayout = view.findViewById(R.id.credit_card_layout);
         View netBankingLayout = view.findViewById(R.id.net_banking_layout);
@@ -48,28 +50,28 @@ public class PaymentOptionsFragment extends BaseFragment implements View.OnClick
         View walletLayout = view.findViewById(R.id.wallet_layout);
         View upiLayout = view.findViewById(R.id.upi_layout);
 
-        if (order.getNetBankingOptions() == null) {
+        if (paymentOptions.getNetBankingOptions() == null) {
             Logger.d(TAG, "Hiding Net banking Layout");
             netBankingLayout.setVisibility(View.GONE);
         }
 
-        if (order.getCardOptions() == null) {
+        if (paymentOptions.getCardOptions() == null) {
             Logger.d(TAG, "Hiding Debit and Credit Card Layout");
             debitCardLayout.setVisibility(View.GONE);
             creditCardLayout.setVisibility(View.GONE);
         }
 
-        if (order.getEmiOptions() == null) {
+        if (paymentOptions.getEmiOptions() == null) {
             Logger.d(TAG, "Hiding EMI Layout");
             emiLayout.setVisibility(View.GONE);
         }
 
-        if (order.getWalletOptions() == null) {
+        if (paymentOptions.getWalletOptions() == null) {
             Logger.d(TAG, "Hiding Wallet Layout");
             walletLayout.setVisibility(View.GONE);
         }
 
-        if (order.getUpiOptions() == null) {
+        if (paymentOptions.getUpiOptions() == null) {
             Logger.d(TAG, "Hiding UPISubmission layout");
             upiLayout.setVisibility(View.GONE);
         }
@@ -107,13 +109,14 @@ public class PaymentOptionsFragment extends BaseFragment implements View.OnClick
             Logger.d(TAG, "Starting CardFragment");
             //since the user is directly jumping to Card from instead of EMI.
             // We can safely assume that emi is not chosen. Hence, clear all emi related stuff in order
-            if (parentActivity.getOrder().getEmiOptions() != null) {
-                parentActivity.getOrder().getEmiOptions().setSelectedBankCode(null);
-                parentActivity.getOrder().getEmiOptions().setSelectedTenure(-1);
+            if (parentActivity.getOrder().getPaymentOptions().getEmiOptions() != null) {
+//                parentActivity.getOrder().getPaymentOptions().getEmiOptions().setSelectedBankCode(null);
+//                parentActivity.getOrder().getPaymentOptions().getEmiOptions().setSelectedTenure(-1);
             }
 
             if (id == R.id.debit_card_layout) {
                 parentActivity.loadFragment(CardFragment.getCardForm(CardFragment.Mode.DebitCard), true);
+
             } else {
                 parentActivity.loadFragment(CardFragment.getCardForm(CardFragment.Mode.CreditCard), true);
             }

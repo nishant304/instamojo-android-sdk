@@ -24,9 +24,10 @@ import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.helpers.Validators;
 import com.instamojo.android.models.Card;
+import com.instamojo.android.models.CardOptions;
 import com.instamojo.android.models.CardPaymentRequest;
 import com.instamojo.android.models.CardPaymentResponse;
-import com.instamojo.android.models.Order;
+import com.instamojo.android.models.GatewayOrder;
 import com.instamojo.android.network.ImojoService;
 import com.instamojo.android.network.ServiceGenerator;
 import com.rengwuxian.materialedittext.MaterialEditText;
@@ -52,6 +53,8 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
     private List<MaterialEditText> editTexts;
     private PaymentDetailsActivity parentActivity;
     private Mode mode;
+    private int mSelectedTenure;
+    private String mSelectedbankCode;
 
     /**
      * Creates a new instance of Fragment
@@ -63,6 +66,14 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
     public static CardFragment getCardForm(Mode mode) {
         CardFragment form = new CardFragment();
         form.mode = mode;
+        return form;
+    }
+
+    public static CardFragment getCardForm(Mode mode, int tenure, String bankCode) {
+        CardFragment form = new CardFragment();
+        form.mode = mode;
+        form.mSelectedbankCode = bankCode;
+        form.mSelectedTenure = tenure;
         return form;
     }
 
@@ -163,7 +174,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
         });
 
         Button checkOutButton = view.findViewById(R.id.checkout);
-        String checkoutText = "Pay ₹" + parentActivity.getOrder().getAmount();
+        String checkoutText = "Pay ₹" + parentActivity.getOrder().getOrder().getAmount();
         checkOutButton.setText(checkoutText);
         checkOutButton.setOnClickListener(this);
 
@@ -245,11 +256,12 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
         final AlertDialog dialog = builder.create();
         dialog.show();
 
-        final Order order = parentActivity.getOrder();
+        final GatewayOrder order = parentActivity.getOrder();
         CardPaymentRequest cardPaymentRequest = populateCardRequest(order, card);
 
         ImojoService service = ServiceGenerator.getImojoService();
-        Call<CardPaymentResponse> orderCall = service.collectCardPayment(order.getCardOptions().getUrl(),
+        final CardOptions cardOptions = order.getPaymentOptions().getCardOptions();
+        Call<CardPaymentResponse> orderCall = service.collectCardPayment(cardOptions.getSubmissionURL(),
                 cardPaymentRequest);
         orderCall.enqueue(new Callback<CardPaymentResponse>() {
             @Override
@@ -264,8 +276,8 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
 
                             final Bundle bundle = new Bundle();
                             bundle.putString(Constants.URL, response.body().getUrl());
-                            bundle.putString(Constants.MERCHANT_ID, order.getCardOptions().getMerchantID());
-                            bundle.putString(Constants.ORDER_ID, order.getCardOptions().getOrderID());
+                            bundle.putString(Constants.MERCHANT_ID, cardOptions.getSubmissionData().getMerchantID());
+                            bundle.putString(Constants.ORDER_ID, cardOptions.getSubmissionData().getOrderID());
                             parentActivity.startPaymentActivity(bundle);
 
                         } else {
@@ -299,7 +311,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
         });
     }
 
-    private CardPaymentRequest populateCardRequest(Order order, Card card) {
+    private CardPaymentRequest populateCardRequest(GatewayOrder order, Card card) {
 
         //For maestro, add the default values if empty
         if (CardUtil.isMaestroCard(card.getCardNumber())) {
@@ -313,8 +325,8 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
         }
 
         CardPaymentRequest cardPaymentRequest = new CardPaymentRequest();
-        cardPaymentRequest.setOrderID(order.getCardOptions().getOrderID());
-        cardPaymentRequest.setMerchantID(order.getCardOptions().getMerchantID());
+        cardPaymentRequest.setOrderID(order.getPaymentOptions().getCardOptions().getSubmissionData().getOrderID());
+        cardPaymentRequest.setMerchantID(order.getPaymentOptions().getCardOptions().getSubmissionData().getMerchantID());
         cardPaymentRequest.setPaymentMethod("CARD");
         cardPaymentRequest.setCardNumber(card.getCardNumber());
         cardPaymentRequest.setCardExpiryMonth(card.getMonth());
@@ -325,12 +337,11 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
         cardPaymentRequest.setFormat("json");
         cardPaymentRequest.setNameOnCard(card.getCardHolderName());
 
-        if (order.getEmiOptions() != null
-                && order.getEmiOptions().getSelectedBankCode() != null) {
+        if (order.getPaymentOptions().getEmiOptions() != null && mSelectedbankCode != null) {
             Logger.d(this.getClass().getSimpleName(), "emi selected....");
             cardPaymentRequest.setEmi(true);
-            cardPaymentRequest.setEmiBank(order.getEmiOptions().getSelectedBankCode());
-            cardPaymentRequest.setEmiTenure(String.valueOf(order.getEmiOptions().getSelectedTenure()));
+            cardPaymentRequest.setEmiBank(mSelectedbankCode);
+            cardPaymentRequest.setEmiTenure(String.valueOf(mSelectedTenure));
         }
 
         return cardPaymentRequest;

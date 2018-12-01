@@ -2,6 +2,7 @@ package com.instamojo.android.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -57,5 +58,15 @@ public class WalletOptions implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(submissionURL);
         parcel.writeTypedList(wallets);
+    }
+
+    /**
+     * PostData to be posted with Wallet URL.
+     *
+     * @param walletID Wallet ID of the wallet user selected.
+     * @return string with form query format.
+     */
+    public String getPostData(@NonNull String walletID) {
+        return "wallet_id=" + walletID;
     }
 }

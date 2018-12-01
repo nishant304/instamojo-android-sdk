@@ -16,7 +16,7 @@ import com.instamojo.android.fragments.BaseFragment;
 import com.instamojo.android.fragments.PaymentOptionsFragment;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
-import com.instamojo.android.models.Order;
+import com.instamojo.android.models.GatewayOrder;
 
 /**
  * Payment Details Activity extends the {@link BaseActivity}. Activity lets user to choose a Payment method
@@ -24,7 +24,7 @@ import com.instamojo.android.models.Order;
 public class PaymentDetailsActivity extends BaseActivity {
 
     private static final String TAG = PaymentDetailsActivity.class.getSimpleName();
-    private Order order;
+    private GatewayOrder order;
     private boolean showSearch;
     private SearchView.OnQueryTextListener onQueryTextListener;
     private String hintText;
@@ -108,7 +108,7 @@ public class PaymentDetailsActivity extends BaseActivity {
     /**
      * @return The current Order
      */
-    public Order getOrder() {
+    public GatewayOrder getOrder() {
         return order;
     }
 

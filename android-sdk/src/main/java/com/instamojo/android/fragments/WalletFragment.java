@@ -17,6 +17,7 @@ import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.Order;
 import com.instamojo.android.models.Wallet;
+import com.instamojo.android.models.WalletOptions;
 
 import java.util.Locale;
 
@@ -78,7 +79,8 @@ public class WalletFragment extends BaseFragment implements SearchView.OnQueryTe
     }
 
     private void loadWallets(String query) {
-        for (final Wallet wallet : parentActivity.getOrder().getWalletOptions().getWallets()) {
+        final WalletOptions walletOptions = parentActivity.getOrder().getPaymentOptions().getWalletOptions();
+        for (final Wallet wallet : walletOptions.getWallets()) {
             if (!wallet.getName().toLowerCase(Locale.US).contains(query.toLowerCase(Locale.US))) {
                 continue;
             }
@@ -88,10 +90,8 @@ public class WalletFragment extends BaseFragment implements SearchView.OnQueryTe
                 @Override
                 public void onClick(View v) {
                     Bundle bundle = new Bundle();
-                    Order order = parentActivity.getOrder();
-                    bundle.putString(Constants.URL, order.getWalletOptions().getUrl());
-                    bundle.putString(Constants.POST_DATA, order.getWalletOptions().
-                            getPostData(wallet.getWalletID()));
+                    bundle.putString(Constants.URL, walletOptions.getSubmissionURL());
+                    bundle.putString(Constants.POST_DATA, walletOptions.getPostData(wallet.getId()));
                     parentActivity.startPaymentActivity(bundle);
                 }
             });

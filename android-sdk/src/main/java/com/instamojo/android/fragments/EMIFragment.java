@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.instamojo.android.R;
 import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.helpers.Logger;
-import com.instamojo.android.models.EMIBank;
+import com.instamojo.android.models.EMIOption;
 
 public class EMIFragment extends BaseFragment {
 
@@ -47,7 +47,8 @@ public class EMIFragment extends BaseFragment {
 
     private void loadBanks() {
         emiBanksContainer.removeAllViews();
-        for (final EMIBank bank : parentActivity.getOrder().getEmiOptions().getEmiBanks()) {
+
+        for (final EMIOption bank : parentActivity.getOrder().getPaymentOptions().getEmiOptions().getEmiOptions()) {
             View bankView = LayoutInflater.from(getContext()).inflate(R.layout.list_view_instamojo, emiBanksContainer, false);
             ((TextView) bankView.findViewById(R.id.item_name)).setText(bank.getBankName());
             bankView.setOnClickListener(new View.OnClickListener() {
@@ -60,6 +61,7 @@ public class EMIFragment extends BaseFragment {
 
             emiBanksContainer.addView(bankView);
         }
+
         Logger.d(TAG, "Loaded EMI Banks");
     }
 }
