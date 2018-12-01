@@ -69,4 +69,12 @@ public class WalletOptions implements Parcelable {
     public String getPostData(@NonNull String walletID) {
         return "wallet_id=" + walletID;
     }
+
+    @Override
+    public String toString() {
+        return "WalletOptions{" +
+                "submissionURL='" + submissionURL + '\'' +
+                ", wallets=" + wallets +
+                '}';
+    }
 }

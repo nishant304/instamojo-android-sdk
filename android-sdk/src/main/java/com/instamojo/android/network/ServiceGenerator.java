@@ -61,11 +61,12 @@ public class ServiceGenerator {
 
         private String getReferer() {
             if (referer == null || referer.isEmpty()) {
-                if (!Instamojo.isInitialised()) {
+                Context appContext = Instamojo.getInstance().getContext();
+
+                if (appContext == null) {
                     return "";
                 }
 
-                Context appContext = Instamojo.getInstance().getContext();
                 referer = "android-app://" + appContext.getPackageName();
 
                 try {

@@ -72,4 +72,13 @@ public class EMIOptions implements Parcelable {
         parcel.writeString(submissionURL);
         parcel.writeParcelable(submissionData, i);
     }
+
+    @Override
+    public String toString() {
+        return "EMIOptions{" +
+                "emiOptions=" + emiOptions +
+                ", submissionURL='" + submissionURL + '\'' +
+                ", submissionData=" + submissionData +
+                '}';
+    }
 }

@@ -58,4 +58,12 @@ public class CardOptions implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(submissionURL);
     }
+
+    @Override
+    public String toString() {
+        return "CardOptions{" +
+                "submissionData=" + submissionData +
+                ", submissionURL='" + submissionURL + '\'' +
+                '}';
+    }
 }

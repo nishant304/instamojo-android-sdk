@@ -15,6 +15,7 @@ public class GatewayOrder implements Parcelable {
 
     protected GatewayOrder(Parcel in) {
         order = in.readParcelable(Order.class.getClassLoader());
+        paymentOptions = in.readParcelable(PaymentOptions.class.getClassLoader());
     }
 
     public static final Creator<GatewayOrder> CREATOR = new Creator<GatewayOrder>() {
@@ -46,12 +47,21 @@ public class GatewayOrder implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        return "GatewayOrder{" +
+                "order=" + order +
+                ", paymentOptions=" + paymentOptions +
+                '}';
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeParcelable(order, i);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(order, flags);
+        dest.writeParcelable(paymentOptions, flags);
     }
 }

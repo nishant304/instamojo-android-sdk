@@ -85,4 +85,13 @@ public class NetBankingOptions implements Parcelable {
         parcel.writeParcelable(submissionData, i);
         parcel.writeString(submissionURL);
     }
+
+    @Override
+    public String toString() {
+        return "NetBankingOptions{" +
+                "banks=" + banks +
+                ", submissionData=" + submissionData +
+                ", submissionURL='" + submissionURL + '\'' +
+                '}';
+    }
 }

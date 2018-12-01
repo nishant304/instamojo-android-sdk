@@ -176,4 +176,21 @@ public class Order implements Parcelable {
         parcel.writeString(webhookUrl);
         parcel.writeString(status);
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id='" + id + '\'' +
+                ", transactionID='" + transactionID + '\'' +
+                ", buyerName='" + buyerName + '\'' +
+                ", buyerEmail='" + buyerEmail + '\'' +
+                ", buyerPhone='" + buyerPhone + '\'' +
+                ", amount='" + amount + '\'' +
+                ", description='" + description + '\'' +
+                ", currency='" + currency + '\'' +
+                ", redirectUrl='" + redirectUrl + '\'' +
+                ", webhookUrl='" + webhookUrl + '\'' +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }

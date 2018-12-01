@@ -13,6 +13,11 @@ public class Bank implements Parcelable {
     @SerializedName("name")
     private String name;
 
+    public Bank(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     protected Bank(Parcel in) {
         id = in.readString();
         name = in.readString();
@@ -55,5 +60,13 @@ public class Bank implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(id);
         parcel.writeString(name);
+    }
+
+    @Override
+    public String toString() {
+        return "Bank{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

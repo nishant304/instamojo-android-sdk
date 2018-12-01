@@ -70,4 +70,13 @@ public class Wallet implements Parcelable {
         parcel.writeString(name);
         parcel.writeString(imageURL);
     }
+
+    @Override
+    public String toString() {
+        return "Wallet{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", imageURL='" + imageURL + '\'' +
+                '}';
+    }
 }

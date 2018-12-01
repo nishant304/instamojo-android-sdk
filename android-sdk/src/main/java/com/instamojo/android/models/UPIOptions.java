@@ -47,4 +47,11 @@ public class UPIOptions implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(submissionURL);
     }
+
+    @Override
+    public String toString() {
+        return "UPIOptions{" +
+                "submissionURL='" + submissionURL + '\'' +
+                '}';
+    }
 }
