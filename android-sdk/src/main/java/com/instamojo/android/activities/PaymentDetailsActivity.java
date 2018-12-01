@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -84,8 +83,7 @@ public class PaymentDetailsActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-//            returnResult(RESULT_CANCELED);
-            fireBroadcast(0, "Payment cancelled", null);
+            fireBroadcastAndReturn(0, "Payment canceled", null);
 
         } else {
             getSupportFragmentManager().popBackStackImmediate();
@@ -97,8 +95,7 @@ public class PaymentDetailsActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.REQUEST_CODE) {
             Logger.d(TAG, "Returning back result to caller");
-//            returnResult(data.getExtras(), resultCode);
-            fireBroadcast(1, "Result", data.getExtras());
+            fireBroadcastAndReturn(1, "Result", data.getExtras());
         }
     }
 
@@ -119,13 +116,12 @@ public class PaymentDetailsActivity extends BaseActivity {
     private void loadFragments() {
         Logger.d(TAG, "looking for Order object...");
         order = getIntent().getParcelableExtra(Constants.ORDER);
-        Log.d("TEST - 2", "" + order);
         if (order == null) {
             Logger.e(TAG, "Object not found. Sending back - Payment Cancelled");
-            fireBroadcast(0, "Payment cancelled", null);
-//            returnResult(RESULT_CANCELED);
+            fireBroadcastAndReturn(0, "Payment canceled", null);
             return;
         }
+
         Logger.d(TAG, "Found order Object. Starting PaymentOptionsFragment");
         loadFragment(new PaymentOptionsFragment(), false);
     }
@@ -165,16 +161,19 @@ public class PaymentDetailsActivity extends BaseActivity {
         invalidateOptionsMenu();
     }
 
-    private void fireBroadcast(int code, String message, Bundle data) {
+    private void fireBroadcastAndReturn(int code, String message, Bundle data) {
         Intent intent = new Intent();
-        intent.setAction("com.instamojo.android.sdk");
-        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         intent.putExtra("code", code);
         intent.putExtra("response", message);
         if (data != null) {
             intent.putExtra("data", data);
         }
 
+        intent.setAction("com.instamojo.android.sdk");
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         sendBroadcast(intent);
+
+        // Finish this activity
+        finish();
     }
 }

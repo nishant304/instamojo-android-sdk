@@ -105,7 +105,7 @@ public class Instamojo extends BroadcastReceiver {
             public void onResponse(Call<GatewayOrder> call, Response<GatewayOrder> response) {
                 if (response.isSuccessful()) {
 
-                    IntentFilter filter = new IntentFilter("com.instamojo.android");
+                    IntentFilter filter = new IntentFilter("com.instamojo.android.sdk");
                     activity.registerReceiver(Instamojo.this, filter);
 
                     Intent intent = new Intent(mContext, PaymentDetailsActivity.class);
@@ -113,9 +113,9 @@ public class Instamojo extends BroadcastReceiver {
                     activity.startActivity(intent);
 
                 } else {
+
                     mCallback.onInstamojoPaymentFailure();
                 }
-
             }
 
             @Override
