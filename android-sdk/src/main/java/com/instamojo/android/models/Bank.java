@@ -5,8 +5,7 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-
-public class Wallet implements Parcelable {
+public class Bank implements Parcelable {
 
     @SerializedName("id")
     private String id;
@@ -14,24 +13,20 @@ public class Wallet implements Parcelable {
     @SerializedName("name")
     private String name;
 
-    @SerializedName("image")
-    private String imageURL;
-
-    protected Wallet(Parcel in) {
+    protected Bank(Parcel in) {
         id = in.readString();
         name = in.readString();
-        imageURL = in.readString();
     }
 
-    public static final Creator<Wallet> CREATOR = new Creator<Wallet>() {
+    public static final Creator<Bank> CREATOR = new Creator<Bank>() {
         @Override
-        public Wallet createFromParcel(Parcel in) {
-            return new Wallet(in);
+        public Bank createFromParcel(Parcel in) {
+            return new Bank(in);
         }
 
         @Override
-        public Wallet[] newArray(int size) {
-            return new Wallet[size];
+        public Bank[] newArray(int size) {
+            return new Bank[size];
         }
     };
 
@@ -51,14 +46,6 @@ public class Wallet implements Parcelable {
         this.name = name;
     }
 
-    public String getImageURL() {
-        return imageURL;
-    }
-
-    public void setImageURL(String imageURL) {
-        this.imageURL = imageURL;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -68,6 +55,5 @@ public class Wallet implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(id);
         parcel.writeString(name);
-        parcel.writeString(imageURL);
     }
 }

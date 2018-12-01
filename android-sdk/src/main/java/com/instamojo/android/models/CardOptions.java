@@ -2,15 +2,42 @@ package com.instamojo.android.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+
+import com.google.gson.annotations.SerializedName;
 
 /**
  * CardOptions object that holds the Card transaction information received from Instamojo server
  * for a particular order.
  */
 public class CardOptions implements Parcelable {
-    @SuppressWarnings("unused")
-    public static final Parcelable.Creator<CardOptions> CREATOR = new Parcelable.Creator<CardOptions>() {
+
+    @SerializedName("submission_data")
+    private SubmissionData submissionData;
+
+    @SerializedName("submission_url")
+    private String submissionURL;
+
+    public SubmissionData getSubmissionData() {
+        return submissionData;
+    }
+
+    public void setSubmissionData(SubmissionData submissionData) {
+        this.submissionData = submissionData;
+    }
+
+    public String getSubmissionURL() {
+        return submissionURL;
+    }
+
+    public void setSubmissionURL(String submissionURL) {
+        this.submissionURL = submissionURL;
+    }
+
+    protected CardOptions(Parcel in) {
+        submissionURL = in.readString();
+    }
+
+    public static final Creator<CardOptions> CREATOR = new Creator<CardOptions>() {
         @Override
         public CardOptions createFromParcel(Parcel in) {
             return new CardOptions(in);
@@ -21,49 +48,6 @@ public class CardOptions implements Parcelable {
             return new CardOptions[size];
         }
     };
-    private final String orderID;
-    private final String url;
-    private final String merchantID;
-
-    /**
-     * Constructor for CardOptions.
-     *
-     * @param orderID    Order ID of the Order. Should not be Null.
-     * @param merchantID Merchant ID of the transaction. Should not be Null.
-     * @param url        Juspay Url to get the final 3D-secure Url.
-     */
-    public CardOptions(@NonNull String orderID, @NonNull String merchantID, @NonNull String url) {
-        this.orderID = orderID;
-        this.url = url;
-        this.merchantID = merchantID;
-    }
-
-    protected CardOptions(Parcel in) {
-        orderID = in.readString();
-        url = in.readString();
-        merchantID = in.readString();
-    }
-
-    /**
-     * @return orderId of the current transaction.
-     */
-    public String getOrderID() {
-        return orderID;
-    }
-
-    /**
-     * @return Juspay url for the current transaction.
-     */
-    public String getUrl() {
-        return url;
-    }
-
-    /**
-     * @return Merchant ID for the current transaction.
-     */
-    public String getMerchantID() {
-        return merchantID;
-    }
 
     @Override
     public int describeContents() {
@@ -71,9 +55,7 @@ public class CardOptions implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(orderID);
-        dest.writeString(url);
-        dest.writeString(merchantID);
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(submissionURL);
     }
 }

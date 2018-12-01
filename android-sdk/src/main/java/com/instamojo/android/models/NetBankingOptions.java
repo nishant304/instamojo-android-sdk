@@ -2,17 +2,32 @@ package com.instamojo.android.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 /**
  * Netbanking options details for a transaction.
  */
 public class NetBankingOptions implements Parcelable {
-    @SuppressWarnings("unused")
-    public static final Parcelable.Creator<NetBankingOptions> CREATOR = new Parcelable.Creator<NetBankingOptions>() {
+
+    @SerializedName("choices")
+    private List<Bank> banks;
+
+    @SerializedName("submission_data")
+    private SubmissionData submissionData;
+
+    @SerializedName("submission_url")
+    private String submissionURL;
+
+    protected NetBankingOptions(Parcel in) {
+        banks = in.createTypedArrayList(Bank.CREATOR);
+        submissionData = in.readParcelable(SubmissionData.class.getClassLoader());
+        submissionURL = in.readString();
+    }
+
+    public static final Creator<NetBankingOptions> CREATOR = new Creator<NetBankingOptions>() {
         @Override
         public NetBankingOptions createFromParcel(Parcel in) {
             return new NetBankingOptions(in);
@@ -23,58 +38,25 @@ public class NetBankingOptions implements Parcelable {
             return new NetBankingOptions[size];
         }
     };
-    private final String url;
-    private LinkedHashMap<String, String> banks = new LinkedHashMap<>();
 
-    /**
-     * Constructor for Net Banking options.
-     *
-     * @param url   Url for Net Banking Options. Must not be null.
-     * @param banks HashMap with Bank Code and Bank Name. Must not be null or empty.
-     */
-    public NetBankingOptions(@NonNull String url, @NonNull LinkedHashMap<String, String> banks) {
-        this.url = url;
+    public void setBanks(List<Bank> banks) {
         this.banks = banks;
     }
 
-    @SuppressWarnings("unchecked")
-    protected NetBankingOptions(Parcel in) {
-        url = in.readString();
-        int size = in.readInt();
-        if (size == 0) {
-            return;
-        }
-
-        banks = new LinkedHashMap<>();
-        for (int i = 0; i < size; i++) {
-            String key = in.readString();
-            String value = in.readString();
-            banks.put(key, value);
-        }
+    public SubmissionData getSubmissionData() {
+        return submissionData;
     }
 
-    /**
-     * @return Netbanking URl.
-     */
-    public String getUrl() {
-        return url;
+    public void setSubmissionData(SubmissionData submissionData) {
+        this.submissionData = submissionData;
     }
 
-    /**
-     * @return HashMap of BankCode and BanksList.
-     */
-    public HashMap<String, String> getBanks() {
-        return banks;
+    public String getSubmissionURL() {
+        return submissionURL;
     }
 
-    /**
-     * PostData to be posted with Netbanking URL.
-     *
-     * @param bankCode  Bank code of the Bank user selected.
-     * @return string with form query format.
-     */
-    public String getPostData(@NonNull String bankCode) {
-        return "bank_code=" + bankCode;
+    public void setSubmissionURL(String submissionURL) {
+        this.submissionURL = submissionURL;
     }
 
     @Override
@@ -83,16 +65,9 @@ public class NetBankingOptions implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(url);
-        if (banks.size() < 1) {
-            dest.writeInt(0);
-            return;
-        }
-        dest.writeInt(banks.size());
-        for (HashMap.Entry<String, String> entry : banks.entrySet()) {
-            dest.writeString(entry.getKey());
-            dest.writeString(entry.getValue());
-        }
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeTypedList(banks);
+        parcel.writeParcelable(submissionData, i);
+        parcel.writeString(submissionURL);
     }
 }
