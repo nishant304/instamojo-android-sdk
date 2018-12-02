@@ -19,18 +19,28 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ServiceGenerator {
 
     private static final String TAG = ServiceGenerator.class.getSimpleName();
-    private static final String BASE_URL = "https://api.instamojo.com/";
+    private static final String PRODUCTION_BASE_URL = "https://api.instamojo.com/";
+    private static final String TEST_BASE_URL = "https://test.instamojo.com/";
 
     private static final OkHttpClient httpClient = new OkHttpClient.Builder()
             .addInterceptor(new DefaultHeadersInterceptor())
             .build();
 
     private static Retrofit.Builder builder = new Retrofit.Builder()
-            .baseUrl(BASE_URL)
             .client(httpClient)
             .addConverterFactory(GsonConverterFactory.create());
 
-    private static final Retrofit retrofit = builder.build();
+    private static Retrofit retrofit;
+
+    static {
+        initialize(Instamojo.Environment.TEST);
+    }
+
+    public static void initialize(Instamojo.Environment environment) {
+        String baseUrl = (environment == Instamojo.Environment.PRODUCTION) ? PRODUCTION_BASE_URL : TEST_BASE_URL;
+        Logger.d(TAG, "Using base URL: " + baseUrl);
+        retrofit = builder.baseUrl(baseUrl).build();
+    }
 
     public static ImojoService getImojoService() {
         return retrofit.create(ImojoService.class);

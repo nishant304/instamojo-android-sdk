@@ -9,9 +9,12 @@ import android.util.Log;
 
 import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.helpers.Constants;
+import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.GatewayOrder;
 import com.instamojo.android.network.ImojoService;
 import com.instamojo.android.network.ServiceGenerator;
+
+import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -23,12 +26,8 @@ import retrofit2.Response;
 public class Instamojo extends BroadcastReceiver {
 
     public static final String TAG = Instamojo.class.getSimpleName();
-    public static final String PRODUCTION_BASE_URL = "https://api.instamojo.com/";
-    public static final String TEST_BASE_URL = "https://test.instamojo.com/";
-
     private static Instamojo mInstance;
     private Context mContext;
-    private static String mBaseUrl;
 
     private InstamojoPaymentCallback mCallback;
 
@@ -76,17 +75,11 @@ public class Instamojo extends BroadcastReceiver {
         Log.e(TAG, "Initializing SDK...");
 
         mContext = context;
-        mBaseUrl = (environment == Environment.PRODUCTION) ? PRODUCTION_BASE_URL : TEST_BASE_URL;
-
-        Log.d(TAG, "Using base url: " + mBaseUrl);
+        ServiceGenerator.initialize(environment);
     }
 
     public Context getContext() {
         return mContext;
-    }
-
-    public String getDefaultRedirectUrl() {
-        return mBaseUrl + "integrations/android/redirect/";
     }
 
     /**
@@ -113,7 +106,15 @@ public class Instamojo extends BroadcastReceiver {
                     activity.startActivity(intent);
 
                 } else {
+                    if (response.errorBody() != null) {
+                        try {
+                            Logger.d(TAG, "Error response from server while fetching order details.");
+                            Logger.e(TAG, "Error: " + response.errorBody().string());
 
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     mCallback.onInstamojoPaymentFailure();
                 }
             }
