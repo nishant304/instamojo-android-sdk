@@ -17,6 +17,23 @@ public class CardOptions implements Parcelable {
     @SerializedName("submission_url")
     private String submissionURL;
 
+    protected CardOptions(Parcel in) {
+        submissionData = in.readParcelable(SubmissionData.class.getClassLoader());
+        submissionURL = in.readString();
+    }
+
+    public static final Creator<CardOptions> CREATOR = new Creator<CardOptions>() {
+        @Override
+        public CardOptions createFromParcel(Parcel in) {
+            return new CardOptions(in);
+        }
+
+        @Override
+        public CardOptions[] newArray(int size) {
+            return new CardOptions[size];
+        }
+    };
+
     public SubmissionData getSubmissionData() {
         return submissionData;
     }
@@ -33,21 +50,13 @@ public class CardOptions implements Parcelable {
         this.submissionURL = submissionURL;
     }
 
-    protected CardOptions(Parcel in) {
-        submissionURL = in.readString();
+    @Override
+    public String toString() {
+        return "CardOptions{" +
+                "submissionData=" + submissionData +
+                ", submissionURL='" + submissionURL + '\'' +
+                '}';
     }
-
-    public static final Creator<CardOptions> CREATOR = new Creator<CardOptions>() {
-        @Override
-        public CardOptions createFromParcel(Parcel in) {
-            return new CardOptions(in);
-        }
-
-        @Override
-        public CardOptions[] newArray(int size) {
-            return new CardOptions[size];
-        }
-    };
 
     @Override
     public int describeContents() {
@@ -55,15 +64,8 @@ public class CardOptions implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(submissionURL);
-    }
-
-    @Override
-    public String toString() {
-        return "CardOptions{" +
-                "submissionData=" + submissionData +
-                ", submissionURL='" + submissionURL + '\'' +
-                '}';
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(submissionData, flags);
+        dest.writeString(submissionURL);
     }
 }
