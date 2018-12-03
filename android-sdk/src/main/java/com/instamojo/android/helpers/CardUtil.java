@@ -41,7 +41,7 @@ public class CardUtil {
         boolean isEvenPosition = false;
         for (int i = cardLength - 1; i >= 0; i--) {
 
-            int digit = cardNumber.charAt(i);
+            int digit = Character.getNumericValue(cardNumber.charAt(i));
 
             if (isEvenPosition) {
                 digit *= 2;
