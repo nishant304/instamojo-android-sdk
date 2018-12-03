@@ -25,7 +25,6 @@ import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.helpers.Validators;
 import com.instamojo.android.models.Card;
 import com.instamojo.android.models.CardOptions;
-import com.instamojo.android.models.CardPaymentRequest;
 import com.instamojo.android.models.CardPaymentResponse;
 import com.instamojo.android.models.GatewayOrder;
 import com.instamojo.android.network.ImojoService;
@@ -34,7 +33,9 @@ import com.rengwuxian.materialedittext.MaterialEditText;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -257,12 +258,13 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
         dialog.show();
 
         final GatewayOrder order = parentActivity.getOrder();
-        CardPaymentRequest cardPaymentRequest = populateCardRequest(order, card);
+        Map<String, String> cardPaymentRequest = populateCardRequest(order, card);
 
         ImojoService service = ServiceGenerator.getImojoService();
         final CardOptions cardOptions = order.getPaymentOptions().getCardOptions();
         Call<CardPaymentResponse> orderCall = service.collectCardPayment(cardOptions.getSubmissionURL(),
                 cardPaymentRequest);
+        Logger.d(TAG, cardOptions.getSubmissionURL());
         orderCall.enqueue(new Callback<CardPaymentResponse>() {
             @Override
             public void onResponse(Call<CardPaymentResponse> call, final Response<CardPaymentResponse> response) {
@@ -311,7 +313,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
         });
     }
 
-    private CardPaymentRequest populateCardRequest(GatewayOrder order, Card card) {
+    private Map<String, String> populateCardRequest(GatewayOrder order, Card card) {
 
         //For maestro, add the default values if empty
         if (CardUtil.isMaestroCard(card.getCardNumber())) {
@@ -324,27 +326,30 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
             }
         }
 
-        CardPaymentRequest cardPaymentRequest = new CardPaymentRequest();
-        cardPaymentRequest.setOrderID(order.getPaymentOptions().getCardOptions().getSubmissionData().getOrderID());
-        cardPaymentRequest.setMerchantID(order.getPaymentOptions().getCardOptions().getSubmissionData().getMerchantID());
-        cardPaymentRequest.setPaymentMethod("CARD");
-        cardPaymentRequest.setCardNumber(card.getCardNumber());
-        cardPaymentRequest.setCardExpiryMonth(card.getMonth());
-        cardPaymentRequest.setCardExpiryYear(card.getYear());
-        cardPaymentRequest.setCardSecurityCode(card.getCvv());
-        cardPaymentRequest.setSaveToLocker(card.canSaveCard());
-        cardPaymentRequest.setRedirectAfterPayment(true);
-        cardPaymentRequest.setFormat("json");
-        cardPaymentRequest.setNameOnCard(card.getCardHolderName());
+        Map<String, String> fieldMap = new HashMap<>();
+        fieldMap.put("order_id", order.getPaymentOptions().getCardOptions().getSubmissionData().getOrderID());
+        fieldMap.put("merchant_id", order.getPaymentOptions().getCardOptions().getSubmissionData().getMerchantID());
+        fieldMap.put("payment_method_type", "CARD");
+        fieldMap.put("card_number", card.getCardNumber());
+        fieldMap.put("card_exp_month", card.getMonth());
+        fieldMap.put("card_exp_year", card.getYear());
+        fieldMap.put("card_security_code", card.getCvv());
+        fieldMap.put("save_to_locker", card.canSaveCard() ? "true" : "false");
+        fieldMap.put("redirect_after_payment", "true");
+        fieldMap.put("format", "json");
+
+        if (card.getCardHolderName() != null) {
+            fieldMap.put("name_on_card", card.getCardHolderName());
+        }
 
         if (order.getPaymentOptions().getEmiOptions() != null && mSelectedbankCode != null) {
             Logger.d(this.getClass().getSimpleName(), "emi selected....");
-            cardPaymentRequest.setEmi(true);
-            cardPaymentRequest.setEmiBank(mSelectedbankCode);
-            cardPaymentRequest.setEmiTenure(String.valueOf(mSelectedTenure));
+            fieldMap.put("is_emi", "true");
+            fieldMap.put("emi_bank", mSelectedbankCode);
+            fieldMap.put("emi_tenure", String.valueOf(mSelectedTenure));
         }
 
-        return cardPaymentRequest;
+        return fieldMap;
     }
 
     @Override
