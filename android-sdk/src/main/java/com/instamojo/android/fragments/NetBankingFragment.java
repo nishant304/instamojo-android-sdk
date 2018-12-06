@@ -7,16 +7,22 @@ import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.instamojo.android.R;
 import com.instamojo.android.activities.PaymentDetailsActivity;
+import com.instamojo.android.adapters.BankListAdapter;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.Bank;
 import com.instamojo.android.models.GatewayOrder;
 import com.instamojo.android.models.NetBankingOptions;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Fragment to show Net Banking options to User.
@@ -25,7 +31,7 @@ public class NetBankingFragment extends BaseFragment implements SearchView.OnQue
 
     private static final String TAG = NetBankingFragment.class.getSimpleName();
     private PaymentDetailsActivity parentActivity;
-    private LinearLayout listContainer;
+    private ListView listView;
     private TextView headerTextView;
 
     /**
@@ -66,7 +72,7 @@ public class NetBankingFragment extends BaseFragment implements SearchView.OnQue
 
     @Override
     public void inflateXML(View view) {
-        listContainer = view.findViewById(R.id.list_container);
+        listView = view.findViewById(R.id.list_container);
         headerTextView = view.findViewById(R.id.header_text);
         Logger.d(TAG, "Inflated XML");
     }
@@ -78,25 +84,27 @@ public class NetBankingFragment extends BaseFragment implements SearchView.OnQue
     private void loadBanks(String query) {
         final GatewayOrder order = parentActivity.getOrder();
         final NetBankingOptions netBankingOptions = order.getPaymentOptions().getNetBankingOptions();
+
+        final List<Bank> filteredBanks = new ArrayList<>();
         for (final Bank bank : netBankingOptions.getBanks()) {
-            if (!bank.getName().toLowerCase().contains(query.toLowerCase())) {
-                continue;
+            if (bank.getName().toLowerCase().contains(query.toLowerCase())) {
+                filteredBanks.add(bank);
             }
-            View bankView = LayoutInflater.from(getContext()).inflate(R.layout.list_view_instamojo, listContainer, false);
-            ((TextView) bankView.findViewById(R.id.item_name)).setText(bank.getName());
-            bankView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Bundle bundle = new Bundle();
-
-                    bundle.putString(Constants.URL, netBankingOptions.getSubmissionURL());
-                    bundle.putString(Constants.POST_DATA, netBankingOptions.getPostData(bank.getId()));
-                    parentActivity.startPaymentActivity(bundle);
-                }
-            });
-
-            listContainer.addView(bankView);
         }
+
+        Collections.sort(filteredBanks);
+
+        BankListAdapter adapter = new BankListAdapter(getActivity(), filteredBanks);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Bundle bundle = new Bundle();
+                bundle.putString(Constants.URL, netBankingOptions.getSubmissionURL());
+                bundle.putString(Constants.POST_DATA, netBankingOptions.getPostData(filteredBanks.get(position).getId()));
+                parentActivity.startPaymentActivity(bundle);
+            }
+        });
     }
 
     @Override

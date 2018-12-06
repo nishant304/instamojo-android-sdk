@@ -2,10 +2,11 @@ package com.instamojo.android.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Bank implements Parcelable {
+public class Bank implements Parcelable, Comparable<Bank> {
 
     @SerializedName("id")
     private String id;
@@ -68,5 +69,10 @@ public class Bank implements Parcelable {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 '}';
+    }
+
+    @Override
+    public int compareTo(@NonNull Bank other) {
+        return this.name.compareTo(other.name);
     }
 }
