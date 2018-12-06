@@ -1,5 +1,6 @@
 package com.instamojo.android.activities;
 
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -83,7 +84,7 @@ public class PaymentDetailsActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-            fireBroadcastAndReturn(0, "Payment canceled", null);
+            fireBroadcastAndReturn(Activity.RESULT_CANCELED, null);
 
         } else {
             getSupportFragmentManager().popBackStackImmediate();
@@ -95,7 +96,7 @@ public class PaymentDetailsActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.REQUEST_CODE) {
             Logger.d(TAG, "Returning back result to caller");
-            fireBroadcastAndReturn(1, "Result", data.getExtras());
+            fireBroadcastAndReturn(resultCode, data.getExtras());
         }
     }
 
@@ -118,7 +119,7 @@ public class PaymentDetailsActivity extends BaseActivity {
         order = getIntent().getParcelableExtra(Constants.ORDER);
         if (order == null) {
             Logger.e(TAG, "Object not found. Sending back - Payment Cancelled");
-            fireBroadcastAndReturn(0, "Payment canceled", null);
+            fireBroadcastAndReturn(RESULT_CANCELED, null);
             return;
         }
 
@@ -161,13 +162,14 @@ public class PaymentDetailsActivity extends BaseActivity {
         invalidateOptionsMenu();
     }
 
-    private void fireBroadcastAndReturn(int code, String message, Bundle data) {
+    private void fireBroadcastAndReturn(int resultCode, Bundle data) {
         Intent intent = new Intent();
-        intent.putExtra("code", code);
-        intent.putExtra("response", message);
+
         if (data != null) {
-            intent.putExtra("data", data);
+            intent.putExtras(data);
         }
+
+        intent.putExtra("code", resultCode);
 
         intent.setAction("com.instamojo.android.sdk");
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);

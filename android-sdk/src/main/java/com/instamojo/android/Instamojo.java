@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.instamojo.android.activities.PaymentDetailsActivity;
@@ -37,12 +38,24 @@ public class Instamojo extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        int code = intent.getIntExtra("code", 0);
-        if (code == 1) {
-            mCallback.onInstamojoPaymentSuccess();
+        Bundle returnData = intent.getExtras();
+        if (returnData == null) {
+            mCallback.onInitiatePaymentFailure("Unknown error. ");
+        }
 
-        } else {
-            mCallback.onInstamojoPaymentFailure();
+        switch (returnData.getInt("code")) {
+            case Activity.RESULT_OK:
+                String orderID = returnData.getString(Constants.ORDER_ID);
+                String transactionID = returnData.getString(Constants.TRANSACTION_ID);
+                String paymentID = returnData.getString(Constants.PAYMENT_ID);
+                String paymentStatus = returnData.getString(Constants.PAYMENT_STATUS);
+                mCallback.onInstamojoPaymentComplete(orderID, transactionID, paymentID, paymentStatus);
+                break;
+
+            case Activity.RESULT_CANCELED:
+                mCallback.onPaymentCancelled();
+                break;
+
         }
     }
 
@@ -51,9 +64,11 @@ public class Instamojo extends BroadcastReceiver {
     }
 
     public interface InstamojoPaymentCallback {
-        void onInstamojoPaymentSuccess();
+        void onInstamojoPaymentComplete(String orderID, String transactionID, String paymentID, String paymentStatus);
 
-        void onInstamojoPaymentFailure();
+        void onPaymentCancelled();
+
+        void onInitiatePaymentFailure(String errorMessage);
     }
 
     public static Instamojo getInstance() {
@@ -115,13 +130,13 @@ public class Instamojo extends BroadcastReceiver {
                             e.printStackTrace();
                         }
                     }
-                    mCallback.onInstamojoPaymentFailure();
+                    mCallback.onInitiatePaymentFailure("Error fetching order details");
                 }
             }
 
             @Override
             public void onFailure(Call<GatewayOrder> call, Throwable t) {
-                mCallback.onInstamojoPaymentFailure();
+                mCallback.onInitiatePaymentFailure("Failed to fetch order details");
             }
         });
     }
