@@ -22,6 +22,7 @@ import com.instamojo.android.helpers.CardType;
 import com.instamojo.android.helpers.CardUtil;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
+import com.instamojo.android.helpers.ObjectMapper;
 import com.instamojo.android.helpers.Validators;
 import com.instamojo.android.models.Card;
 import com.instamojo.android.models.CardOptions;
@@ -33,7 +34,6 @@ import com.rengwuxian.materialedittext.MaterialEditText;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +55,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
     private PaymentDetailsActivity parentActivity;
     private Mode mode;
     private int mSelectedTenure;
-    private String mSelectedbankCode;
+    private String mSelectedBankCode;
 
     /**
      * Creates a new instance of Fragment
@@ -73,7 +73,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
     public static CardFragment getCardForm(Mode mode, int tenure, String bankCode) {
         CardFragment form = new CardFragment();
         form.mode = mode;
-        form.mSelectedbankCode = bankCode;
+        form.mSelectedBankCode = bankCode;
         form.mSelectedTenure = tenure;
         return form;
     }
@@ -258,7 +258,8 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
         dialog.show();
 
         final GatewayOrder order = parentActivity.getOrder();
-        Map<String, String> cardPaymentRequest = populateCardRequest(order, card);
+        Map<String, String> cardPaymentRequest = ObjectMapper.populateCardRequest(order, card,
+                mSelectedBankCode, mSelectedTenure);
 
         ImojoService service = ServiceGenerator.getImojoService();
         final CardOptions cardOptions = order.getPaymentOptions().getCardOptions();
@@ -311,45 +312,6 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
                 });
             }
         });
-    }
-
-    private Map<String, String> populateCardRequest(GatewayOrder order, Card card) {
-
-        //For maestro, add the default values if empty
-        if (CardUtil.isMaestroCard(card.getCardNumber())) {
-            if (card.getDate() == null || card.getDate().isEmpty()) {
-                card.setDate("12/49");
-            }
-
-            if (card.getCvv() == null || card.getCvv().isEmpty()) {
-                card.setDate("111");
-            }
-        }
-
-        Map<String, String> fieldMap = new HashMap<>();
-        fieldMap.put("order_id", order.getPaymentOptions().getCardOptions().getSubmissionData().getOrderID());
-        fieldMap.put("merchant_id", order.getPaymentOptions().getCardOptions().getSubmissionData().getMerchantID());
-        fieldMap.put("payment_method_type", "CARD");
-        fieldMap.put("card_number", card.getCardNumber());
-        fieldMap.put("card_exp_month", card.getMonth());
-        fieldMap.put("card_exp_year", card.getYear());
-        fieldMap.put("card_security_code", card.getCvv());
-        fieldMap.put("save_to_locker", card.canSaveCard() ? "true" : "false");
-        fieldMap.put("redirect_after_payment", "true");
-        fieldMap.put("format", "json");
-
-        if (card.getCardHolderName() != null) {
-            fieldMap.put("name_on_card", card.getCardHolderName());
-        }
-
-        if (order.getPaymentOptions().getEmiOptions() != null && mSelectedbankCode != null) {
-            Logger.d(this.getClass().getSimpleName(), "emi selected....");
-            fieldMap.put("is_emi", "true");
-            fieldMap.put("emi_bank", mSelectedbankCode);
-            fieldMap.put("emi_tenure", String.valueOf(mSelectedTenure));
-        }
-
-        return fieldMap;
     }
 
     @Override
