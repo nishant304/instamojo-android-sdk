@@ -7,26 +7,38 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatSpinner;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.instamojo.android.activities.PaymentActivity;
-import com.instamojo.android.callbacks.JuspayRequestCallback;
+import com.instamojo.android.adapters.BankListAdapter;
 import com.instamojo.android.helpers.Constants;
+import com.instamojo.android.helpers.Logger;
+import com.instamojo.android.helpers.ObjectMapper;
+import com.instamojo.android.models.Bank;
 import com.instamojo.android.models.Card;
-import com.instamojo.android.models.Errors;
-import com.instamojo.android.models.Order;
-import com.instamojo.android.network.Request;
+import com.instamojo.android.models.CardOptions;
+import com.instamojo.android.models.CardPaymentResponse;
+import com.instamojo.android.models.GatewayOrder;
+import com.instamojo.android.models.PaymentOptions;
+import com.instamojo.android.network.ImojoService;
+import com.instamojo.android.network.ServiceGenerator;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CustomUIActivity extends AppCompatActivity {
 
+    private static final String TAG = CustomUIActivity.class.getSimpleName();
     private AlertDialog dialog;
+    private GatewayOrder mOrder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +50,38 @@ public class CustomUIActivity extends AppCompatActivity {
         builder.setView(R.layout.layout_loading_dialog);
         dialog = builder.create();
 
-        makeUI();
+        final String orderID = getIntent().getStringExtra(Constants.ORDER_ID);
+        fetchOrder(orderID);
+    }
+
+    private void fetchOrder(String orderID) {
+        ImojoService imojoService = ServiceGenerator.getImojoService();
+        Call<GatewayOrder> gatewayOrderCall = imojoService.getPaymentOptions(orderID);
+        gatewayOrderCall.enqueue(new Callback<GatewayOrder>() {
+            @Override
+            public void onResponse(Call<GatewayOrder> call, Response<GatewayOrder> response) {
+                if (response.isSuccessful()) {
+                    mOrder = response.body();
+                    makeUI();
+
+                } else {
+                    if (response.errorBody() != null) {
+                        try {
+                            Logger.d(TAG, "Error response from server while fetching order details.");
+                            Logger.e(TAG, "Error: " + response.errorBody().string());
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GatewayOrder> call, Throwable t) {
+                Logger.d(TAG, "Failure fetching gateway order");
+            }
+        });
     }
 
     @Override
@@ -53,14 +96,16 @@ public class CustomUIActivity extends AppCompatActivity {
     }
 
     private void makeUI() {
-        final Order order = getIntent().getParcelableExtra(Constants.ORDER);
+
         //finish the activity if the order is null or both the debit and netbanking is disabled
-        if (order == null || (order.getCardOptions() == null
-                && order.getNetBankingOptions() == null)) {
+        if (mOrder == null || (mOrder.getPaymentOptions().getCardOptions() == null
+                && mOrder.getPaymentOptions().getNetBankingOptions() == null)) {
             setResult(RESULT_CANCELED);
             finish();
             return;
         }
+
+        final PaymentOptions paymentOptions = mOrder.getPaymentOptions();
 
         final AppCompatEditText cardNumber = findViewById(R.id.card_number);
         final AppCompatEditText cardExpiryDate = findViewById(R.id.card_expiry_date);
@@ -73,12 +118,13 @@ public class CustomUIActivity extends AppCompatActivity {
         View separator = findViewById(R.id.net_banking_separator);
         AppCompatSpinner netBankingSpinner = findViewById(R.id.net_banking_spinner);
 
-        if (order.getCardOptions() == null) {
+        if (paymentOptions.getCardOptions() == null) {
             //seems like card payment is not enabled
             findViewById(R.id.card_layout_1).setVisibility(View.GONE);
             findViewById(R.id.card_layout_2).setVisibility(View.GONE);
             proceed.setVisibility(View.GONE);
             separator.setVisibility(View.GONE);
+
         } else {
             proceed.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -95,22 +141,25 @@ public class CustomUIActivity extends AppCompatActivity {
                     }
 
                     //Get order details form Juspay
-                    proceedWithCard(order, card);
+                    proceedWithCard(mOrder, card);
                 }
             });
         }
 
-        if (order.getNetBankingOptions() == null) {
+        if (paymentOptions.getNetBankingOptions() == null) {
             //seems like netbanking is not enabled
             separator.setVisibility(View.GONE);
             netBankingSpinner.setVisibility(View.GONE);
+
         } else {
-            final ArrayList<String> banks = new ArrayList<>(order.getNetBankingOptions().getBanks().keySet());
+            final List<Bank> banks = paymentOptions.getNetBankingOptions().getBanks();
             Collections.sort(banks);
-            banks.add(0, "Select a Bank");
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, banks);
+            banks.add(0, new Bank("-1", "Select a bank"));
+
+            BankListAdapter adapter = new BankListAdapter(this, banks);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             netBankingSpinner.setAdapter(adapter);
+
             netBankingSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -119,12 +168,11 @@ public class CustomUIActivity extends AppCompatActivity {
                     }
 
                     //User selected a Bank. Hence proceed to Juspay
-                    String bankCode = order.getNetBankingOptions().getBanks().get(banks.get(position));
+                    String bankCode = banks.get(position).getId();
                     Bundle bundle = new Bundle();
-                    bundle.putString(Constants.URL, order.getNetBankingOptions().getUrl());
-                    bundle.putString(Constants.POST_DATA, order.
-                            getNetBankingOptions().getPostData(bankCode));
-                    startPaymentActivity(bundle);
+                    bundle.putString(Constants.URL, paymentOptions.getNetBankingOptions().getSubmissionURL());
+                    bundle.putString(Constants.POST_DATA, paymentOptions.getNetBankingOptions().getPostData(bankCode));
+                    CustomUIActivity.this.startPaymentActivity(bundle);
                 }
 
                 @Override
@@ -132,36 +180,55 @@ public class CustomUIActivity extends AppCompatActivity {
 
                 }
             });
-
-
         }
     }
 
-    private void proceedWithCard(Order order, Card card) {
+    private void proceedWithCard(GatewayOrder order, Card card) {
         dialog.show();
-        Request request = new Request(order, card, new JuspayRequestCallback() {
+
+        ImojoService service = ServiceGenerator.getImojoService();
+        final CardOptions cardOptions = order.getPaymentOptions().getCardOptions();
+        Map<String, String> cardPaymentRequest = ObjectMapper.populateCardRequest(order, card, null, 0);
+
+        Call<CardPaymentResponse> orderCall = service.collectCardPayment(cardOptions.getSubmissionURL(), cardPaymentRequest);
+        orderCall.enqueue(new Callback<CardPaymentResponse>() {
             @Override
-            public void onFinish(final Bundle bundle, final Exception error) {
+            public void onResponse(Call<CardPaymentResponse> call, final Response<CardPaymentResponse> response) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        dialog.dismiss();
-                        if (error != null) {
-                            if (error instanceof Errors.ConnectionError) {
-                                Log.e("App", "No internet");
-                            } else if (error instanceof Errors.ServerError) {
-                                Log.e("App", "Server Error. try again");
-                            } else {
-                                Log.e("App", error.getMessage());
+                        if (response.isSuccessful()) {
+                            final Bundle bundle = new Bundle();
+                            bundle.putString(Constants.URL, response.body().getUrl());
+                            bundle.putString(Constants.MERCHANT_ID, cardOptions.getSubmissionData().getMerchantID());
+                            bundle.putString(Constants.ORDER_ID, cardOptions.getSubmissionData().getOrderID());
+                            CustomUIActivity.this.startPaymentActivity(bundle);
+
+                        } else {
+                            if (response.errorBody() != null) {
+                                try {
+                                    Logger.e(TAG, "Error response from card checkout call - " +
+                                            response.errorBody().string());
+
+                                } catch (IOException e) {
+                                    Logger.e(TAG, "Error reading error response: " + e.getMessage());
+                                }
                             }
-                            return;
                         }
-                        startPaymentActivity(bundle);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<CardPaymentResponse> call, final Throwable t) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Logger.e(TAG, "Card checkout failed due to - " + t.getMessage());
                     }
                 });
             }
         });
-        request.execute();
     }
 
     private boolean cardValid(Card card) {

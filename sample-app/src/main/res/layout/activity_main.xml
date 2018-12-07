@@ -11,25 +11,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin">
+        android:paddingBottom="@dimen/activity_vertical_margin">
 
-        <android.support.v7.widget.AppCompatSpinner
-            android:id="@+id/env_spinner"
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/env_switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
-            android:spinnerMode="dialog" />
+            android:layout_margin="12dp"
+            android:checked="false"
+            android:text="TEST"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textOff="TEST"
+            android:textOn="PRODUCTION" />
+
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/ui_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:checked="false"
+            android:text="Instamojo UI"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textOff="Instamojo UI"
+            android:textOn="Custom UI" />
 
         <android.support.v7.widget.AppCompatEditText
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_margin="10dp"
             android:inputType="textPersonName"
             android:text="@string/example_name" />
 
@@ -37,8 +50,7 @@
             android:id="@+id/email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_margin="10dp"
             android:inputType="textEmailAddress"
             android:text="@string/example_email" />
 
@@ -46,8 +58,7 @@
             android:id="@+id/phone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_margin="10dp"
             android:inputType="phone"
             android:text="@string/example_phone" />
 
@@ -55,8 +66,7 @@
             android:id="@+id/amount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_margin="10dp"
             android:inputType="numberDecimal"
             android:text="@string/example_amount" />
 
@@ -64,8 +74,7 @@
             android:id="@+id/description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_margin="10dp"
             android:inputType="textAutoComplete|textCapSentences"
             android:text="@string/test_description" />
 
@@ -73,8 +82,7 @@
             android:id="@+id/pay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_margin="10dp"
             android:text="@string/pay" />
 
     </LinearLayout>
