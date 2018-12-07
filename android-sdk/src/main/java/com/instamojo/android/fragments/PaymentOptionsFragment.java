@@ -107,13 +107,6 @@ public class PaymentOptionsFragment extends BaseFragment implements View.OnClick
 
         } else {
             Logger.d(TAG, "Starting CardFragment");
-            //since the user is directly jumping to Card from instead of EMI.
-            // We can safely assume that emi is not chosen. Hence, clear all emi related stuff in order
-            if (parentActivity.getOrder().getPaymentOptions().getEmiOptions() != null) {
-//                parentActivity.getOrder().getPaymentOptions().getEmiOptions().setSelectedBankCode(null);
-//                parentActivity.getOrder().getPaymentOptions().getEmiOptions().setSelectedTenure(-1);
-            }
-
             if (id == R.id.debit_card_layout) {
                 parentActivity.loadFragment(CardFragment.getCardForm(CardFragment.Mode.DebitCard), true);
 
