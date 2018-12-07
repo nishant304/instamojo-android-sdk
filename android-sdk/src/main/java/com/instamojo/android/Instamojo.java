@@ -4,22 +4,12 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.helpers.Constants;
-import com.instamojo.android.helpers.Logger;
-import com.instamojo.android.models.GatewayOrder;
-import com.instamojo.android.network.ImojoService;
 import com.instamojo.android.network.ServiceGenerator;
-
-import java.io.IOException;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Instamojo SDK
@@ -27,10 +17,16 @@ import retrofit2.Response;
 public class Instamojo extends BroadcastReceiver {
 
     public static final String TAG = Instamojo.class.getSimpleName();
+    public static final String ACTION_INTENT_FILTER = "com.instamojo.android.sdk";
     private static Instamojo mInstance;
     private Context mContext;
 
     private InstamojoPaymentCallback mCallback;
+
+    public static final int RESULT_SUCCESS = 1;
+    public static final int RESULT_CANCELLED = 2;
+    public static final int RESULT_FAILED = 3;
+
 
     private Instamojo() {
         // Default private constructor
@@ -38,25 +34,36 @@ public class Instamojo extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        String unknownErrMsg = "Unknown error";
+
         Bundle returnData = intent.getExtras();
-        if (returnData == null) {
-            mCallback.onInitiatePaymentFailure("Unknown error. ");
+        if (returnData != null && returnData.getInt(Constants.KEY_CODE, -1) != -1) {
+            int resultCode = returnData.getInt(Constants.KEY_CODE);
+            switch (resultCode) {
+                case RESULT_SUCCESS:
+                    String orderID = returnData.getString(Constants.ORDER_ID);
+                    String transactionID = returnData.getString(Constants.TRANSACTION_ID);
+                    String paymentID = returnData.getString(Constants.PAYMENT_ID);
+                    String paymentStatus = returnData.getString(Constants.PAYMENT_STATUS);
+                    mCallback.onInstamojoPaymentComplete(orderID, transactionID, paymentID, paymentStatus);
+                    return;
+
+                case RESULT_CANCELLED:
+                    mCallback.onPaymentCancelled();
+                    return;
+
+                case RESULT_FAILED:
+                    String message = returnData.getString(Constants.KEY_MESSGE);
+                    if (message == null) {
+                        message = unknownErrMsg;
+                    }
+
+                    mCallback.onInitiatePaymentFailure(message);
+                    return;
+            }
         }
 
-        switch (returnData.getInt("code")) {
-            case Activity.RESULT_OK:
-                String orderID = returnData.getString(Constants.ORDER_ID);
-                String transactionID = returnData.getString(Constants.TRANSACTION_ID);
-                String paymentID = returnData.getString(Constants.PAYMENT_ID);
-                String paymentStatus = returnData.getString(Constants.PAYMENT_STATUS);
-                mCallback.onInstamojoPaymentComplete(orderID, transactionID, paymentID, paymentStatus);
-                break;
-
-            case Activity.RESULT_CANCELED:
-                mCallback.onPaymentCancelled();
-                break;
-
-        }
+        mCallback.onInitiatePaymentFailure(unknownErrMsg);
     }
 
     public enum Environment {
@@ -104,40 +111,9 @@ public class Instamojo extends BroadcastReceiver {
      * @param callback Callback interface to receive the response from Instamojo SDK
      */
     public void initiatePayment(final Activity activity, final String orderID, final InstamojoPaymentCallback callback) {
-
         mCallback = callback;
-        ImojoService imojoService = ServiceGenerator.getImojoService();
-        Call<GatewayOrder> gatewayOrderCall = imojoService.getPaymentOptions(orderID);
-        gatewayOrderCall.enqueue(new Callback<GatewayOrder>() {
-            @Override
-            public void onResponse(Call<GatewayOrder> call, Response<GatewayOrder> response) {
-                if (response.isSuccessful()) {
-
-                    IntentFilter filter = new IntentFilter("com.instamojo.android.sdk");
-                    activity.registerReceiver(Instamojo.this, filter);
-
-                    Intent intent = new Intent(mContext, PaymentDetailsActivity.class);
-                    intent.putExtra(Constants.ORDER, response.body());
-                    activity.startActivity(intent);
-
-                } else {
-                    if (response.errorBody() != null) {
-                        try {
-                            Logger.d(TAG, "Error response from server while fetching order details.");
-                            Logger.e(TAG, "Error: " + response.errorBody().string());
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    mCallback.onInitiatePaymentFailure("Error fetching order details");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<GatewayOrder> call, Throwable t) {
-                mCallback.onInitiatePaymentFailure("Failed to fetch order details");
-            }
-        });
+        Intent intent = new Intent(mContext, PaymentDetailsActivity.class);
+        intent.putExtra(Constants.ORDER_ID, orderID);
+        activity.startActivity(intent);
     }
 }

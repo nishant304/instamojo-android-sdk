@@ -55,4 +55,8 @@ public class Constants {
      * Status code for UPI Pending Authentication
      */
     public static final int PENDING_PAYMENT = 2;
+
+    public static final String KEY_CODE = "code";
+
+    public static final String KEY_MESSGE = "message";
 }

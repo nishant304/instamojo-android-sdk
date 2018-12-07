@@ -1,9 +1,9 @@
 package com.instamojo.android.activities;
 
-import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.SearchView;
@@ -12,12 +12,21 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.instamojo.android.Instamojo;
 import com.instamojo.android.R;
 import com.instamojo.android.fragments.BaseFragment;
 import com.instamojo.android.fragments.PaymentOptionsFragment;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.GatewayOrder;
+import com.instamojo.android.network.ImojoService;
+import com.instamojo.android.network.ServiceGenerator;
+
+import java.io.IOException;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Payment Details Activity extends the {@link BaseActivity}. Activity lets user to choose a Payment method
@@ -35,7 +44,49 @@ public class PaymentDetailsActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_details_instamojo);
         inflateXML();
-        loadFragments();
+
+        String orderID = getIntent().getStringExtra(Constants.ORDER_ID);
+        if (orderID == null) {
+            Logger.e(TAG, "Object not found. Sending back - Payment Cancelled");
+            fireBroadcastAndReturn(Instamojo.RESULT_CANCELLED, null);
+        }
+
+        fetchOrder(orderID);
+
+        IntentFilter filter = new IntentFilter(Instamojo.ACTION_INTENT_FILTER);
+        registerReceiver(Instamojo.getInstance(), filter);
+    }
+
+    private void fetchOrder(String orderID) {
+        ImojoService imojoService = ServiceGenerator.getImojoService();
+        Call<GatewayOrder> gatewayOrderCall = imojoService.getPaymentOptions(orderID);
+        gatewayOrderCall.enqueue(new Callback<GatewayOrder>() {
+            @Override
+            public void onResponse(Call<GatewayOrder> call, Response<GatewayOrder> response) {
+                if (response.isSuccessful()) {
+                    order = response.body();
+                    loadFragments();
+
+                } else {
+                    if (response.errorBody() != null) {
+                        try {
+                            Logger.d(TAG, "Error response from server while fetching order details.");
+                            Logger.e(TAG, "Error: " + response.errorBody().string());
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    fireBroadcastAndReturn(Instamojo.RESULT_FAILED, null, "Error fetching order details");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GatewayOrder> call, Throwable t) {
+                fireBroadcastAndReturn(Instamojo.RESULT_FAILED, null, "Failed to fetch order details");
+            }
+        });
     }
 
     @Override
@@ -84,7 +135,7 @@ public class PaymentDetailsActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-            fireBroadcastAndReturn(Activity.RESULT_CANCELED, null);
+            fireBroadcastAndReturn(Instamojo.RESULT_CANCELLED, null);
 
         } else {
             getSupportFragmentManager().popBackStackImmediate();
@@ -96,7 +147,7 @@ public class PaymentDetailsActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.REQUEST_CODE) {
             Logger.d(TAG, "Returning back result to caller");
-            fireBroadcastAndReturn(resultCode, data.getExtras());
+            fireBroadcastAndReturn(mapResultCode(resultCode), data.getExtras());
         }
     }
 
@@ -115,14 +166,6 @@ public class PaymentDetailsActivity extends BaseActivity {
     }
 
     private void loadFragments() {
-        Logger.d(TAG, "looking for Order object...");
-        order = getIntent().getParcelableExtra(Constants.ORDER);
-        if (order == null) {
-            Logger.e(TAG, "Object not found. Sending back - Payment Cancelled");
-            fireBroadcastAndReturn(RESULT_CANCELED, null);
-            return;
-        }
-
         Logger.d(TAG, "Found order Object. Starting PaymentOptionsFragment");
         loadFragment(new PaymentOptionsFragment(), false);
     }
@@ -163,19 +206,45 @@ public class PaymentDetailsActivity extends BaseActivity {
     }
 
     private void fireBroadcastAndReturn(int resultCode, Bundle data) {
+        fireBroadcastAndReturn(resultCode, data, null);
+    }
+
+    private void fireBroadcastAndReturn(int resultCode, Bundle data, String message) {
         Intent intent = new Intent();
 
         if (data != null) {
             intent.putExtras(data);
         }
 
-        intent.putExtra("code", resultCode);
+        intent.putExtra(Constants.KEY_CODE, resultCode);
 
-        intent.setAction("com.instamojo.android.sdk");
+        if (message != null && !message.isEmpty()) {
+            intent.putExtra(Constants.KEY_MESSGE, message);
+        }
+
+        intent.setAction(Instamojo.ACTION_INTENT_FILTER);
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         sendBroadcast(intent);
 
         // Finish this activity
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(Instamojo.getInstance());
+        super.onDestroy();
+    }
+
+    private int mapResultCode(int activityResultCode) {
+        switch (activityResultCode) {
+            case RESULT_OK:
+                return Instamojo.RESULT_SUCCESS;
+
+            case RESULT_CANCELED:
+                return Instamojo.RESULT_CANCELLED;
+        }
+
+        return Instamojo.RESULT_FAILED;
     }
 }
