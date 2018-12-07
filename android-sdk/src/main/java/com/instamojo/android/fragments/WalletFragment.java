@@ -8,17 +8,20 @@ import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.instamojo.android.R;
 import com.instamojo.android.activities.PaymentDetailsActivity;
+import com.instamojo.android.adapters.WalletListAdapter;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
-import com.instamojo.android.models.Order;
 import com.instamojo.android.models.Wallet;
 import com.instamojo.android.models.WalletOptions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -28,7 +31,7 @@ public class WalletFragment extends BaseFragment implements SearchView.OnQueryTe
 
     private static final String TAG = WalletFragment.class.getSimpleName();
     private PaymentDetailsActivity parentActivity;
-    private LinearLayout listContainer;
+    private ListView mWalletListView;
     private TextView headerTextView;
 
     /**
@@ -69,7 +72,7 @@ public class WalletFragment extends BaseFragment implements SearchView.OnQueryTe
 
     @Override
     public void inflateXML(View view) {
-        listContainer = view.findViewById(R.id.list_container);
+        mWalletListView = view.findViewById(R.id.list_container);
         headerTextView = view.findViewById(R.id.header_text);
         Logger.d(TAG, "Inflated XML");
     }
@@ -80,24 +83,24 @@ public class WalletFragment extends BaseFragment implements SearchView.OnQueryTe
 
     private void loadWallets(String query) {
         final WalletOptions walletOptions = parentActivity.getOrder().getPaymentOptions().getWalletOptions();
+        final List<Wallet> filteredWallets = new ArrayList<>();
         for (final Wallet wallet : walletOptions.getWallets()) {
-            if (!wallet.getName().toLowerCase(Locale.US).contains(query.toLowerCase(Locale.US))) {
-                continue;
+            if (wallet.getName().toLowerCase(Locale.US).contains(query.toLowerCase(Locale.US))) {
+                filteredWallets.add(wallet);
             }
-            View itemView = LayoutInflater.from(getContext()).inflate(R.layout.list_view_instamojo, listContainer, false);
-            ((TextView) itemView.findViewById(R.id.item_name)).setText(wallet.getName());
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString(Constants.URL, walletOptions.getSubmissionURL());
-                    bundle.putString(Constants.POST_DATA, walletOptions.getPostData(wallet.getId()));
-                    parentActivity.startPaymentActivity(bundle);
-                }
-            });
-
-            listContainer.addView(itemView);
         }
+
+        WalletListAdapter adapter = new WalletListAdapter(getActivity(), filteredWallets);
+        mWalletListView.setAdapter(adapter);
+        mWalletListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Bundle bundle = new Bundle();
+                bundle.putString(Constants.URL, walletOptions.getSubmissionURL());
+                bundle.putString(Constants.POST_DATA, walletOptions.getPostData(filteredWallets.get(position).getId()));
+                parentActivity.startPaymentActivity(bundle);
+            }
+        });
     }
 
     @Override
