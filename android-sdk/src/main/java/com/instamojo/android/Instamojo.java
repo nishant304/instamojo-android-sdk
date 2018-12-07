@@ -1,86 +1,119 @@
 package com.instamojo.android;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 
-import com.instamojo.android.network.Urls;
+import com.instamojo.android.activities.PaymentDetailsActivity;
+import com.instamojo.android.helpers.Constants;
+import com.instamojo.android.network.ServiceGenerator;
 
 /**
- * SDK Base Class.
+ * Instamojo SDK
  */
+public class Instamojo extends BroadcastReceiver {
 
-public class Instamojo {
+    public static final String TAG = Instamojo.class.getSimpleName();
+    public static final String ACTION_INTENT_FILTER = "com.instamojo.android.sdk";
+    private static Instamojo mInstance;
+    private Context mContext;
 
-    /**
-     * Base URL for production environment.
-     */
-    public static final String PRODUCTION_BASE_URL = "https://api.instamojo.com/";
+    private InstamojoPaymentCallback mCallback;
 
-    /**
-     * Base URL for test environment.
-     */
-    public static final String TEST_BASE_URL = "https://test.instamojo.com/";
+    public static final int RESULT_SUCCESS = 1;
+    public static final int RESULT_CANCELLED = 2;
+    public static final int RESULT_FAILED = 3;
 
-    private static Instamojo instance;
-    private Context appContext;
 
-    public Instamojo(Context appContext) {
-        this.appContext = appContext;
+    private Instamojo() {
+        // Default private constructor
     }
 
-    /**
-     * Initialises the previous session if exists
-     *
-     * @param appContext Application Context
-     */
-    public static void initialize(Context appContext) {
-        instance = new Instamojo(appContext);
-        Urls.setBaseUrl(PRODUCTION_BASE_URL);
-    }
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        String unknownErrMsg = "Unknown error";
 
-    /**
-     * Sets the log level for the session
-     *
-     * @param logLevel Android LOG class values
-     */
-    public static void setLogLevel(int logLevel) {
-        if (!isInitialised()) {
-            return;
-        }
-    }
+        Bundle returnData = intent.getExtras();
+        if (returnData != null && returnData.getInt(Constants.KEY_CODE, -1) != -1) {
+            int resultCode = returnData.getInt(Constants.KEY_CODE);
+            switch (resultCode) {
+                case RESULT_SUCCESS:
+                    String orderID = returnData.getString(Constants.ORDER_ID);
+                    String transactionID = returnData.getString(Constants.TRANSACTION_ID);
+                    String paymentID = returnData.getString(Constants.PAYMENT_ID);
+                    String paymentStatus = returnData.getString(Constants.PAYMENT_STATUS);
+                    mCallback.onInstamojoPaymentComplete(orderID, transactionID, paymentID, paymentStatus);
+                    return;
 
-    /**
-     * Sets the base url for all network calls
-     *
-     * @param baseUrl URl
-     */
-    public static void setBaseUrl(String baseUrl) {
-        if (!isInitialised()) {
-            return;
-        }
-        Urls.setBaseUrl(baseUrl);
-    }
+                case RESULT_CANCELLED:
+                    mCallback.onPaymentCancelled();
+                    return;
 
-    public static boolean isInitialised() {
-        if (instance != null) {
-            return true;
+                case RESULT_FAILED:
+                    String message = returnData.getString(Constants.KEY_MESSGE);
+                    if (message == null) {
+                        message = unknownErrMsg;
+                    }
+
+                    mCallback.onInitiatePaymentFailure(message);
+                    return;
+            }
         }
 
-        Log.e("Instamojo SDK", "Initialise the SDK with Application Context.");
-        return false;
+        mCallback.onInitiatePaymentFailure(unknownErrMsg);
     }
 
-    /**
-     * @return Current instance
-     */
+    public enum Environment {
+        TEST, PRODUCTION
+    }
+
+    public interface InstamojoPaymentCallback {
+        void onInstamojoPaymentComplete(String orderID, String transactionID, String paymentID, String paymentStatus);
+
+        void onPaymentCancelled();
+
+        void onInitiatePaymentFailure(String errorMessage);
+    }
+
     public static Instamojo getInstance() {
-        return instance;
+        if (mInstance == null) {
+            synchronized (Instamojo.class) {
+                if (mInstance == null) {
+                    mInstance = new Instamojo();
+                }
+            }
+        }
+
+        return mInstance;
     }
 
     /**
-     * @return Application context
+     * Initialize the SDK with application context and environment
      */
-    public Context getAppContext() {
-        return appContext;
+    public void initialize(Context context, Environment environment) {
+        Log.e(TAG, "Initializing SDK...");
+
+        mContext = context;
+        ServiceGenerator.initialize(environment);
+    }
+
+    public Context getContext() {
+        return mContext;
+    }
+
+    /**
+     * Initiate an Instamojo payment with an orderID
+     *
+     * @param orderID  Identifier of an Gateway Order instance created in the server (developer)
+     * @param callback Callback interface to receive the response from Instamojo SDK
+     */
+    public void initiatePayment(final Activity activity, final String orderID, final InstamojoPaymentCallback callback) {
+        mCallback = callback;
+        Intent intent = new Intent(mContext, PaymentDetailsActivity.class);
+        intent.putExtra(Constants.ORDER_ID, orderID);
+        activity.startActivity(intent);
     }
 }

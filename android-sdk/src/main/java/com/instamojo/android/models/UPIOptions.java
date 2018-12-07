@@ -3,14 +3,22 @@ package com.instamojo.android.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * UPIOptions Class to hold the details of a UPISubmission options.
  */
 
 public class UPIOptions implements Parcelable {
 
-    @SuppressWarnings("unused")
-    public static final Parcelable.Creator<UPIOptions> CREATOR = new Parcelable.Creator<UPIOptions>() {
+    @SerializedName("submission_url")
+    private String submissionURL;
+
+    protected UPIOptions(Parcel in) {
+        submissionURL = in.readString();
+    }
+
+    public static final Creator<UPIOptions> CREATOR = new Creator<UPIOptions>() {
         @Override
         public UPIOptions createFromParcel(Parcel in) {
             return new UPIOptions(in);
@@ -21,22 +29,13 @@ public class UPIOptions implements Parcelable {
             return new UPIOptions[size];
         }
     };
-    private String url;
 
-    public UPIOptions(String url) {
-        this.url = url;
+    public String getSubmissionURL() {
+        return submissionURL;
     }
 
-    protected UPIOptions(Parcel in) {
-        url = in.readString();
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
+    public void setSubmissionURL(String submissionURL) {
+        this.submissionURL = submissionURL;
     }
 
     @Override
@@ -45,7 +44,14 @@ public class UPIOptions implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(url);
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(submissionURL);
+    }
+
+    @Override
+    public String toString() {
+        return "UPIOptions{" +
+                "submissionURL='" + submissionURL + '\'' +
+                '}';
     }
 }

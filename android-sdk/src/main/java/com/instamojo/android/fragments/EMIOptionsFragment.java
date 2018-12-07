@@ -11,29 +11,30 @@ import android.widget.TextView;
 import com.instamojo.android.R;
 import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.helpers.MoneyUtils;
-import com.instamojo.android.models.EMIBank;
+import com.instamojo.android.models.EMIOption;
+import com.instamojo.android.models.EMIRate;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
-public class EMIBankOptionsView extends BaseFragment {
+public class EMIOptionsFragment extends BaseFragment {
 
     private PaymentDetailsActivity parentActivity;
     private LinearLayout optionsContainer;
-    private EMIBank selectedBank;
+    private EMIOption selectedBank;
 
-    public EMIBankOptionsView() {
+    public EMIOptionsFragment() {
     }
 
-    public static EMIBankOptionsView getInstance(EMIBank selectedBank) {
-        EMIBankOptionsView optionsView = new EMIBankOptionsView();
+    public static EMIOptionsFragment getInstance(EMIOption selectedBank) {
+        EMIOptionsFragment optionsView = new EMIOptionsFragment();
         optionsView.setSelectedBank(selectedBank);
         return optionsView;
     }
 
-    private static double getEmiAmount(String totalAmount, BigDecimal rate, int tenure) {
+    private static double getEmiAmount(String totalAmount, String rate, int tenure) {
+
         double parsedAmount = Double.parseDouble(totalAmount);
-        return MoneyUtils.getMonthlyEMI(parsedAmount, rate, tenure);
+        return MoneyUtils.getMonthlyEMI(parsedAmount, new BigDecimal(rate), tenure);
     }
 
     private static double getTotalAmount(double emiAmount, int tenure) {
@@ -63,29 +64,28 @@ public class EMIBankOptionsView extends BaseFragment {
         parentActivity.updateActionBarTitle(R.string.choose_an_emi_option);
     }
 
-    public void setSelectedBank(EMIBank selectedBank) {
+    public void setSelectedBank(EMIOption selectedBank) {
         this.selectedBank = selectedBank;
     }
 
     private void loadOptions() {
         optionsContainer.removeAllViews();
-        String orderAmount = parentActivity.getOrder().getAmount();
-        for (final Map.Entry<Integer, BigDecimal> option : selectedBank.getRates().entrySet()) {
+        String orderAmount = parentActivity.getOrder().getOrder().getAmount();
+
+        for (final EMIRate option : selectedBank.getEmiRates()) {
             View optionView = LayoutInflater.from(getContext()).inflate(R.layout.emi_option_view,
                     optionsContainer, false);
-            double emiAmount = getEmiAmount(orderAmount, option.getValue(), option.getKey());
-            String emiAmountString = "₹" + emiAmount + " x " + option.getKey() + " Months";
-            String finalAmountString = "Total ₹" + getTotalAmount(emiAmount, option.getKey()) + " @ "
-                    + option.getValue() + "% pa";
+            double emiAmount = getEmiAmount(orderAmount, option.getInterest(), option.getTenure());
+            String emiAmountString = "₹" + emiAmount + " x " + option.getTenure() + " Months";
+            String finalAmountString = "Total ₹" + getTotalAmount(emiAmount, option.getTenure()) + " @ "
+                    + option.getInterest() + "% pa";
             ((TextView) optionView.findViewById(R.id.emi_amount)).setText(emiAmountString);
             ((TextView) optionView.findViewById(R.id.final_emi_amount)).setText(finalAmountString);
             optionView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    parentActivity.getOrder().getEmiOptions()
-                            .setSelectedBankCode(selectedBank.getBankCode());
-                    parentActivity.getOrder().getEmiOptions().setSelectedTenure(option.getKey());
-                    parentActivity.loadFragment(CardForm.getCardForm(CardForm.Mode.EMI), true);
+                    parentActivity.loadFragment(CardFragment.getCardForm(
+                            CardFragment.Mode.EMI, option.getTenure(), selectedBank.getBankCode()), true);
                 }
             });
             optionsContainer.addView(optionView);

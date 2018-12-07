@@ -3,6 +3,7 @@ package com.instamojo.android.activities;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.SearchView;
@@ -11,13 +12,21 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.instamojo.android.Instamojo;
 import com.instamojo.android.R;
 import com.instamojo.android.fragments.BaseFragment;
-import com.instamojo.android.fragments.ChoosePaymentOption;
-import com.instamojo.android.fragments.ListForm;
+import com.instamojo.android.fragments.PaymentOptionsFragment;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
-import com.instamojo.android.models.Order;
+import com.instamojo.android.models.GatewayOrder;
+import com.instamojo.android.network.ImojoService;
+import com.instamojo.android.network.ServiceGenerator;
+
+import java.io.IOException;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Payment Details Activity extends the {@link BaseActivity}. Activity lets user to choose a Payment method
@@ -25,17 +34,59 @@ import com.instamojo.android.models.Order;
 public class PaymentDetailsActivity extends BaseActivity {
 
     private static final String TAG = PaymentDetailsActivity.class.getSimpleName();
-    private Order order;
+    private GatewayOrder order;
     private boolean showSearch;
     private SearchView.OnQueryTextListener onQueryTextListener;
-    private ListForm.Mode mode;
+    private String hintText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_details_instamojo);
         inflateXML();
-        loadFragments();
+
+        String orderID = getIntent().getStringExtra(Constants.ORDER_ID);
+        if (orderID == null) {
+            Logger.e(TAG, "Object not found. Sending back - Payment Cancelled");
+            fireBroadcastAndReturn(Instamojo.RESULT_CANCELLED, null);
+        }
+
+        fetchOrder(orderID);
+
+        IntentFilter filter = new IntentFilter(Instamojo.ACTION_INTENT_FILTER);
+        registerReceiver(Instamojo.getInstance(), filter);
+    }
+
+    private void fetchOrder(String orderID) {
+        ImojoService imojoService = ServiceGenerator.getImojoService();
+        Call<GatewayOrder> gatewayOrderCall = imojoService.getPaymentOptions(orderID);
+        gatewayOrderCall.enqueue(new Callback<GatewayOrder>() {
+            @Override
+            public void onResponse(Call<GatewayOrder> call, Response<GatewayOrder> response) {
+                if (response.isSuccessful()) {
+                    order = response.body();
+                    loadFragments();
+
+                } else {
+                    if (response.errorBody() != null) {
+                        try {
+                            Logger.d(TAG, "Error response from server while fetching order details.");
+                            Logger.e(TAG, "Error: " + response.errorBody().string());
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    fireBroadcastAndReturn(Instamojo.RESULT_FAILED, null, "Error fetching order details");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GatewayOrder> call, Throwable t) {
+                fireBroadcastAndReturn(Instamojo.RESULT_FAILED, null, "Failed to fetch order details");
+            }
+        });
     }
 
     @Override
@@ -44,18 +95,12 @@ public class PaymentDetailsActivity extends BaseActivity {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.menu_payment_options, menu);
 
-            SearchManager searchManager = (SearchManager)
-                    getSystemService(Context.SEARCH_SERVICE);
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             MenuItem searchMenuItem = menu.findItem(R.id.search);
             SearchView searchView = (SearchView) searchMenuItem.getActionView();
-            if (mode == ListForm.Mode.NetBanking) {
-                searchView.setQueryHint(getString(R.string.search_your_bank));
-            } else {
-                searchView.setQueryHint(getString(R.string.search_your_wallet));
-            }
+            searchView.setQueryHint(hintText);
 
-            searchView.setSearchableInfo(searchManager.
-                    getSearchableInfo(getComponentName()));
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
             searchView.setSubmitButtonEnabled(true);
             if (onQueryTextListener != null) {
                 searchView.setOnQueryTextListener(onQueryTextListener);
@@ -90,7 +135,8 @@ public class PaymentDetailsActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-            returnResult(RESULT_CANCELED);
+            fireBroadcastAndReturn(Instamojo.RESULT_CANCELLED, null);
+
         } else {
             getSupportFragmentManager().popBackStackImmediate();
         }
@@ -101,7 +147,7 @@ public class PaymentDetailsActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.REQUEST_CODE) {
             Logger.d(TAG, "Returning back result to caller");
-            returnResult(data.getExtras(), resultCode);
+            fireBroadcastAndReturn(mapResultCode(resultCode), data.getExtras());
         }
     }
 
@@ -115,20 +161,13 @@ public class PaymentDetailsActivity extends BaseActivity {
     /**
      * @return The current Order
      */
-    public Order getOrder() {
+    public GatewayOrder getOrder() {
         return order;
     }
 
     private void loadFragments() {
-        Logger.d(TAG, "looking for Order object...");
-        order = getIntent().getParcelableExtra(Constants.ORDER);
-        if (order == null) {
-            Logger.e(TAG, "Object not found. Sending back - Payment Cancelled");
-            returnResult(RESULT_CANCELED);
-            return;
-        }
         Logger.d(TAG, "Found order Object. Starting PaymentOptionsFragment");
-        loadFragment(new ChoosePaymentOption(), false);
+        loadFragment(new PaymentOptionsFragment(), false);
     }
 
     /**
@@ -152,14 +191,60 @@ public class PaymentDetailsActivity extends BaseActivity {
     /**
      * Show the search icon in the actionbar
      *
-     * @param showSearch        Show the search icon in action action bar
      * @param queryTextListener {@link android.support.v7.widget.SearchView.OnQueryTextListener} to listen for the query string
      */
-    public void setShowSearch(boolean showSearch, SearchView.OnQueryTextListener queryTextListener, ListForm.Mode mode) {
-        this.mode = mode;
-        this.showSearch = showSearch;
+    public void showSearchOption(String hintText, SearchView.OnQueryTextListener queryTextListener) {
+        this.showSearch = true;
         this.onQueryTextListener = queryTextListener;
+        this.hintText = hintText;
         invalidateOptionsMenu();
-        Logger.d(TAG, "Invalidating search option for Net banking");
+    }
+
+    public void hideSearchOption() {
+        this.showSearch = false;
+        invalidateOptionsMenu();
+    }
+
+    private void fireBroadcastAndReturn(int resultCode, Bundle data) {
+        fireBroadcastAndReturn(resultCode, data, null);
+    }
+
+    private void fireBroadcastAndReturn(int resultCode, Bundle data, String message) {
+        Intent intent = new Intent();
+
+        if (data != null) {
+            intent.putExtras(data);
+        }
+
+        intent.putExtra(Constants.KEY_CODE, resultCode);
+
+        if (message != null && !message.isEmpty()) {
+            intent.putExtra(Constants.KEY_MESSGE, message);
+        }
+
+        intent.setAction(Instamojo.ACTION_INTENT_FILTER);
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        sendBroadcast(intent);
+
+        // Finish this activity
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(Instamojo.getInstance());
+        super.onDestroy();
+    }
+
+    private int mapResultCode(int activityResultCode) {
+        switch (activityResultCode) {
+            case RESULT_OK:
+                return Instamojo.RESULT_SUCCESS;
+
+            case RESULT_CANCELED:
+                return Instamojo.RESULT_CANCELLED;
+        }
+
+        return Instamojo.RESULT_FAILED;
     }
 }

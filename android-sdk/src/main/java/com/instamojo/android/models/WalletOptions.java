@@ -4,11 +4,24 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import java.util.ArrayList;
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 public class WalletOptions implements Parcelable {
-    @SuppressWarnings("unused")
-    public static final Parcelable.Creator<WalletOptions> CREATOR = new Parcelable.Creator<WalletOptions>() {
+
+    @SerializedName("submission_url")
+    private String submissionURL;
+
+    @SerializedName("choices")
+    private List<Wallet> wallets;
+
+    protected WalletOptions(Parcel in) {
+        submissionURL = in.readString();
+        wallets = in.createTypedArrayList(Wallet.CREATOR);
+    }
+
+    public static final Creator<WalletOptions> CREATOR = new Creator<WalletOptions>() {
         @Override
         public WalletOptions createFromParcel(Parcel in) {
             return new WalletOptions(in);
@@ -19,42 +32,21 @@ public class WalletOptions implements Parcelable {
             return new WalletOptions[size];
         }
     };
-    private final String url;
-    private ArrayList<Wallet> wallets = new ArrayList<>();
 
-    public WalletOptions(String url, ArrayList<Wallet> wallets) {
-        this.url = url;
-        this.wallets = wallets;
+    public String getSubmissionURL() {
+        return submissionURL;
     }
 
-    protected WalletOptions(Parcel in) {
-        url = in.readString();
-        int walletsSize = in.readInt();
-        if (walletsSize == 0) {
-            return;
-        }
-        wallets = new ArrayList<>();
-        for (int i = 0; i < walletsSize; i++) {
-            wallets.add((Wallet) in.readParcelable(Wallet.class.getClassLoader()));
-        }
+    public void setSubmissionURL(String submissionURL) {
+        this.submissionURL = submissionURL;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public ArrayList<Wallet> getWallets() {
+    public List<Wallet> getWallets() {
         return wallets;
     }
 
-    /**
-     * PostData to be posted with Wallet URL.
-     *
-     * @param walletID  Wallet ID of the wallet user selected.
-     * @return string with form query format.
-     */
-    public String getPostData(@NonNull String walletID) {
-        return "wallet_id=" + walletID;
+    public void setWallets(List<Wallet> wallets) {
+        this.wallets = wallets;
     }
 
     @Override
@@ -63,16 +55,26 @@ public class WalletOptions implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(url);
-        if (wallets.size() < 1) {
-            dest.writeInt(0);
-            return;
-        }
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(submissionURL);
+        parcel.writeTypedList(wallets);
+    }
 
-        dest.writeInt(wallets.size());
-        for (Wallet wallet : wallets) {
-            dest.writeParcelable(wallet, flags);
-        }
+    /**
+     * PostData to be posted with Wallet URL.
+     *
+     * @param walletID Wallet ID of the wallet user selected.
+     * @return string with form query format.
+     */
+    public String getPostData(@NonNull String walletID) {
+        return "wallet_id=" + walletID;
+    }
+
+    @Override
+    public String toString() {
+        return "WalletOptions{" +
+                "submissionURL='" + submissionURL + '\'' +
+                ", wallets=" + wallets +
+                '}';
     }
 }

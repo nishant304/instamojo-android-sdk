@@ -18,24 +18,35 @@ import android.widget.Toast;
 import com.instamojo.android.R;
 import com.instamojo.android.activities.BaseActivity;
 import com.instamojo.android.activities.PaymentDetailsActivity;
-import com.instamojo.android.callbacks.JuspayRequestCallback;
 import com.instamojo.android.helpers.CardType;
 import com.instamojo.android.helpers.CardUtil;
+import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
+import com.instamojo.android.helpers.ObjectMapper;
 import com.instamojo.android.helpers.Validators;
 import com.instamojo.android.models.Card;
-import com.instamojo.android.network.Request;
+import com.instamojo.android.models.CardOptions;
+import com.instamojo.android.models.CardPaymentResponse;
+import com.instamojo.android.models.GatewayOrder;
+import com.instamojo.android.network.ImojoService;
+import com.instamojo.android.network.ServiceGenerator;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass. The {@link Fragment} to get Debit Card details from user.
  */
-public class CardForm extends BaseFragment implements View.OnClickListener {
+public class CardFragment extends BaseFragment implements View.OnClickListener {
 
-    private static final String TAG = CardForm.class.getSimpleName();
+    private static final String TAG = CardFragment.class.getSimpleName();
     private static final String MONTH_YEAR_SEPARATOR = "/";
     private static final String FRAGMENT_NAME = "Card Form";
 
@@ -43,17 +54,27 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
     private List<MaterialEditText> editTexts;
     private PaymentDetailsActivity parentActivity;
     private Mode mode;
+    private int mSelectedTenure;
+    private String mSelectedBankCode;
 
     /**
      * Creates a new instance of Fragment
      */
-    public CardForm() {
+    public CardFragment() {
         // Required empty public constructor
     }
 
-    public static CardForm getCardForm(Mode mode) {
-        CardForm form = new CardForm();
+    public static CardFragment getCardForm(Mode mode) {
+        CardFragment form = new CardFragment();
         form.mode = mode;
+        return form;
+    }
+
+    public static CardFragment getCardForm(Mode mode, int tenure, String bankCode) {
+        CardFragment form = new CardFragment();
+        form.mode = mode;
+        form.mSelectedBankCode = bankCode;
+        form.mSelectedTenure = tenure;
         return form;
     }
 
@@ -154,7 +175,7 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
         });
 
         Button checkOutButton = view.findViewById(R.id.checkout);
-        String checkoutText = "Pay ₹" + parentActivity.getOrder().getAmount();
+        String checkoutText = "Pay ₹" + parentActivity.getOrder().getOrder().getAmount();
         checkOutButton.setText(checkoutText);
         checkOutButton.setOnClickListener(this);
 
@@ -236,26 +257,61 @@ public class CardForm extends BaseFragment implements View.OnClickListener {
         final AlertDialog dialog = builder.create();
         dialog.show();
 
-        Request request = new Request(parentActivity.getOrder(), card, new JuspayRequestCallback() {
+        final GatewayOrder order = parentActivity.getOrder();
+        Map<String, String> cardPaymentRequest = ObjectMapper.populateCardRequest(order, card,
+                mSelectedBankCode, mSelectedTenure);
+
+        ImojoService service = ServiceGenerator.getImojoService();
+        final CardOptions cardOptions = order.getPaymentOptions().getCardOptions();
+        Call<CardPaymentResponse> orderCall = service.collectCardPayment(cardOptions.getSubmissionURL(),
+                cardPaymentRequest);
+        Logger.d(TAG, cardOptions.getSubmissionURL());
+        orderCall.enqueue(new Callback<CardPaymentResponse>() {
             @Override
-            public void onFinish(final Bundle bundle, final Exception error) {
+            public void onResponse(Call<CardPaymentResponse> call, final Response<CardPaymentResponse> response) {
+
                 parentActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        changeEditBoxesState(true);
-                        dialog.dismiss();
-                        if (error != null) {
+                        if (response.isSuccessful()) {
+                            changeEditBoxesState(true);
+                            dialog.dismiss();
+
+                            final Bundle bundle = new Bundle();
+                            bundle.putString(Constants.URL, response.body().getUrl());
+                            bundle.putString(Constants.MERCHANT_ID, cardOptions.getSubmissionData().getMerchantID());
+                            bundle.putString(Constants.ORDER_ID, cardOptions.getSubmissionData().getOrderID());
+                            parentActivity.startPaymentActivity(bundle);
+
+                        } else {
                             Toast.makeText(parentActivity, R.string.error_message_juspay,
                                     Toast.LENGTH_SHORT).show();
-                            Logger.e(this.getClass().getSimpleName(), "Card checkout failed due to - " + error.getMessage());
-                            return;
+                            if (response.errorBody() != null) {
+                                try {
+                                    Logger.e(TAG, "Error response from card checkout call - " +
+                                            response.errorBody().string());
+
+                                } catch (IOException e) {
+                                    Logger.e(TAG, "Error reading error response: " + e.getMessage());
+                                }
+                            }
                         }
-                        parentActivity.startPaymentActivity(bundle);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<CardPaymentResponse> call, final Throwable t) {
+                parentActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(parentActivity, R.string.error_message_juspay,
+                                Toast.LENGTH_SHORT).show();
+                        Logger.e(TAG, "Card checkout failed due to - " + t.getMessage());
                     }
                 });
             }
         });
-        request.execute();
     }
 
     @Override
