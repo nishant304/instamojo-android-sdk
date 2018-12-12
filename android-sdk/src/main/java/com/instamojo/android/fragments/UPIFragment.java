@@ -18,7 +18,7 @@ import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.helpers.Validators;
 import com.instamojo.android.models.GatewayOrder;
-import com.instamojo.android.models.UPIPaymentRequest;
+import com.instamojo.android.models.UPIOptions;
 import com.instamojo.android.models.UPIStatusResponse;
 import com.instamojo.android.models.UPISubmissionResponse;
 import com.instamojo.android.network.ImojoService;
@@ -49,36 +49,7 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
     private View preVPALayout, postVPALayout, verifyPayment;
     private UPISubmissionResponse upiSubmissionResponse;
     private Handler handler = new Handler();
-
-    private StatusPoller mStatusPoller = new StatusPoller("url");
-
-    class StatusPoller implements Runnable {
-        String statusURL;
-
-        public StatusPoller(String statusURL) {
-            this.statusURL = statusURL;
-        }
-
-        @Override
-        public void run() {
-            try {
-                int statusCode = fetchUPIStatus(statusURL);
-                // TODO instead check for SUCCESS
-                if (statusCode != Constants.PENDING_PAYMENT) {
-                    // Stop polling for status. Return to activity
-                    returnResult();
-                    return;
-                }
-
-            } catch (IOException e) {
-                Logger.d(TAG, "Exception occurred while polling for status. Error: " + e.getMessage());
-
-            } finally {
-                // Continue for exceptions as well
-                handler.postDelayed(mStatusPoller, DELAY_CHECK);
-            }
-        }
-    }
+    private String mUPIStatusURL;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -127,7 +98,6 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
 
     @Override
     public void onDetach() {
-        handler.removeCallbacks(mStatusPoller);
         super.onDetach();
     }
 
@@ -140,12 +110,14 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         virtualAddressBox.setEnabled(false);
         verifyPayment.setEnabled(false);
 
-        UPIPaymentRequest upiPaymentRequest = new UPIPaymentRequest();
-        upiPaymentRequest.setUpiAddress(virtualAddressBox.getText().toString());
-
         ImojoService imojoService = ServiceGenerator.getImojoService();
+
+        // TODO this fragment should receive UPI options only
+        GatewayOrder gatewayOrder = parentActivity.getOrder();
+        UPIOptions upiOptions = gatewayOrder.getPaymentOptions().getUpiOptions();
+
         Call<UPISubmissionResponse> upiPaymentCall =
-                imojoService.collectUPIPayment(parentActivity.getOrder().getOrder().getId(), upiPaymentRequest);
+                imojoService.collectUPIPayment(upiOptions.getSubmissionURL(), virtualAddressBox.getText().toString());
 
         upiPaymentCall.enqueue(new Callback<UPISubmissionResponse>() {
             @Override
@@ -166,7 +138,8 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
                             postVPALayout.setVisibility(View.VISIBLE);
 
                             UPIFragment.this.upiSubmissionResponse = upiSubmissionResponse;
-                            startPollingForUPIStatus();
+                            mUPIStatusURL = upiSubmissionResponse.getStatusCheckURL();
+                            checkUpiPaymentStatus();
                         }
                     });
 
@@ -175,6 +148,7 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
                     if (response.code() == 400) {
                         try {
                             String errorBody = response.errorBody().string();
+                            Logger.d(TAG, errorBody);
                             JSONObject responseObject = new JSONObject(errorBody);
                             JSONObject errors = responseObject.getJSONObject("errors");
 
@@ -197,19 +171,35 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
                 Toast.makeText(getContext(), "Oops. Some error occurred. Please try again..", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
-    private int fetchUPIStatus(String statusURL) throws IOException {
+    private void checkUpiPaymentStatus() {
         ImojoService imojoService = ServiceGenerator.getImojoService();
-        Call<UPIStatusResponse> upiStatusCall = imojoService.getUPIStatus(statusURL);
-        Response<UPIStatusResponse> response = upiStatusCall.execute();
-        UPIStatusResponse upiStatusResponse = response.body();
-        return upiStatusResponse.getStatusCode();
-    }
+        Call<UPIStatusResponse> upiStatusCall = imojoService.getUPIStatus(mUPIStatusURL);
+        upiStatusCall.enqueue(new Callback<UPIStatusResponse>() {
+            @Override
+            public void onResponse(Call<UPIStatusResponse> call, Response<UPIStatusResponse> response) {
+                if (response.isSuccessful()) {
+                    int statusCode = response.body().getStatusCode();
+                    if (statusCode != Constants.PENDING_PAYMENT) {
+                        // Stop polling for status. Return to activity
+                        returnResult();
 
-    private void startPollingForUPIStatus() {
-        mStatusPoller.run();
+                    } else {
+                        // Keep trying
+                        retryUPIStatusCheck();
+                    }
+
+                } else {
+                    Logger.e(TAG, "Error response while fetching UPI status");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UPIStatusResponse> call, Throwable t) {
+                Logger.e(TAG, "Failed to fetch UPI status. Error: " + t.getMessage());
+            }
+        });
     }
 
     private void returnResult() {
@@ -220,5 +210,14 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         bundle.putString(Constants.PAYMENT_ID, upiSubmissionResponse.getPaymentID());
         Logger.d(TAG, "Payment complete. Finishing activity...");
         parentActivity.returnResult(bundle, Activity.RESULT_OK);
+    }
+
+    public void retryUPIStatusCheck() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkUpiPaymentStatus();
+            }
+        }, DELAY_CHECK);
     }
 }
