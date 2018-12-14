@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.instamojo.android.R;
 import com.instamojo.android.activities.PaymentDetailsActivity;
-import com.instamojo.android.helpers.MoneyUtils;
+import com.instamojo.android.helpers.MoneyUtil;
 import com.instamojo.android.models.EMIOption;
 import com.instamojo.android.models.EMIRate;
 
@@ -34,11 +34,11 @@ public class EMIOptionsFragment extends BaseFragment {
     private static double getEmiAmount(String totalAmount, String rate, int tenure) {
 
         double parsedAmount = Double.parseDouble(totalAmount);
-        return MoneyUtils.getMonthlyEMI(parsedAmount, new BigDecimal(rate), tenure);
+        return MoneyUtil.getMonthlyEMI(parsedAmount, new BigDecimal(rate), tenure);
     }
 
     private static double getTotalAmount(double emiAmount, int tenure) {
-        return MoneyUtils.getRoundedValue(emiAmount * tenure, 2);
+        return MoneyUtil.getRoundedValue(emiAmount * tenure, 2);
     }
 
     @SuppressWarnings("unchecked")

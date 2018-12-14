@@ -2,7 +2,7 @@ package com.instamojo.android.helpers;
 
 import java.math.BigDecimal;
 
-public class MoneyUtils {
+public class MoneyUtil {
 
     /**
      * Converts a number to a expected precision by rounding the number.
