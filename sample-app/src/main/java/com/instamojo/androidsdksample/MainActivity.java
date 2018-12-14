@@ -1,81 +1,46 @@
 package com.instamojo.androidsdksample;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
-import android.support.v7.widget.AppCompatSpinner;
+import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.instamojo.android.Instamojo;
-import com.instamojo.android.activities.PaymentDetailsActivity;
-import com.instamojo.android.callbacks.OrderRequestCallback;
 import com.instamojo.android.helpers.Constants;
-import com.instamojo.android.models.Errors;
-import com.instamojo.android.models.Order;
-import com.instamojo.android.network.Request;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
-
-    private static class DefaultHeadersInterceptor implements Interceptor {
-        @Override
-        public okhttp3.Response intercept(Chain chain) throws IOException {
-            return chain.proceed(chain.request()
-                    .newBuilder()
-                    .header("User-Agent", getUserAgent())
-                    .header("Referer", getReferer())
-                    .build());
-        }
-
-        private static String getUserAgent() {
-            return "instamojo-android-sdk-sample/" + BuildConfig.VERSION_NAME
-                    + " android/" + Build.VERSION.RELEASE
-                    + " " + Build.BRAND + "/" + Build.MODEL;
-        }
-
-        private static String getReferer() {
-            return "android-app://" + BuildConfig.APPLICATION_ID;
-        }
-    }
+public class MainActivity extends AppCompatActivity implements Instamojo.InstamojoPaymentCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final HashMap<String, String> env_options = new HashMap<>();
+    private static final HashMap<Instamojo.Environment, String> env_options = new HashMap<>();
 
     static {
-        env_options.put("Test", "https://test.instamojo.com/");
-        env_options.put("Production", "https://api.instamojo.com/");
+        env_options.put(Instamojo.Environment.TEST, "https://test.instamojo.com/");
+        env_options.put(Instamojo.Environment.PRODUCTION, "https://api.instamojo.com/");
     }
 
     private AlertDialog dialog;
     private AppCompatEditText nameBox, emailBox, phoneBox, amountBox, descriptionBox;
-    private String currentEnv = null;
-
-    private static OkHttpClient httpClient = new OkHttpClient.Builder()
-            .addInterceptor(new DefaultHeadersInterceptor())
-            .build();
+    private Instamojo.Environment mCurrentEnv = Instamojo.Environment.TEST;
+    private boolean mCustomUIFlow = false;
 
     private MyBackendService myBackendService;
 
@@ -85,30 +50,40 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Button button = findViewById(R.id.pay);
         nameBox = findViewById(R.id.name);
-        nameBox.setSelection(nameBox.getText().toString().trim().length());
         emailBox = findViewById(R.id.email);
-        emailBox.setSelection(emailBox.getText().toString().trim().length());
         phoneBox = findViewById(R.id.phone);
-        phoneBox.setSelection(phoneBox.getText().toString().trim().length());
         amountBox = findViewById(R.id.amount);
-        amountBox.setSelection(amountBox.getText().toString().trim().length());
         descriptionBox = findViewById(R.id.description);
-        descriptionBox.setSelection(descriptionBox.getText().toString().trim().length());
-        AppCompatSpinner envSpinner = findViewById(R.id.env_spinner);
-        final ArrayList<String> envs = new ArrayList<>(env_options.keySet());
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, envs);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        envSpinner.setAdapter(adapter);
-        envSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+        final SwitchCompat envSwitch = findViewById(R.id.env_switch);
+        envSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                currentEnv = envs.get(position);
-                Instamojo.setBaseUrl(env_options.get(currentEnv));
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mCurrentEnv = Instamojo.Environment.PRODUCTION;
+                    envSwitch.setText(envSwitch.getTextOn());
+
+                } else {
+                    mCurrentEnv = Instamojo.Environment.TEST;
+                    envSwitch.setText(envSwitch.getTextOff());
+                }
+
+                Instamojo.getInstance().initialize(MainActivity.this, mCurrentEnv);
             }
+        });
 
+        final SwitchCompat uiSwitch = findViewById(R.id.ui_switch);
+        uiSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mCustomUIFlow = true;
+                    uiSwitch.setText(uiSwitch.getTextOn());
 
+                } else {
+                    mCustomUIFlow = false;
+                    uiSwitch.setText(uiSwitch.getTextOff());
+                }
             }
         });
 
@@ -119,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize the backend service client
         Retrofit retrofit = new Retrofit.Builder()
-                .client(httpClient)
                 .baseUrl("https://sample-sdk-server.instamojo.com")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -131,14 +105,11 @@ public class MainActivity extends AppCompatActivity {
                 createOrderOnServer();
             }
         });
-
-        //let's set the log level to debug
-        Instamojo.setLogLevel(Log.DEBUG);
     }
 
     private void createOrderOnServer() {
         GetOrderIDRequest request = new GetOrderIDRequest();
-        request.setEnv(currentEnv);
+        request.setEnv(mCurrentEnv.name());
         request.setBuyerName(nameBox.getText().toString());
         request.setBuyerEmail(emailBox.getText().toString());
         request.setBuyerPhone(phoneBox.getText().toString());
@@ -151,7 +122,15 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<GetOrderIDResponse> call, Response<GetOrderIDResponse> response) {
                 if (response.isSuccessful()) {
                     String orderId = response.body().getOrderID();
-                    fetchOrder(orderId);
+
+                    if (!mCustomUIFlow) {
+                        // Initiate the default SDK-provided payment activity
+                        initiateSDKPayment(orderId);
+
+                    } else {
+                        // OR initiate a custom UI activity
+                        initiateCustomPayment(orderId);
+                    }
 
                 } else {
                     // Handle api errors
@@ -175,50 +154,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // this is for the market place
-    // you should have created the order from your backend and pass back the order id to app for the payment
-    private void fetchOrder(String orderID) {
-        // Good time to show dialog
-        Request request = new Request(orderID, new OrderRequestCallback() {
-            @Override
-            public void onFinish(final Order order, final Exception error) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.dismiss();
-                        if (error != null) {
-                            if (error instanceof Errors.ConnectionError) {
-                                showToast("No internet connection");
-                            } else if (error instanceof Errors.ServerError) {
-                                showToast("Server error. Try again");
-                            } else if (error instanceof Errors.AuthenticationError) {
-                                showToast("Access token is invalid or expired. Please update the token");
-                            } else {
-                                showToast(error.toString());
-                            }
-                            return;
-                        }
-
-                        startPreCreatedUI(order);
-                    }
-                });
-            }
-        });
-
-        request.execute();
+    private void initiateSDKPayment(String orderID) {
+        Instamojo.getInstance().initiatePayment(this, orderID, this);
     }
 
-    private void startPreCreatedUI(Order order) {
-        //Using Pre created UI
-        Intent intent = new Intent(getBaseContext(), PaymentDetailsActivity.class);
-        intent.putExtra(Constants.ORDER, order);
-        startActivityForResult(intent, Constants.REQUEST_CODE);
-    }
-
-    private void startCustomUI(Order order) {
-        //Custom UI Implementation
+    private void initiateCustomPayment(String orderID) {
         Intent intent = new Intent(getBaseContext(), CustomUIActivity.class);
-        intent.putExtra(Constants.ORDER, order);
+        intent.putExtra(Constants.ORDER_ID, orderID);
         startActivityForResult(intent, Constants.REQUEST_CODE);
     }
 
@@ -246,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         showToast("Checking transaction status");
-        Call<GatewayOrderStatus> getOrderStatusCall = myBackendService.orderStatus(currentEnv.toLowerCase(Locale.US),
+        Call<GatewayOrderStatus> getOrderStatusCall = myBackendService.orderStatus(mCurrentEnv.name().toLowerCase(),
                 orderID, transactionID);
         getOrderStatusCall.enqueue(new retrofit2.Callback<GatewayOrderStatus>() {
             @Override
@@ -302,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
 
         showToast("Initiating a refund for - " + amount);
         Call<ResponseBody> refundCall = myBackendService.refundAmount(
-                currentEnv.toLowerCase(Locale.US),
+                mCurrentEnv.name().toLowerCase(),
                 transactionID, amount);
         refundCall.enqueue(new retrofit2.Callback<ResponseBody>() {
             @Override
@@ -346,4 +288,24 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    @Override
+    public void onInstamojoPaymentComplete(String orderID, String transactionID, String paymentID, String paymentStatus) {
+        Log.d(TAG, "Payment complete");
+        showToast("Payment complete. Order ID: " + orderID + ", Transaction ID: " + transactionID
+                + ", Payment ID:" + paymentID + ", Status: " + paymentStatus);
+    }
+
+    @Override
+    public void onPaymentCancelled() {
+        Log.d(TAG, "Payment cancelled");
+        showToast("Payment cancelled by user");
+    }
+
+    @Override
+    public void onInitiatePaymentFailure(String errorMessage) {
+        Log.d(TAG, "Initiate payment failed");
+        showToast("Initiating payment failed. Error: " + errorMessage);
+    }
+
 }

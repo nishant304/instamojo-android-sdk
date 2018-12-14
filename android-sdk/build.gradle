@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 ext {
-    sdkVersion = '2.0.2'
-    sdkVersionCode = 15
+    sdkVersion = '3.0.0'
+    sdkVersionCode = 16
     libraryDescription = 'Instamojo Payments Android SDK'
     siteUrl = 'https://github.com/Instamojo/instamojo-android-sdk'
     gitUrl = 'https://github.com/Instamojo/instamojo-android-sdk.git'
@@ -25,28 +25,37 @@ android {
         vectorDrawables.useSupportLibrary = true
         consumerProguardFiles 'proguard-rules.pro'
     }
+
     buildTypes {
         release {
             minifyEnabled true
             debuggable false
             proguardFiles 'proguard-rules.pro'
         }
+        debug {
+            debuggable true
+            testCoverageEnabled false
+        }
     }
+
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
         exclude '.readme'
     }
+
     lintOptions {
         abortOnError true
         ignoreWarnings false
         textReport true
         textOutput 'stdout'
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+
     productFlavors {
     }
 }
@@ -54,12 +63,13 @@ android {
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
     api 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support:recyclerview-v7:27.1.1'
-    api 'com.squareup.okhttp3:okhttp:3.11.0'
     api 'com.rengwuxian.materialedittext:library:2.1.4'
-    api 'in.juspay:godel:0.6.25.2.1423'
+    api 'in.juspay:godel:0.6.25.3.1423'
     api 'com.squareup.retrofit2:retrofit:2.5.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    api 'com.squareup.retrofit2:converter-gson:2.5.0'
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'pl.pragmatists:JUnitParams:1.1.1'
 }
 
 apply from: '../install.gradle'
