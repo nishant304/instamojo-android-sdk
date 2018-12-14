@@ -69,6 +69,7 @@ dependencies {
     api 'com.squareup.retrofit2:converter-gson:2.5.0'
 
     testImplementation 'junit:junit:4.12'
+    testImplementation 'pl.pragmatists:JUnitParams:1.1.1'
 }
 
 apply from: '../install.gradle'
