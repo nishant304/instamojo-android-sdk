@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 ext {
     sdkVersion = '3.0.0'
-    sdkVersionCode = 15
+    sdkVersionCode = 16
     libraryDescription = 'Instamojo Payments Android SDK'
     siteUrl = 'https://github.com/Instamojo/instamojo-android-sdk'
     gitUrl = 'https://github.com/Instamojo/instamojo-android-sdk.git'
