@@ -45,10 +45,12 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-//    implementation 'com.instamojo:android-sdk:2.0.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-    api project(":android-sdk")
+    // Using local android-sdk project
+    implementation project(":android-sdk")
+    // Comment out the above dependency and uncomment the below one to use the release SDK aar
+    // implementation 'com.instamojo:android-sdk:2.0.1'
 }
