@@ -1,7 +1,6 @@
 # Instamojo Android SDK 
 
-Table of Contents
-=================
+## Table of Contents
 
    * [Overview](#overview)
    * [Payment flow using SDK](#payment-flow-using-sdk)
@@ -15,11 +14,12 @@ Table of Contents
      * [Initializing SDK](#initializing-sdk)
      * [Initiating Payment](#initiating-payment)
      * [Receiving response from the SDK](#receiving-response-from-the-sdk)
-   * [Using Custom Created UI](#using-custom-created-ui)
+   * [The Sample App](#the-sample-app)
+   * [Using Custom UI](#using-custom-ui)
     
 ##***Note:SDK currently does not support MarketPlace Integration. MarketPlace API Documentation is available [here](https://docs.instamojo.com/v2/docs)***
 
-##Overview
+## Overview
 This SDK allows you to integrate payments via Instamojo into your Android app. It currently supports following modes of payments:
 
 1. Credit / Debit Cards
@@ -34,7 +34,7 @@ This SDK also comes pre-integrated with Juspay Safe Browser, which makes payment
 3. Input & Keyboard Enhancements: Displays right keyboard with password viewing option.
 4. Smooth User Experience: Aids the natural flow of users with features like Automatic Focus, Scroll/Zoom, Navigation buttons.
 
-##Payment flow using SDK
+## Payment flow using SDK
 The section describes how the payment flow probably looks like, when you integrate with this SDK. Note that, this is just for reference and you are free to make changes to this flow that works well for you.
 
 - When the buyer clicks on Buy button, your app makes a call to your backend to initiate a transaction in your system.
@@ -81,38 +81,61 @@ The following are the minimum set of permissions required by the SDK. Add the fo
 ```
 
 ### Proguard rules
-If you are using Proguard for code obfuscation, add following rules in the proguard configuration file `proguard-rules.pro`
+If you are using Proguard for code obfuscation, add following rules in the proguard configuration file `proguard-rules.pro`.
 ```
 # Rules for Instamojo SDK
 -keep class com.instamojo.android.**{*;}
 ```
 
 ## Fetch Order ID from backend server
-For initiating a payment, you should first create a payment order in your backend server and send the Order ID to the app.
-Please check this [documentation](https://github.com/Instamojo/android-sdk-sample-app/blob/master/sample-sdk-server/Readme.md) 
-on how to create an order on backend server using client credentials.
+For initiating a payment, you should first create a payment order in your backend server and send the orderID to the app.
+Please check this [documentation](https://github.com/Instamojo/sample-sdk-server/blob/master/Readme.md) 
+on how to create a payment order on your backend server using your Instamojo client credentials.
 
 
 ## Simple Integration
 ### Initializing SDK
-Add the following code snippet inside the `onCreate()` method of that custom application class.
-```Java
-    @Override
-        public void onCreate() {
-            super.onCreate();
-            Instamojo.getInstance().initialize(this, Instamojo.Environment.TEST);
-            ...
-        }
+Add the following code snippet inside the `onCreate()` method of your activity class.
+```java
+@Override
+public void onCreate() {
+    super.onCreate();
+    Instamojo.getInstance().initialize(this, Instamojo.Environment.TEST);
+    ...
+}
 ```
 
+### Implement the callback interface
+Implement the `Instamojo.InstamojoPaymentCallback` callback interface in your activity class.
+```java
+public class MainActivity extends AppCompatActivity implements Instamojo.InstamojoPaymentCallback {
+    ...
+    
+    @Override
+    public void onInstamojoPaymentComplete(String orderID, String transactionID, String paymentID, String paymentStatus) {
+        ...
+    }
+
+    @Override
+    public void onPaymentCancelled() {
+        ...
+    }
+
+    @Override
+    public void onInitiatePaymentFailure(String errorMessage) {
+        ...
+    }
+}
+
+```
 ### Initiating Payment
-Once the SDK is initialized, you can simply call `initiatePayment` with the `orderID` and a the callback instance
-```Java
-    Instamojo.getInstance().initiatePayment(this, orderID, this);
+Now you can simply call `initiatePayment` with the `orderID` and the callback instance (which is the activity itself) to initiate a payment.
+```java
+Instamojo.getInstance().initiatePayment(this, orderID, this);
 ```
 
 ### Receiving response from the SDK
-Once the payment is initiated from your activity, it can receive the various SDK responses through the following callback methods
+Once the payment is initiated from your activity, it can receive the various SDK responses in the callback methods.
 
 1. Payment through SDK is complete. The payment can be either a success or a failure
 ```java
@@ -140,13 +163,15 @@ public void onInitiatePaymentFailure(String errorMessage) {
 }
 ```
 
-## Using Custom Created UI
-We know that every application is unique. If you choose to create your own UI to collect Payment information, SDK has necessary APIs to achieve this.
-Use `CustomUIActivity` activity, which uses SDK APIs to collect Payment Information, to extend and modify as per your needs.
+## The Sample App
+You can find the sample app code which uses the latest SDK code under the directory `sample-app`. Read more on it [here](https://github.com/Instamojo/instamojo-android-sdk/blob/readme_update/sample-app/Readme.md).
+
+## Using Custom UI
+We know that every application is unique. If you choose to create your own UI to collect payment information, Instamojo SDK has the necessary APIs to achieve this.
+Check out the [CustomUIActivity](https://github.com/Instamojo/instamojo-android-sdk/blob/master/sample-app/src/main/java/com/instamojo/androidsdksample/CustomUIActivity.java) activity with in the sample app to find out how this can be achieved.
 
 ## Integrate the SDK using DevsupportAI (DEPRECATED and uses SDK version 1.2.6)
-Integration documentation for SDK v1.2.6 using DevsupportAI [here](https://docs.instamojo.com/v1.1/page/devsupport-ai-android-integration).
+Find the integration documentation for SDK v1.2.6 using DevsupportAI [here](https://docs.instamojo.com/v1.1/page/devsupport-ai-android-integration).
 
 ## I have queries regarding the SDK Integration
-If this documentation does not answer any specific question(s) pertaining to SDK integration,
-please shoot out a mail to our [support](mailto:support@instamojo.com). We will respond ASAP.
+If you still have doubts pertaining to SDK integration, please send a mail to our support id: [support@instamojo.com](mailto:support@instamojo.com). We will respond ASAP.
