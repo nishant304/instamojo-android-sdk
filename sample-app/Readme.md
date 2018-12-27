@@ -14,14 +14,14 @@ The sample app needs a backend server to do operations that require a secure env
 
 ## How it works?
 1. The user chooses the environment (Test or Production) and provides the order details like buyer name, email, amount etc.
-3. The sample app sends the details to the sample backend server.
-4. The backend server talks to Instamojo servers and creates a payment order using the order details as well as the client credentials.
-5. The backend server returns the `orderID` to the sample app.
-6. The sample app initiates a payment by passing the `orderID` to the SDK.
-3. The SDK then provides a view consisting of multiple payment options (Credit Card, Net Banking, UPI etc.) for the user to choose from.
-4. User makes a payment using one of the options.
-5. Once the payment is done, the SDK returns the payment status and details to the sample app.
-6. If the payment is successful, the sample app initiates a full refund for the order through the sample backend server.
+2. The sample app sends the details to the sample backend server.
+3. The backend server talks to Instamojo servers and creates a payment order using the order details as well as the client credentials.
+4. The backend server returns the `orderID` to the sample app.
+5. The sample app initiates a payment by passing the `orderID` to the SDK.
+6. The SDK then provides a view consisting of multiple payment options (Credit Card, Net Banking, UPI etc.) for the user to choose from.
+7. User makes a payment using one of the options.
+8. Once the payment is done, the SDK returns the payment status and details to the sample app.
+9. If the payment is successful, the sample app initiates a full refund for the order through the sample backend server.
 
 ## I have few more queries
 If you still have queries regarding sample app, please send a mail to our support id: [support@instamojo.com](mailto:support@instamojo.com). We will respond ASAP.
