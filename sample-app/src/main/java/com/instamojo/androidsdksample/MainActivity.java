@@ -273,27 +273,11 @@ public class MainActivity extends AppCompatActivity implements Instamojo.Instamo
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Constants.REQUEST_CODE && data != null) {
-            String orderID = data.getStringExtra(Constants.ORDER_ID);
-            String transactionID = data.getStringExtra(Constants.TRANSACTION_ID);
-            String paymentID = data.getStringExtra(Constants.PAYMENT_ID);
-
-            // Check transactionID, orderID, and orderID for null before using them to check the Payment status.
-            if (transactionID != null || paymentID != null) {
-                checkPaymentStatus(transactionID, orderID);
-            } else {
-                showToast("Oops!! Payment was cancelled");
-            }
-        }
-    }
-
-    @Override
     public void onInstamojoPaymentComplete(String orderID, String transactionID, String paymentID, String paymentStatus) {
         Log.d(TAG, "Payment complete");
         showToast("Payment complete. Order ID: " + orderID + ", Transaction ID: " + transactionID
                 + ", Payment ID:" + paymentID + ", Status: " + paymentStatus);
+        checkPaymentStatus(transactionID, orderID);
     }
 
     @Override
