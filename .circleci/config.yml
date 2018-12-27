@@ -23,6 +23,9 @@ jobs:
       - run:
           name: Run Tests
           command: ./gradlew lint test
+      - run:
+          name: Generate report
+          command: ./gradlew jacocoTestReport
       - store_artifacts:
           path: android-sdk/build/reports
           destination: reports
@@ -34,6 +37,12 @@ jobs:
       - store_artifacts:
           path: android-sdk/build/outputs/aar/
           destination: aar
+      - run:
+          name: codecov.io
+          when: always
+          command: |
+            docker cp android-sdk/build/reports/jacoco/jacocoTestDebugUnitTestReport/jacocoTestDebugUnitTestReport.xml .
+            curl -s https://codecov.io/bash | bash
 
   release:
     <<: *defaults
