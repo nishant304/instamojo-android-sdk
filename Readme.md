@@ -174,4 +174,4 @@ Check out the [CustomUIActivity](https://github.com/Instamojo/instamojo-android-
 Find the integration documentation for SDK v1.2.6 using DevsupportAI [here](https://docs.instamojo.com/v1.1/page/devsupport-ai-android-integration).
 
 ## I have queries regarding the SDK Integration
-If you still have doubts pertaining to SDK integration, please send a mail to our support id: [support@instamojo.com](mailto:support@instamojo.com). We will respond ASAP.
+If you still have queries regarding SDK integration, please send a mail to our support id: [support@instamojo.com](mailto:support@instamojo.com). We will respond ASAP.
