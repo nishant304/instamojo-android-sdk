@@ -14,7 +14,6 @@
      * [Initializing SDK](#initializing-sdk)
      * [Initiating Payment](#initiating-payment)
      * [Receiving response from the SDK](#receiving-response-from-the-sdk)
-   * [The Sample App](#the-sample-app)
    * [Using Custom UI](#using-custom-ui)
     
 ##***Note:SDK currently does not support MarketPlace Integration. MarketPlace API Documentation is available [here](https://docs.instamojo.com/v2/docs)***
@@ -23,9 +22,10 @@
 This SDK allows you to integrate payments via Instamojo into your Android app. It currently supports following modes of payments:
 
 1. Credit / Debit Cards
-2. EMI 
+2. EMI
 3. Net Banking
 4. Wallets
+5. UPI
 
 This SDK also comes pre-integrated with Juspay Safe Browser, which makes payments on mobile easier, resulting in faster transaction time and improvement in conversions.
 
@@ -38,17 +38,17 @@ This SDK also comes pre-integrated with Juspay Safe Browser, which makes payment
 The section describes how the payment flow probably looks like, when you integrate with this SDK. Note that, this is just for reference and you are free to make changes to this flow that works well for you.
 
 - When the buyer clicks on Buy button, your app makes a call to your backend to initiate a transaction in your system.
-- Your backend systems creates a payment order and returns the order ID to the app. See sample backend.
-- The app then initiates a payment via Instamojo using the OrderID.
-- If OrderID is valid, the user is shown the payment modes, which will take him via the payment process as per mode selected.
-- Once a payment is completed, a callback is called in your Android app with your transaction_id and the payment status.
-- Your app shows the success / failure screen based on the payment status.
-- For more details on the payment, your app makes a request to your backend servers with the transaction_id, which then returns the details after fetching the same from Instamojo servers.
+- Your backend systems creates a payment order and returns the `orderID` to the app. See the [sample app](https://github.com/Instamojo/instamojo-android-sdk/tree/readme_update/sample-app) and [sample backend](https://github.com/Instamojo/sample-sdk-server) for more details.
+- The app then initiates a payment via Instamojo SDK using the `orderID`.
+- If `orderID` is valid, the user is shown the available payment modes. This will take him via the payment process as per mode selected.
+- Once a payment is completed, a callback is received in your android activity with the `payment_id`, `transaction_id` and `payment_status`.
+- Your app shows the success / failure screen based on the payment status (either `Credit` or `Failure`).
+- For more details on the payment, your app may make a request to your backend servers with the `transaction_id`, which then returns the details after fetching the same from Instamojo servers.
 
 
 ## Sample Application 
 A sample app that uses the latest SDK code is provided under `/sample-app` folder. You can either use it as a base for your project or have a look at the integration in action.
-Check out the documentation of the Sample App [here](https://github.com/Instamojo/instamojo-android-sdk/tree/master/sample-app/Readme.md).
+Check out the documentation of the sample app [here](https://github.com/Instamojo/instamojo-android-sdk/tree/master/sample-app/Readme.md).
 
 ## SDK Installation
 ### SDK Dependency
@@ -162,9 +162,6 @@ public void onInitiatePaymentFailure(String errorMessage) {
     showToast("Initiating payment failed. Error: " + errorMessage);
 }
 ```
-
-## The Sample App
-You can find the sample app code which uses the latest SDK code under the directory `sample-app`. Read more on it [here](https://github.com/Instamojo/instamojo-android-sdk/blob/readme_update/sample-app/Readme.md).
 
 ## Using Custom UI
 We know that every application is unique. If you choose to create your own UI to collect payment information, Instamojo SDK has the necessary APIs to achieve this.
