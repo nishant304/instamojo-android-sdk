@@ -39,7 +39,6 @@ jobs:
           name: codecov.io
           when: always
           command: |
-            docker cp reports/jacoco/jacocoTestReport/jacocoTestReport.xml .
             curl -s https://codecov.io/bash | bash
 
   release:
