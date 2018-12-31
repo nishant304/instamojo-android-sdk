@@ -36,7 +36,7 @@ jobs:
           path: android-sdk/build/outputs/aar/
           destination: aar
       - run:
-          name: codecov.io
+          name: Publishing coverage report(codecov.io)
           when: always
           command: |
             curl -s https://codecov.io/bash | bash
