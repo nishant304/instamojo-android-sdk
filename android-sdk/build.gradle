@@ -24,17 +24,17 @@ android {
         versionName sdkVersion
         vectorDrawables.useSupportLibrary = true
         consumerProguardFiles 'proguard-rules.pro'
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
     buildTypes {
         release {
             minifyEnabled true
-            debuggable false
             proguardFiles 'proguard-rules.pro'
         }
         debug {
             debuggable true
-            testCoverageEnabled false
+            testCoverageEnabled true
         }
     }
 
@@ -58,6 +58,15 @@ android {
 
     productFlavors {
     }
+
+    testOptions {
+        execution 'ANDROID_TEST_ORCHESTRATOR'
+        animationsDisabled true
+
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -74,3 +83,4 @@ dependencies {
 
 apply from: '../install.gradle'
 apply from: '../bintray.gradle'
+apply from: '../coverage.gradle'
