@@ -2,7 +2,9 @@ package com.instamojo.android.network;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.webkit.JavascriptInterface;
 
+import com.instamojo.android.BuildConfig;
 import com.instamojo.android.activities.PaymentActivity;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
@@ -23,7 +25,7 @@ public class JavaScriptInterface {
         this.activity = activity;
     }
 
-    @android.webkit.JavascriptInterface
+    @JavascriptInterface
     public void onTransactionComplete(String orderID, String transactionID, String paymentID, String paymentStatus) {
         Logger.d(this.getClass().getSimpleName(), "Received Call to Javascript Interface");
         Bundle bundle = new Bundle();
@@ -33,5 +35,10 @@ public class JavaScriptInterface {
         bundle.putString(Constants.PAYMENT_STATUS, paymentStatus);
         Logger.d(this.getClass().getSimpleName(), "Returning result back to caller");
         ((PaymentActivity) activity).returnResult(bundle, Activity.RESULT_OK);
+    }
+
+    @JavascriptInterface
+    public int getSDKVersionCode() {
+        return BuildConfig.VERSION_CODE;
     }
 }

@@ -1,48 +1,27 @@
-# Android SDK Sample Documentation
+# Instamojo Android SDK Sample App
 
 ## Why Sample App?
-1. The Sample app implements the complete scope of the Android SDK. 
-2. To help you kick start your own application using the Sample App as a Base so that you can focus 
-on developing a cool application while we take care of payments in your application.
+1. The Sample app implements the complete scope of the Android SDK.
+2. To help you kick start your own application using the Sample App as a base with Instamojo payments integrated.
 
 ## What does Sample App do now?
 1. Create orders and make payments on either Test or Production Environments.
 2. Check for the Order status.
 3. Refund the Payment for a completed Order.
 
-## Flow of the Sample App?
-1. Choose either Test or Production Environment
-2. Give your details and proceed to create a new Order with Instamojo.
-3. Choose from a Payment method from multiple Payment Methods.
-4. Make the Payment.
-5. Check the Order status.
-6. If successful, initiate a full refund for that Order.
+## Sample server
+The sample app needs a backend server to do operations that require a secure environment and use credentials like `client_id` and `client_secret`. These operations include fetching an oauth access token, creating payment order and initiating a refund. For the purpose of testing the sample app, we have hosted a [sample backend server](https://github.com/Instamojo/sample-sdk-server) at `https://sample-sdk-server.instamojo.com`. Do checkout the [readme](https://github.com/Instamojo/sample-sdk-server/blob/master/Readme.md) to see how to implement your own backend server for Instamojo Android SDK.
 
-## What about Existing Projects?
-Well, we got you covered there as well. Check out the Integration Documentation 
-[here](https://docs.instamojo.com/page/android-sdk) to integrate Instamojo SDK in your Project.
-
-## Requirements
-From here on we assume that you have `Client ID` and `Client Secret` for Production as well as Test. 
-'Why Test?' you might think. Test Environment to do the integration check of the SDK. 
-
-If you do not have the credentials yet, raise a support ticket so that we could generate and 
-send you the credentials in a jiffy.
-
-## How to Generate Access Token?
-Please check the Sample Server [documentation](https://github.com/Instamojo/sample-sdk-server/blob/master/Readme.md#generating-access-token) on how to generate access_token using `client_id` and `client_secret`
-
-## What is this `Transaction ID` I keep hearing about?
-Well, transaction ID is a unique ID for an Order. Using this transaction ID, 
-you can fetch Order status, get order details, and even initiate a refund for the Order attached to that transaction ID.
-
-The transaction ID should be unique for every Order.
-
-## Well, is there any sample to get me started on the server side?
-Yes, we do have a sample server written in Google Go. Sample uses the Sample server to get `access_token` and `transaction_id`
-to create an `Order`.
-
-You can check the documentation for the Sample Server [here](https://github.com/Instamojo/sample-sdk-server/blob/master/Readme.md)
+## How it works?
+1. The user chooses the environment (Test or Production) and provides the order details like buyer name, email, amount etc.
+2. The sample app sends the details to the sample backend server.
+3. The backend server talks to Instamojo servers and creates a payment order using the order details as well as the client credentials.
+4. The backend server returns the `orderID` to the sample app.
+5. The sample app initiates a payment by passing the `orderID` to the SDK.
+6. The SDK then provides a view consisting of multiple payment options (Credit Card, Net Banking, UPI etc.) for the user to choose from.
+7. User makes a payment using one of the options.
+8. Once the payment is done, the SDK returns the payment status and details to the sample app.
+9. If the payment is successful, the sample app initiates a full refund for the order through the sample backend server.
 
 ## I have few more queries
-Well, if this documentation doesn't answer any specific questions regarding the Sample App, please raise support ticket. We will respond ASAP.
+If you still have queries regarding sample app, please send a mail to our support id: [support@instamojo.com](mailto:support@instamojo.com). We will respond ASAP.

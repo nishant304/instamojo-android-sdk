@@ -14,26 +14,32 @@ jobs:
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "android-sdk/build.gradle" }}
       - run:
-          name: Download Dependencies
+          name: Download dependencies
           command: ./gradlew androidDependencies
       - save_cache:
           paths:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "android-sdk/build.gradle" }}
       - run:
-          name: Run Tests
-          command: ./gradlew lint test
+          name: Run tests with coverage
+          command: ./gradlew lint test jacocoTestReport
       - store_artifacts:
           path: android-sdk/build/reports
           destination: reports
       - store_test_results:
           path: android-sdk/build/test-results
+          destination: test-results
       - run:
           name: Build library
           command: ./gradlew assemble
       - store_artifacts:
           path: android-sdk/build/outputs/aar/
           destination: aar
+      - run:
+          name: Publishing coverage report(codecov.io)
+          when: always
+          command: |
+            curl -s https://codecov.io/bash | bash
 
   release:
     <<: *defaults
