@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 ext {
-    sdkVersion = '3.0.0'
-    sdkVersionCode = 16
+    sdkVersion = '3.1.0'
+    sdkVersionCode = 17
     libraryDescription = 'Instamojo Payments Android SDK'
     siteUrl = 'https://github.com/Instamojo/instamojo-android-sdk'
     gitUrl = 'https://github.com/Instamojo/instamojo-android-sdk.git'
@@ -73,7 +73,7 @@ dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
     api 'com.android.support:appcompat-v7:27.1.1'
     api 'com.rengwuxian.materialedittext:library:2.1.4'
-    api 'in.juspay:godel:0.6.25.3.1423'
+    api 'in.juspay:godel:0.6.25.4.1423'
     api 'com.squareup.retrofit2:retrofit:2.5.0'
     api 'com.squareup.retrofit2:converter-gson:2.5.0'
 
