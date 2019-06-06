@@ -116,3 +116,5 @@
 
 # support class
 -keep class android.support.v7.** { *; }
+
+-keep class com.instamojo.android.models.** { *; }
