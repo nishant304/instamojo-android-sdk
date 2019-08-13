@@ -139,7 +139,7 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
 
                             UPIFragment.this.upiSubmissionResponse = upiSubmissionResponse;
                             mUPIStatusURL = upiSubmissionResponse.getStatusCheckURL();
-                            checkUpiPaymentStatus();
+                            retryUPIStatusCheck(0);
                         }
                     });
 
@@ -173,35 +173,6 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         });
     }
 
-    private void checkUpiPaymentStatus() {
-        ImojoService imojoService = ServiceGenerator.getImojoService();
-        Call<UPIStatusResponse> upiStatusCall = imojoService.getUPIStatus(mUPIStatusURL);
-        upiStatusCall.enqueue(new Callback<UPIStatusResponse>() {
-            @Override
-            public void onResponse(Call<UPIStatusResponse> call, Response<UPIStatusResponse> response) {
-                if (response.isSuccessful()) {
-                    int statusCode = response.body().getStatusCode();
-                    if (statusCode != Constants.PENDING_PAYMENT) {
-                        // Stop polling for status. Return to activity
-                        returnResult();
-
-                    } else {
-                        // Keep trying
-                        retryUPIStatusCheck();
-                    }
-
-                } else {
-                    Logger.e(TAG, "Error response while fetching UPI status");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UPIStatusResponse> call, Throwable t) {
-                Logger.e(TAG, "Failed to fetch UPI status. Error: " + t.getMessage());
-            }
-        });
-    }
-
     private void returnResult() {
         Bundle bundle = new Bundle();
         GatewayOrder order = parentActivity.getOrder();
@@ -212,12 +183,38 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         parentActivity.returnResult(bundle, Activity.RESULT_OK);
     }
 
-    public void retryUPIStatusCheck() {
+    public void retryUPIStatusCheck(long delay) {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                checkUpiPaymentStatus();
+                ImojoService imojoService = ServiceGenerator.getImojoService();
+                Call<UPIStatusResponse> upiStatusCall = imojoService.getUPIStatus(mUPIStatusURL);
+                upiStatusCall.enqueue(new Callback<UPIStatusResponse>() {
+                    @Override
+                    public void onResponse(Call<UPIStatusResponse> call, Response<UPIStatusResponse> response) {
+                        if (response.isSuccessful()) {
+                            int statusCode = response.body().getStatusCode();
+                            if (statusCode != Constants.PENDING_PAYMENT) {
+                                // Stop polling for status. Return to activity
+                                returnResult();
+
+                            } else {
+                                // Keep trying
+                                retryUPIStatusCheck(DELAY_CHECK);
+                            }
+
+                        } else {
+                            Logger.e(TAG, "Error response while fetching UPI status");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<UPIStatusResponse> call, Throwable t) {
+                        Logger.e(TAG, "Failed to fetch UPI status. Error: " + t.getMessage());
+                    }
+                });
             }
-        }, DELAY_CHECK);
+        }, delay);
     }
+
 }
