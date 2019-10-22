@@ -16,7 +16,7 @@
      * [Receiving response from the SDK](#receiving-response-from-the-sdk)
    * [Using Custom UI](#using-custom-ui)
     
-##***Note:SDK currently does not support MarketPlace Integration. MarketPlace API Documentation is available [here](https://docs.instamojo.com/v2/docs)***
+> #### ***Note: SDK currently does not support MarketPlace Integration. MarketPlace API Documentation is available [here](https://docs.instamojo.com/v2/docs)***
 
 ## Overview
 This SDK allows you to integrate payments via Instamojo into your Android app. It currently supports following modes of payments:
