@@ -56,6 +56,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
     private Mode mode;
     private int mSelectedTenure;
     private String mSelectedBankCode;
+    private int cardNumberSelection;
 
     /**
      * Creates a new instance of Fragment
@@ -194,7 +195,8 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
     private void applyText(MaterialEditText editText, TextWatcher watcher, String text) {
         editText.removeTextChangedListener(watcher);
         editText.setText(text);
-        editText.setSelection(editText.getText().toString().length());
+        cardNumberSelection = Math.min(cardNumberSelection,text.length());
+        editText.setSelection(cardNumberSelection);
         editText.addTextChangedListener(watcher);
     }
 
@@ -373,6 +375,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
         @Override
         public void afterTextChanged(Editable s) {
             String cardNumber = s.toString().trim();
+            cardNumberSelection = cardNumberBox.getSelectionStart();
             if (cardNumber.length() < 4) {
                 return;
             }
@@ -391,6 +394,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
                             modifiedCard = modifiedCard + data[index];
                             if (index == 4 || index == 8 || index == 12) {
                                 modifiedCard = modifiedCard + " ";
+                                cardNumberSelection++;
                             }
                         }
                         break;
@@ -399,6 +403,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
                             modifiedCard = modifiedCard + data[index];
                             if (index == 4 || index == 11) {
                                 modifiedCard = modifiedCard + " ";
+                                cardNumberSelection++;
                             }
                         }
                         break;
@@ -407,6 +412,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
                             modifiedCard = modifiedCard + data[index];
                             if (index == 4 || index == 10) {
                                 modifiedCard = modifiedCard + " ";
+                                cardNumberSelection++;
                             }
                         }
                         break;
