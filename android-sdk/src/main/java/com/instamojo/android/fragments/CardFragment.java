@@ -7,8 +7,11 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -46,7 +49,7 @@ import retrofit2.Response;
 /**
  * A simple {@link Fragment} subclass. The {@link Fragment} to get Debit Card details from user.
  */
-public class CardFragment extends BaseFragment implements View.OnClickListener {
+public class CardFragment extends BaseFragment implements View.OnClickListener, View.OnKeyListener {
 
     private static final String TAG = CardFragment.class.getSimpleName();
     private static final String MONTH_YEAR_SEPARATOR = "/";
@@ -59,6 +62,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
     private int mSelectedTenure;
     private String mSelectedBankCode;
     private int cardNumberSelection;
+    private CardTextWatcher textWatcher;
 
     /**
      * Creates a new instance of Fragment
@@ -120,7 +124,8 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
     public void inflateXML(View view) {
         cardNumberBox = view.findViewById(R.id.card_number_box);
         cardNumberBox.setNextFocusDownId(R.id.card_date_box);
-        cardNumberBox.addTextChangedListener(new CardTextWatcher());
+        cardNumberBox.addTextChangedListener(textWatcher = new CardTextWatcher());
+        cardNumberBox.setOnKeyListener(this);
         cardNumberBox.addValidator(new Validators.EmptyFieldValidator());
         cardNumberBox.addValidator(new Validators.CardValidator());
         dateBox = view.findViewById(R.id.card_date_box);
@@ -158,7 +163,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
                     }
                 }
 
-                applyText(dateBox, this, modifiedDate);
+                applyDateText(dateBox, this, modifiedDate);
                 if (modifiedDate.length() == 5 && dateBox.validate()) {
                     cvvBox.requestFocus();
                 }
@@ -184,6 +189,13 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
 
         editTexts = Arrays.asList(cardNumberBox, dateBox, cvvBox);
         Logger.d(TAG, "Inflated XML");
+    }
+
+    private void applyDateText(MaterialEditText dateBox, TextWatcher textWatcher, String modifiedDate) {
+        dateBox.removeTextChangedListener(textWatcher);
+        dateBox.setText(modifiedDate);
+        dateBox.setSelection(modifiedDate.length());
+        dateBox.addTextChangedListener(textWatcher);
     }
 
     @Override
@@ -343,6 +355,22 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
         }
     }
 
+    @Override
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN){
+            if (keyCode == KeyEvent.KEYCODE_BACK){
+                cardNumberBox.removeTextChangedListener(textWatcher);
+                return true;
+            }
+        }else if(event.getAction() == KeyEvent.ACTION_UP) {
+            if (keyCode == KeyEvent.KEYCODE_BACK){
+                cardNumberBox.addTextChangedListener(textWatcher);
+                return true;
+            }
+        }
+        return false;
+    }
+
     enum Mode {
         DebitCard,
         CreditCard,
@@ -393,6 +421,9 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
 
         @Override
         public void afterTextChanged(Editable s) {
+            if(currentLength < previousLength){
+                return;
+            }
             String cardNumber = s.toString().trim();
             cardNumberSelection = cardNumberBox.getSelectionStart();
             if (cardNumber.length() < 4) {
@@ -406,8 +437,17 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
                 CardType cardType = CardUtil.getCardType(cardNumber);
                 switch (cardType) {
                     case VISA:
+                        modifiedCard = cardNumber;
+                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
+                        break;
                     case MASTER_CARD:
+                        modifiedCard = cardNumber;
+                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
+                        break;
                     case DISCOVER:
+                        modifiedCard = cardNumber;
+                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
+                        break;
                     case RUPAY:
                         for (int index = 1; index < data.length; index++) {
                             modifiedCard = modifiedCard + data[index];
@@ -416,6 +456,9 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
                                 cardNumberSelection++;
                             }
                         }
+
+                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
+
                         break;
                     case AMEX:
                         for (int index = 1; index < data.length; index++) {
@@ -425,6 +468,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
                                 cardNumberSelection++;
                             }
                         }
+                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(4)});
                         break;
                     case DINERS_CLUB:
                         for (int index = 1; index < data.length; index++) {
@@ -434,6 +478,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
                                 cardNumberSelection++;
                             }
                         }
+                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
                         break;
                     default:
                         modifiedCard = cardNumber;
@@ -441,8 +486,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
             } else {
                 modifiedCard = cardNumber;
             }
-
-            applyText(cardNumberBox, this, modifiedCard);
+                        applyText(cardNumberBox, this, modifiedCard);
         }
     }
 

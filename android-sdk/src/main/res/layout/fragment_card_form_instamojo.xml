@@ -44,7 +44,6 @@
             android:maxLength="5"
             android:textSize="16sp"
             app:met_errorColor="@android:color/holo_red_light"
-            app:met_floatingLabel="highlight"
             app:met_primaryColor="@color/edit_text_color"
             app:met_textColor="@android:color/black"
             app:met_validateOnFocusLost="true" />
@@ -59,8 +58,6 @@
             android:maxLength="@integer/card_max_cvv_length"
             android:textSize="16sp"
             app:met_errorColor="@android:color/holo_red_light"
-            app:met_floatingLabel="highlight"
-            app:met_maxCharacters="@integer/card_max_cvv_length"
             app:met_primaryColor="@color/edit_text_color"
             app:met_textColor="@android:color/black"
             app:met_validateOnFocusLost="true" />
