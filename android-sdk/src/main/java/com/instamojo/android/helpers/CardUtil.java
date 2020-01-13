@@ -2,6 +2,7 @@ package com.instamojo.android.helpers;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -90,16 +91,9 @@ public class CardUtil {
      */
 
     public static boolean isDateExpired(String expiryDateStr) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/yy", Locale.ENGLISH);
-        dateFormat.setLenient(false);
-        try {
-            Date expiryDate = dateFormat.parse(expiryDateStr);
-            return expiryDate.before(new Date());
-
-        } catch (ParseException e) {
-            Logger.e(TAG, "Invalid Date - " + expiryDateStr);
-        }
-
-        return false;
+        DateValidator dateValidator = new DateValidator(Calendar.getInstance());
+        String [] strings =  expiryDateStr.split("/");
+        return !dateValidator.isValidHelper(strings[0],strings[1]);
     }
+
 }

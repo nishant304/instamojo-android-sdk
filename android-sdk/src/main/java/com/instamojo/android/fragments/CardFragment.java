@@ -31,8 +31,10 @@ import com.instamojo.android.models.GatewayOrder;
 import com.instamojo.android.network.ImojoService;
 import com.instamojo.android.network.ServiceGenerator;
 import com.rengwuxian.materialedittext.MaterialEditText;
+import com.rengwuxian.materialedittext.validation.METValidator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -208,8 +210,25 @@ public class CardFragment extends BaseFragment implements View.OnClickListener {
     }
 
     private void addOptionalValidators() {
-        dateBox.addValidator(new Validators.EmptyFieldValidator());
-        dateBox.addValidator(new Validators.DateValidator());
+        boolean dateValidatorAdded = false;
+        boolean emptyFieldValidatorAdded= false;
+        List<METValidator> validators = dateBox.getValidators();
+        if(validators != null) {
+            for (METValidator validator : validators) {
+                if (validator instanceof Validators.DateValidator) {
+                    dateValidatorAdded = true;
+                }
+                if (validator instanceof Validators.EmptyFieldValidator) {
+                    emptyFieldValidatorAdded = true;
+                }
+            }
+        }
+        if(!emptyFieldValidatorAdded) {
+            dateBox.addValidator(new Validators.EmptyFieldValidator());
+        }
+        if(!dateValidatorAdded) {
+            dateBox.addValidator(new Validators.DateValidator());
+        }
         cvvBox.addValidator(new Validators.EmptyFieldValidator());
     }
 
