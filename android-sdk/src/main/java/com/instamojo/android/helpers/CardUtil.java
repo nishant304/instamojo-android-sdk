@@ -90,9 +90,12 @@ public class CardUtil {
      * @return True if the Date is expired else False.
      */
 
-    public static boolean isDateExpired(String expiryDateStr) {
+    public static boolean isDateInValid(String date) {
+        if(!date.contains("/")){
+            return true;
+        }
         DateValidator dateValidator = new DateValidator(Calendar.getInstance());
-        String [] strings =  expiryDateStr.split("/");
+        String [] strings =  date.split("/");
         return !dateValidator.isValidHelper(strings[0],strings[1]);
     }
 

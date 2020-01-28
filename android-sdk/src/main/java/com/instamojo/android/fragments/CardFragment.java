@@ -209,7 +209,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
     private void applyText(MaterialEditText editText, TextWatcher watcher, String text) {
         editText.removeTextChangedListener(watcher);
         editText.setText(text);
-        cardNumberSelection = Math.min(cardNumberSelection,text.length());
+        cardNumberSelection = Math.min(cardNumberSelection, text.length());
         editText.setSelection(cardNumberSelection);
         editText.addTextChangedListener(watcher);
     }
@@ -223,9 +223,9 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
 
     private void addOptionalValidators() {
         boolean dateValidatorAdded = false;
-        boolean emptyFieldValidatorAdded= false;
+        boolean emptyFieldValidatorAdded = false;
         List<METValidator> validators = dateBox.getValidators();
-        if(validators != null) {
+        if (validators != null) {
             for (METValidator validator : validators) {
                 if (validator instanceof Validators.DateValidator) {
                     dateValidatorAdded = true;
@@ -235,13 +235,22 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
                 }
             }
         }
-        if(!emptyFieldValidatorAdded) {
+        if (!emptyFieldValidatorAdded) {
             dateBox.addValidator(new Validators.EmptyFieldValidator());
         }
-        if(!dateValidatorAdded) {
+        if (!dateValidatorAdded) {
             dateBox.addValidator(new Validators.DateValidator());
         }
-        cvvBox.addValidator(new Validators.EmptyFieldValidator());
+
+        boolean emptyFieldValidatorAddedCvv = false;
+        for (METValidator validator : cvvBox.getValidators()) {
+            if (validator instanceof Validators.EmptyFieldValidator) {
+                emptyFieldValidatorAddedCvv = true;
+            }
+        }
+        if (!emptyFieldValidatorAddedCvv) {
+            cvvBox.addValidator(new Validators.EmptyFieldValidator());
+        }
     }
 
     private void changeEditBoxesState(boolean enable) {
@@ -357,13 +366,13 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
 
     @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_DOWN){
-            if (keyCode == KeyEvent.KEYCODE_BACK){
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
                 cardNumberBox.removeTextChangedListener(textWatcher);
                 return true;
             }
-        }else if(event.getAction() == KeyEvent.ACTION_UP) {
-            if (keyCode == KeyEvent.KEYCODE_BACK){
+        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
                 cardNumberBox.addTextChangedListener(textWatcher);
                 return true;
             }
@@ -421,7 +430,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
 
         @Override
         public void afterTextChanged(Editable s) {
-            if(currentLength < previousLength){
+            if (currentLength < previousLength) {
                 return;
             }
             String cardNumber = s.toString().trim();
@@ -437,17 +446,8 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
                 CardType cardType = CardUtil.getCardType(cardNumber);
                 switch (cardType) {
                     case VISA:
-                        modifiedCard = cardNumber;
-                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
-                        break;
                     case MASTER_CARD:
-                        modifiedCard = cardNumber;
-                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
-                        break;
                     case DISCOVER:
-                        modifiedCard = cardNumber;
-                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
-                        break;
                     case RUPAY:
                         for (int index = 1; index < data.length; index++) {
                             modifiedCard = modifiedCard + data[index];
@@ -457,8 +457,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
                             }
                         }
 
-                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
-
+                        cvvBox.setFilters(new InputFilter[]{new InputFilter.LengthFilter(cardType.getCvvLength())});
                         break;
                     case AMEX:
                         for (int index = 1; index < data.length; index++) {
@@ -468,7 +467,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
                                 cardNumberSelection++;
                             }
                         }
-                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(4)});
+                        cvvBox.setFilters(new InputFilter[]{new InputFilter.LengthFilter(cardType.getCvvLength())});
                         break;
                     case DINERS_CLUB:
                         for (int index = 1; index < data.length; index++) {
@@ -478,7 +477,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
                                 cardNumberSelection++;
                             }
                         }
-                        cvvBox.setFilters(new InputFilter[] {new InputFilter.LengthFilter(3)});
+                        cvvBox.setFilters(new InputFilter[]{new InputFilter.LengthFilter(cardType.getCvvLength())});
                         break;
                     default:
                         modifiedCard = cardNumber;
@@ -486,7 +485,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
             } else {
                 modifiedCard = cardNumber;
             }
-                        applyText(cardNumberBox, this, modifiedCard);
+            applyText(cardNumberBox, this, modifiedCard);
         }
     }
 
