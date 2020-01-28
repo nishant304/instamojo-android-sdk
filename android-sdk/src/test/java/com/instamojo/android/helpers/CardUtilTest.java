@@ -110,6 +110,6 @@ public class CardUtilTest {
     @Test
     @Parameters
     public void isDateExpired_DateString_ReturnsExpected(String dateString, boolean expected) {
-        assertEquals(expected, !CardUtil.isDateInValid(dateString));
+        assertEquals(expected, CardUtil.isDateInValid(dateString));
     }
 }

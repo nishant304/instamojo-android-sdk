@@ -45,15 +45,15 @@ public class DateValidator {
     }
 
     protected boolean isValidHelper(String monthString, String yearString) {
-        if (TextUtils.isEmpty(monthString)) {
+        if (monthString.equals("")) {
             return false;
         }
 
-        if (TextUtils.isEmpty(yearString)) {
+        if (yearString.equals("")) {
             return false;
         }
 
-        if (!TextUtils.isDigitsOnly(monthString) || !TextUtils.isDigitsOnly(yearString)) {
+        if (!isDigitsOnly(monthString) || !isDigitsOnly(yearString)) {
             return false;
         }
 
@@ -107,4 +107,17 @@ public class DateValidator {
     private int getCurrentTwoDigitYear() {
         return mCalendar.get(Calendar.YEAR) % 100;
     }
+
+    public static boolean isDigitsOnly(CharSequence str) {
+        final int len = str.length();
+        for (int cp, i = 0; i < len; i += Character.charCount(cp)) {
+            cp = Character.codePointAt(str, i);
+            if (!Character.isDigit(cp)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 }
