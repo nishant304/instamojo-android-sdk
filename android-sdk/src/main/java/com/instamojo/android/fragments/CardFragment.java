@@ -243,13 +243,15 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
         }
 
         boolean emptyFieldValidatorAddedCvv = false;
-        for (METValidator validator : cvvBox.getValidators()) {
-            if (validator instanceof Validators.EmptyFieldValidator) {
-                emptyFieldValidatorAddedCvv = true;
+        if(cvvBox.getValidators() != null) {
+            for (METValidator validator : cvvBox.getValidators()) {
+                if (validator instanceof Validators.EmptyFieldValidator) {
+                    emptyFieldValidatorAddedCvv = true;
+                }
             }
-        }
-        if (!emptyFieldValidatorAddedCvv) {
-            cvvBox.addValidator(new Validators.EmptyFieldValidator());
+            if (!emptyFieldValidatorAddedCvv) {
+                cvvBox.addValidator(new Validators.EmptyFieldValidator());
+            }
         }
     }
 
