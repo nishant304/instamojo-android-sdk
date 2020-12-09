@@ -103,6 +103,7 @@
 -keepattributes Annotation
 -keep class okhttp3.** { *; }
 -keep interface okhttp3.** { *; }
+-keep class com.instamojo.android.fragments.UPIFragment
 -dontwarn okhttp3.**
 -dontwarn okio.**
 
