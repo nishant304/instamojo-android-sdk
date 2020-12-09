@@ -11,6 +11,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.instamojo.android.Instamojo;
 import com.instamojo.android.R;
@@ -42,6 +44,7 @@ public class PaymentDetailsActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setStatusBarColor();
         setContentView(R.layout.activity_payment_details_instamojo);
         inflateXML();
 
@@ -55,6 +58,13 @@ public class PaymentDetailsActivity extends BaseActivity {
 
         IntentFilter filter = new IntentFilter(Instamojo.ACTION_INTENT_FILTER);
         registerReceiver(Instamojo.getInstance(), filter);
+    }
+
+    private void setStatusBarColor() {
+        Window window = getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(getResources().getColor(R.color.primary_color));
     }
 
     private void fetchOrder(String orderID) {
