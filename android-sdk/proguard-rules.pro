@@ -118,3 +118,7 @@
 -keep class android.support.v7.** { *; }
 
 -keep class com.instamojo.android.models.** { *; }
+
+# retrofit rules
+-keep class retrofit2.** { *; }
+-dontwarn retrofit2.**
