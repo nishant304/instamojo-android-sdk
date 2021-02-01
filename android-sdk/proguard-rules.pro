@@ -118,3 +118,9 @@
 -keep class android.support.v7.** { *; }
 
 -keep class com.instamojo.android.models.** { *; }
+
+-keep class com.instamojo.android.fragments.UPIFragment { *; }
+
+# retrofit rules
+-keep class retrofit2.** { *; }
+-dontwarn retrofit2.**
