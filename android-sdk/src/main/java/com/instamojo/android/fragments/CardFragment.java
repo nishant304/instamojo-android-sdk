@@ -265,7 +265,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
         }
 
         Card card = new Card();
-        String cardNumber = cardNumberBox.getText().toString().trim();
+        String cardNumber = cardNumberBox.getText().toString().trim().replace(" ", "");
         cardNumber = cardNumber.replaceAll(" ", "");
         card.setCardNumber(cardNumber);
         String date = dateBox.getText().toString().trim();
@@ -449,9 +449,9 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
                     case MASTER_CARD:
                     case DISCOVER:
                     case RUPAY:
-                        for (int index = 1; index < data.length; index++) {
+                        for (int index = 0; index < data.length; index++) {
                             modifiedCard = modifiedCard + data[index];
-                            if (index == 4 || index == 8 || index == 12) {
+                            if (index == 3 || index == 7 || index == 11) {
                                 modifiedCard = modifiedCard + " ";
                                 cardNumberSelection++;
                             }

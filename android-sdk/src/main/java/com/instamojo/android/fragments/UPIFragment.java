@@ -208,6 +208,7 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         bundle.putString(Constants.ORDER_ID, order.getOrder().getId());
         bundle.putString(Constants.TRANSACTION_ID, order.getOrder().getTransactionID());
         bundle.putString(Constants.PAYMENT_ID, upiSubmissionResponse.getPaymentID());
+        Toast.makeText(getContext(), "Payment complete.", Toast.LENGTH_SHORT).show();
         Logger.d(TAG, "Payment complete. Finishing activity...");
         parentActivity.returnResult(bundle, Activity.RESULT_OK);
     }
