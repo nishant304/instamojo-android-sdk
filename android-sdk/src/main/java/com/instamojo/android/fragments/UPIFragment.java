@@ -183,8 +183,9 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
                     int statusCode = response.body().getStatusCode();
                     if (statusCode != Constants.PENDING_PAYMENT) {
                         // Stop polling for status. Return to activity
-                        returnResult();
-
+                        Toast.makeText(getContext(), "Payment complete.", Toast.LENGTH_SHORT).show();
+                        Logger.d(TAG, "Payment complete. Finishing activity...");
+                        parentActivity.returnResult(getBundle(), Activity.RESULT_OK);
                     } else {
                         // Keep trying
                         retryUPIStatusCheck();
@@ -202,15 +203,13 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         });
     }
 
-    private void returnResult() {
+    private Bundle getBundle() {
         Bundle bundle = new Bundle();
         GatewayOrder order = parentActivity.getOrder();
         bundle.putString(Constants.ORDER_ID, order.getOrder().getId());
         bundle.putString(Constants.TRANSACTION_ID, order.getOrder().getTransactionID());
         bundle.putString(Constants.PAYMENT_ID, upiSubmissionResponse.getPaymentID());
-        Toast.makeText(getContext(), "Payment complete.", Toast.LENGTH_SHORT).show();
-        Logger.d(TAG, "Payment complete. Finishing activity...");
-        parentActivity.returnResult(bundle, Activity.RESULT_OK);
+        return bundle;
     }
 
     public void retryUPIStatusCheck() {
