@@ -1,6 +1,5 @@
 package com.instamojo.android.fragments;
 
-
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,7 +10,6 @@ import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -244,7 +242,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
         }
 
         boolean emptyFieldValidatorAddedCvv = false;
-        if(cvvBox.getValidators() != null) {
+        if (cvvBox.getValidators() != null) {
             for (METValidator validator : cvvBox.getValidators()) {
                 if (validator instanceof Validators.EmptyFieldValidator) {
                     emptyFieldValidatorAddedCvv = true;
@@ -444,8 +442,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
 
             String modifiedCard;
             if (currentLength > previousLength) {
-                List<String> data = new ArrayList<>(Arrays.asList(cardNumber.replaceAll(" ", "").split("")));
-                data.removeAll(Collections.singleton(""));
+                List<String> data = getCardNumberArray(cardNumber);
                 modifiedCard = "";
                 CardType cardType = CardUtil.getCardType(cardNumber);
                 switch (cardType) {
@@ -491,6 +488,12 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
             }
             applyText(cardNumberBox, this, modifiedCard);
         }
+    }
+
+    public static List<String> getCardNumberArray(String cardNumber) {
+        List<String> data = new ArrayList<>(Arrays.asList(cardNumber.replaceAll(" ", "").split("")));
+        data.removeAll(Collections.singleton(""));
+        return data;
     }
 
 }
