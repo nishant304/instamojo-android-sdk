@@ -1,6 +1,5 @@
 package com.instamojo.android.fragments;
 
-
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,7 +10,6 @@ import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -39,6 +37,7 @@ import com.rengwuxian.materialedittext.validation.METValidator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -243,7 +242,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
         }
 
         boolean emptyFieldValidatorAddedCvv = false;
-        if(cvvBox.getValidators() != null) {
+        if (cvvBox.getValidators() != null) {
             for (METValidator validator : cvvBox.getValidators()) {
                 if (validator instanceof Validators.EmptyFieldValidator) {
                     emptyFieldValidatorAddedCvv = true;
@@ -443,7 +442,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
 
             String modifiedCard;
             if (currentLength > previousLength) {
-                String[] data = cardNumber.replaceAll(" ", "").split("");
+                List<String> data = getCardNumberArray(cardNumber);
                 modifiedCard = "";
                 CardType cardType = CardUtil.getCardType(cardNumber);
                 switch (cardType) {
@@ -451,9 +450,9 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
                     case MASTER_CARD:
                     case DISCOVER:
                     case RUPAY:
-                        for (int index = 1; index < data.length; index++) {
-                            modifiedCard = modifiedCard + data[index];
-                            if (index == 4 || index == 8 || index == 12) {
+                        for (int index = 0; index < data.size(); index++) {
+                            modifiedCard = modifiedCard + data.get(index);
+                            if (index == 3 || index == 7 || index == 11) {
                                 modifiedCard = modifiedCard + " ";
                                 cardNumberSelection++;
                             }
@@ -462,9 +461,9 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
                         cvvBox.setFilters(new InputFilter[]{new InputFilter.LengthFilter(cardType.getCvvLength())});
                         break;
                     case AMEX:
-                        for (int index = 1; index < data.length; index++) {
-                            modifiedCard = modifiedCard + data[index];
-                            if (index == 4 || index == 11) {
+                        for (int index = 0; index < data.size(); index++) {
+                            modifiedCard = modifiedCard + data.get(index);
+                            if (index == 3 || index == 10) {
                                 modifiedCard = modifiedCard + " ";
                                 cardNumberSelection++;
                             }
@@ -472,9 +471,9 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
                         cvvBox.setFilters(new InputFilter[]{new InputFilter.LengthFilter(cardType.getCvvLength())});
                         break;
                     case DINERS_CLUB:
-                        for (int index = 1; index < data.length; index++) {
-                            modifiedCard = modifiedCard + data[index];
-                            if (index == 4 || index == 10) {
+                        for (int index = 0; index < data.size(); index++) {
+                            modifiedCard = modifiedCard + data.get(index);
+                            if (index == 3 || index == 9) {
                                 modifiedCard = modifiedCard + " ";
                                 cardNumberSelection++;
                             }
@@ -489,6 +488,12 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
             }
             applyText(cardNumberBox, this, modifiedCard);
         }
+    }
+
+    public static List<String> getCardNumberArray(String cardNumber) {
+        List<String> data = new ArrayList<>(Arrays.asList(cardNumber.replaceAll(" ", "").split("")));
+        data.removeAll(Collections.singleton(""));
+        return data;
     }
 
 }
