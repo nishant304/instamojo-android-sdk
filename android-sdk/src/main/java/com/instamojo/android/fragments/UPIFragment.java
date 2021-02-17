@@ -184,7 +184,6 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
                     if (statusCode != Constants.PENDING_PAYMENT) {
                         // Stop polling for status. Return to activity
                         returnResult();
-
                     } else {
                         // Keep trying
                         retryUPIStatusCheck();
