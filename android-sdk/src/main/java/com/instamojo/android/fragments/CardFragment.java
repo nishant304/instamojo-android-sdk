@@ -266,7 +266,7 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
         }
 
         Card card = new Card();
-        String cardNumber = cardNumberBox.getText().toString().trim().replace(" ", "");
+        String cardNumber = cardNumberBox.getText().toString().trim();
         cardNumber = cardNumber.replaceAll(" ", "");
         card.setCardNumber(cardNumber);
         String date = dateBox.getText().toString().trim();
