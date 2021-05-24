@@ -44,9 +44,4 @@ public class MoneyUtilTest {
         assertEquals(expectedEMI, MoneyUtil.getMonthlyEMI(amount, rate, tenure), 0.0);
     }
 
-    @Test
-    public void checkBundleFromOrder() {
-        assertEquals("id",MoneyUtil.createBundleFromOrder("id","q","pid").getString(Constants.ORDER_ID));
-    }
-
 }

@@ -59,14 +59,9 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_upi_instamojo, container, false);
         parentActivity = (PaymentDetailsActivity) getActivity();
         inflateXML(view);
-        return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
         int title = R.string.title_fragment_upi;
         parentActivity.updateActionBarTitle(title);
+        return view;
     }
 
     @Override
@@ -95,11 +90,6 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
                 }
             }
         });
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
     }
 
     @Override
