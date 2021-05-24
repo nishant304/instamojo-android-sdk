@@ -23,4 +23,9 @@ public class CardFragmentTest {
         assertEquals(EXPECTED_CARD_NUMBER_ARRAY, CardFragment.getCardNumberArray(CARD_NUMBER));
     }
 
+    @Test
+    public void checkValidPaymentStatus() {
+        assertEquals(5, Constants.PAYMENT_SUCCEDED);
+    }
+
 }
