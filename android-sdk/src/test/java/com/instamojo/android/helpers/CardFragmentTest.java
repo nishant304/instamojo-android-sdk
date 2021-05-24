@@ -28,4 +28,9 @@ public class CardFragmentTest {
         assertEquals(5, Constants.PAYMENT_SUCCEDED);
     }
 
+    @Test
+    public void checkValidPaymentPending() {
+        assertEquals(2, Constants.PENDING_PAYMENT);
+    }
+
 }
