@@ -30,10 +30,11 @@ android {
         release {
             minifyEnabled true
             proguardFiles 'proguard-rules.pro'
+            testCoverageEnabled false
         }
         debug {
             debuggable true
-            testCoverageEnabled true
+            testCoverageEnabled false
         }
     }
     packagingOptions {
@@ -61,6 +62,8 @@ android {
             includeAndroidResources = true
         }
     }
+
+
 }
 
 dependencies {

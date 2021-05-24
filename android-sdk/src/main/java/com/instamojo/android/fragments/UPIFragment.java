@@ -223,4 +223,5 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
             }
         }, DELAY_CHECK);
     }
+
 }
