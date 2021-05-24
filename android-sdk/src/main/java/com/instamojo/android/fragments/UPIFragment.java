@@ -43,6 +43,7 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
     private static final String TAG = UPIFragment.class.getSimpleName();
     private static final String FRAGMENT_NAME = "UPISubmission Form";
     private static final long DELAY_CHECK = 2000;
+    public static final String UPI_RESULT = "instamojo:upi:result";
 
     private MaterialEditText virtualAddressBox;
     private PaymentDetailsActivity parentActivity;
@@ -208,9 +209,7 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         bundle.putString(Constants.TRANSACTION_ID, order.getOrder().getTransactionID());
         bundle.putString(Constants.PAYMENT_ID, upiSubmissionResponse.getPaymentID());
         Logger.d(TAG, "Payment complete. Finishing activity...");
-        parentActivity.returnResult(bundle, Activity.RESULT_OK);
-        
-
+        getParentFragmentManager().setFragmentResult(UPI_RESULT,bundle);
     }
 
     public void retryUPIStatusCheck() {
@@ -221,4 +220,5 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
             }
         }, DELAY_CHECK);
     }
+
 }

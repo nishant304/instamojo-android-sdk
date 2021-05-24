@@ -1,10 +1,14 @@
 package com.instamojo.android.activities;
 
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
@@ -18,6 +22,7 @@ import com.instamojo.android.Instamojo;
 import com.instamojo.android.R;
 import com.instamojo.android.fragments.BaseFragment;
 import com.instamojo.android.fragments.PaymentOptionsFragment;
+import com.instamojo.android.fragments.UPIFragment;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.GatewayOrder;
@@ -58,6 +63,12 @@ public class PaymentDetailsActivity extends BaseActivity {
 
         IntentFilter filter = new IntentFilter(Instamojo.ACTION_INTENT_FILTER);
         registerReceiver(Instamojo.getInstance(), filter);
+        getSupportFragmentManager().setFragmentResultListener(UPIFragment.UPI_RESULT, this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                fireBroadcastAndReturn(mapResultCode(Activity.RESULT_OK),result);
+            }
+        });
     }
 
     private void setStatusBarColor() {
