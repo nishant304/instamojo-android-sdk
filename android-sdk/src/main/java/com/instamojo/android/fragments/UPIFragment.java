@@ -16,6 +16,7 @@ import com.instamojo.android.R;
 import com.instamojo.android.activities.PaymentDetailsActivity;
 import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
+import com.instamojo.android.helpers.MoneyUtil;
 import com.instamojo.android.helpers.Validators;
 import com.instamojo.android.models.GatewayOrder;
 import com.instamojo.android.models.UPIOptions;
@@ -58,14 +59,9 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_upi_instamojo, container, false);
         parentActivity = (PaymentDetailsActivity) getActivity();
         inflateXML(view);
-        return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
         int title = R.string.title_fragment_upi;
         parentActivity.updateActionBarTitle(title);
+        return view;
     }
 
     @Override
@@ -94,11 +90,6 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
                 }
             }
         });
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
     }
 
     @Override
@@ -183,7 +174,7 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
                     int statusCode = response.body().getStatusCode();
                     if (statusCode != Constants.PENDING_PAYMENT) {
                         // Stop polling for status. Return to activity
-                        returnResult();
+                        returnResult(statusCode);
                     } else {
                         // Keep trying
                         retryUPIStatusCheck();
@@ -201,14 +192,14 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         });
     }
 
-    private void returnResult() {
-        Bundle bundle = new Bundle();
-        GatewayOrder order = parentActivity.getOrder();
-        bundle.putString(Constants.ORDER_ID, order.getOrder().getId());
-        bundle.putString(Constants.TRANSACTION_ID, order.getOrder().getTransactionID());
-        bundle.putString(Constants.PAYMENT_ID, upiSubmissionResponse.getPaymentID());
+    private void returnResult(int statusCode) {
+        Bundle bundle = MoneyUtil.createBundleFromOrder(parentActivity.getOrder().getOrder().getId(),parentActivity.getOrder().getOrder().getTransactionID(),upiSubmissionResponse.getPaymentID());
         Logger.d(TAG, "Payment complete. Finishing activity...");
-        parentActivity.returnResult(bundle, Activity.RESULT_OK);
+        if(statusCode == Constants.PAYMENT_SUCCEDED) {
+            parentActivity.onUPIResponse(bundle, Activity.RESULT_OK);
+        }else{
+            parentActivity.onUPIResponse(bundle, Activity.RESULT_CANCELED);
+        }
     }
 
     public void retryUPIStatusCheck() {
@@ -219,4 +210,5 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
             }
         }, DELAY_CHECK);
     }
+
 }
