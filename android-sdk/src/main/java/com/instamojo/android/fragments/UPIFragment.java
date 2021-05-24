@@ -210,6 +210,8 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         bundle.putString(Constants.PAYMENT_ID, upiSubmissionResponse.getPaymentID());
         Logger.d(TAG, "Payment complete. Finishing activity...");
         parentActivity.returnResult(bundle, Activity.RESULT_OK);
+        
+
     }
 
     public void retryUPIStatusCheck() {

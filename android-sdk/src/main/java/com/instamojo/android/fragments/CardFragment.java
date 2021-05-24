@@ -6,6 +6,9 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
+
+import android.os.Handler;
+import android.os.Message;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -60,7 +63,15 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
     private int mSelectedTenure;
     private String mSelectedBankCode;
     private int cardNumberSelection;
-    private CardTextWatcher textWatcher;
+    private TextWatcher textWatcher;
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            if(!handler.hasMessages(1)){
+
+            }
+        }
+    };
 
     /**
      * Creates a new instance of Fragment
@@ -160,8 +171,10 @@ public class CardFragment extends BaseFragment implements View.OnClickListener, 
                         modifiedDate = date.substring(0, 2) + MONTH_YEAR_SEPARATOR + date.substring(2, date.length());
                     }
                 }
-
-                applyDateText(dateBox, this, modifiedDate);
+                Message message = new Message();
+                message.obj = modifiedDate;
+                message.what = 1;
+                applyDateText(dateBox, textWatcher, modifiedDate);
                 if (modifiedDate.length() == 5 && dateBox.validate()) {
                     cvvBox.requestFocus();
                 }
