@@ -59,4 +59,5 @@ public class Constants {
     public static final String KEY_CODE = "code";
 
     public static final String KEY_MESSGE = "message";
+    public static final int PAYMENT_SUCCEDED = 5;
 }
