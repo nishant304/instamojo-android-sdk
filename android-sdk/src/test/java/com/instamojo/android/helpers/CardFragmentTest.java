@@ -33,4 +33,10 @@ public class CardFragmentTest {
         assertEquals(2, Constants.PENDING_PAYMENT);
     }
 
+    @Test
+    public void checkPaymentDeclined() {
+        assertEquals(6, Constants.PAYMENT_DECLINED;
+    }
+
+
 }

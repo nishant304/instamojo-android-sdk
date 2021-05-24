@@ -44,4 +44,5 @@ public class MoneyUtilTest {
         assertEquals(expectedEMI, MoneyUtil.getMonthlyEMI(amount, rate, tenure), 0.0);
     }
 
+
 }
