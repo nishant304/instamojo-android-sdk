@@ -12,6 +12,10 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,6 +31,7 @@ import com.instamojo.android.helpers.Constants;
 import com.instamojo.android.helpers.Logger;
 import com.instamojo.android.models.GatewayOrder;
 import com.instamojo.android.network.ImojoService;
+import com.instamojo.android.network.Resource;
 import com.instamojo.android.network.ServiceGenerator;
 
 import java.io.IOException;
@@ -46,12 +51,16 @@ public class PaymentDetailsActivity extends BaseActivity {
     private SearchView.OnQueryTextListener onQueryTextListener;
     private String hintText;
 
+    private PaymentDetailsViewModel paymentDetailsViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStatusBarColor();
         setContentView(R.layout.activity_payment_details_instamojo);
         inflateXML();
+
+        paymentDetailsViewModel = ViewModelProviders.of(this).get(PaymentDetailsViewModel.class);
 
         String orderID = getIntent().getStringExtra(Constants.ORDER_ID);
         if (orderID == null) {
@@ -79,33 +88,15 @@ public class PaymentDetailsActivity extends BaseActivity {
     }
 
     private void fetchOrder(String orderID) {
-        ImojoService imojoService = ServiceGenerator.getImojoService();
-        Call<GatewayOrder> gatewayOrderCall = imojoService.getPaymentOptions(orderID);
-        gatewayOrderCall.enqueue(new Callback<GatewayOrder>() {
+        paymentDetailsViewModel.getOrderDetails(orderID).observe(this, new Observer<Resource<GatewayOrder>>() {
             @Override
-            public void onResponse(Call<GatewayOrder> call, Response<GatewayOrder> response) {
-                if (response.isSuccessful()) {
-                    order = response.body();
-                    loadFragments();
-
-                } else {
-                    if (response.errorBody() != null) {
-                        try {
-                            Logger.d(TAG, "Error response from server while fetching order details.");
-                            Logger.e(TAG, "Error: " + response.errorBody().string());
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
+            public void onChanged(Resource<GatewayOrder> gatewayOrderResource) {
+                if(gatewayOrderResource.getStatus() == Resource.ERROR){
                     fireBroadcastAndReturn(Instamojo.RESULT_FAILED, null, "Error fetching order details");
+                }else if(gatewayOrderResource.getStatus() == Resource.SUCCESS) {
+                    order = gatewayOrderResource.getData();
+                    loadFragments();
                 }
-            }
-
-            @Override
-            public void onFailure(Call<GatewayOrder> call, Throwable t) {
-                fireBroadcastAndReturn(Instamojo.RESULT_FAILED, null, "Failed to fetch order details");
             }
         });
     }
@@ -127,8 +118,6 @@ public class PaymentDetailsActivity extends BaseActivity {
                 searchView.setOnQueryTextListener(onQueryTextListener);
             }
         }
-
-        Logger.d(TAG, "Inflated Options Menu");
         return true;
     }
 
@@ -176,7 +165,6 @@ public class PaymentDetailsActivity extends BaseActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         updateActionBar();
-        Logger.d(TAG, "Inflated XML");
     }
 
     /**
@@ -206,7 +194,6 @@ public class PaymentDetailsActivity extends BaseActivity {
             fragmentTransaction.addToBackStack(fragment.getFragmentName());
         }
         fragmentTransaction.commit();
-        Logger.d(TAG, "Loaded Fragment - " + fragment.getClass().getSimpleName());
     }
 
     /**
