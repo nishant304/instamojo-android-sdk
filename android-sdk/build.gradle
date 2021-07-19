@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin : "com.vanniktech.maven.publish"
+
 
 ext {
     sdkVersion = '3.6.0'
@@ -15,6 +17,7 @@ repositories {
         url "https://s3-ap-southeast-1.amazonaws.com/godel-release/godel/"
     }
 }
+
 
 android {
     compileSdkVersion 30
@@ -85,6 +88,6 @@ dependencies {
     implementation "android.arch.lifecycle:viewmodel:1.1.0"
 }
 
-apply from: '../install.gradle'
-apply from: '../bintray.gradle'
+
 apply from: '../coverage.gradle'
+

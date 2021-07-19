@@ -55,8 +55,8 @@ jobs:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "android-sdk/build.gradle" }}
       - run:
-          name: Publish to Bintray
-          command: ./gradlew bintrayUpload
+          name: Publish to Maven
+          command: ./gradlew closeAndReleaseRepository
 
 workflows:
   version: 2
