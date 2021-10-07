@@ -126,7 +126,6 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         super.onResume();
         int title = R.string.title_fragment_upi;
         parentActivity.updateActionBarTitle(title);
-        return view;
     }
 
     @Override
@@ -175,7 +174,7 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
         upiViewModel.onNewUPIStatusRequest(mUPIStatusURL);
     }
 
-    private void returnResult(int statusCode) {
+    private void returnResult() {
         Bundle bundle = MoneyUtil.createBundleFromOrder(parentActivity.getOrder().getOrder().getId(),parentActivity.getOrder().getOrder().getTransactionID(),upiSubmissionResponse.getPaymentID());
         Logger.d(TAG, "Payment complete. Finishing activity...");
         getParentFragmentManager().setFragmentResult(UPI_RESULT,bundle);
