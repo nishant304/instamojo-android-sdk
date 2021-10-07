@@ -39,6 +39,6 @@ public class JavaScriptInterface {
 
     @JavascriptInterface
     public int getSDKVersionCode() {
-        return BuildConfig.VERSION_CODE;
+        return 22;
     }
 }
