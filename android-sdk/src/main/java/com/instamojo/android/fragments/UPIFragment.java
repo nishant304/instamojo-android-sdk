@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -193,22 +194,17 @@ public class UPIFragment extends BaseFragment implements View.OnClickListener {
     }
 
     private void returnResult(int statusCode) {
-        Bundle bundle = MoneyUtil.createBundleFromOrder(parentActivity.getOrder().getOrder().getId(),parentActivity.getOrder().getOrder().getTransactionID(),upiSubmissionResponse.getPaymentID());
+        Bundle bundle = MoneyUtil.createBundleFromOrder(parentActivity.getOrder().getOrder().getId(), parentActivity.getOrder().getOrder().getTransactionID(), upiSubmissionResponse.getPaymentID());
         Logger.d(TAG, "Payment complete. Finishing activity...");
-        if(statusCode == Constants.PAYMENT_SUCCEDED) {
+        if (statusCode == Constants.PAYMENT_SUCCEDED) {
             parentActivity.onUPIResponse(bundle, Activity.RESULT_OK);
-        }else{
+        } else {
             parentActivity.onUPIResponse(bundle, Activity.RESULT_CANCELED);
         }
     }
 
     public void retryUPIStatusCheck() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                checkUpiPaymentStatus();
-            }
-        }, DELAY_CHECK);
+        new Handler(Looper.getMainLooper()).postDelayed(this::checkUpiPaymentStatus, DELAY_CHECK);
     }
 
 }
