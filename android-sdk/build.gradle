@@ -31,10 +31,14 @@ android {
         release {
             minifyEnabled true
             proguardFiles 'proguard-rules.pro'
+            buildConfigField("int", "VERSION_CODE", "${defaultConfig.versionCode}")
+            buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
         }
         debug {
             debuggable true
             testCoverageEnabled true
+            buildConfigField("int", "VERSION_CODE", "${defaultConfig.versionCode}")
+            buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
         }
     }
     packagingOptions {
