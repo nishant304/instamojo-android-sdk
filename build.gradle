@@ -37,7 +37,3 @@ allprojects {
 subprojects {
     tasks.withType(Javadoc).all { enabled = false }
 }
-
-task clean2(type: Delete) {
-    delete rootProject.buildDir
-}
