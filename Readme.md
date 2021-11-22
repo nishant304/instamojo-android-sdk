@@ -43,7 +43,7 @@ The section describes how the payment flow probably looks like, when you integra
 - If `orderID` is valid, the user is shown the available payment modes. This will take him via the payment process as per mode selected.
 - Once a payment is completed, a callback is received in your android activity with the `payment_id`, `transaction_id` and `payment_status`.
 - Your app shows the success / failure screen based on the payment status (either `Credit` or `Failure`).
-- For more details on the payment, your app may make a request to your backend servers with the `transaction_id`, which then returns the details after fetching the same from Instamojo servers.
+- For more details on the payment, your app may make a request to your backend servers with the `transaction_id`, which then returns the details after fetching the same from Instamojo server.
 
 
 ## Sample Application 
